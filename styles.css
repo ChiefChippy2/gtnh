@@ -1,42 +1,93 @@
 @font-face {
-    font-family: 'Minecraftia';
-    src: url('./assets/fonts/MinecraftiaRegular.ttf') format('truetype');
+    font-family:'Minecraftia';
+    src: url('./assets/fonts/MinecraftiaRegular.ttf');
 }
 
 body {
-    font-family: 'Minecraftia', sans-serif;
+    font-family:'Minecraftia', sans-serif;
+    -webkit-font-smoothing: never;
+    font-smooth: never;
     image-rendering: pixelated;
-    margin: 0;
-    padding: 0;
+    text-rendering: geometricPrecision;
+    font-size: 16px;
+    line-height: 2;
 }
 
-#root {
+.text-count {
     position: absolute;
-    left: 0;
-    top: 0;
-    font-size: 8px; /* After scaling (x2), this becomes 16px */
-    transform-origin: top left;
-    image-rendering: pixelated;
+    font-size: 8px;
+    color: white;
+    text-shadow: 1px 1px #342C34;
+    bottom: -4px;
+    right: 2px;
 }
 
 .panel {
     width: 192px;
     height: 192px;
     border-style: solid;
-    border-width: 5px;
-    
-    border-image: url('./assets/images/Panel.png');
-    border-image-slice: 5 fill;
+    border-width: 10px;
+    border-image: url('./assets/images/Panel.png') 5 fill;
+}
+
+.slot {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background-size: 36px;
+    background-repeat: no-repeat;
+    background-image: url("./assets/images/Slot.png");
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .icon {
-    width: 16px;  /* Width of each icon */
-    height: 16px; /* Height of each icon */
-    background-size: 1024px 1024px; /* Size of the atlas image */
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-size: 8192px;
     background-repeat: no-repeat;
 
-    background-image: url('./data/atlas/0.png');
+    background-image: url('./data/atlas.webp');
     background-position: 
-        calc((var(--icon-id) % 64) * -64px) /* Column position */
-        calc(floor(var(--icon-id) / 64) * -64px); /* Row position */
+        calc(mod(var(--icon-id), 256) * (-32px))
+        calc(round(var(--icon-id)/256 - 0.5) * (-32px));
+}
+
+.tooltip {
+    max-width: 260px;
+    border-style: solid;
+    border-width: 4px;
+    border-image: url('./assets/images/Tooltip.png') 2 fill;
+    text-shadow: 2px 2px #342C34;
+    display: table;
+    padding: 2px 10px;
+}
+
+p {
+    margin: 0;
+}
+
+.tooltip-header
+{
+    color: white;
+}
+
+.tooltip-debug
+{
+    color: #FFFFFF69;
+    font-size: 8px;
+    text-shadow: 1px 1px #342C34;
+    line-height: 16px;
+}
+
+.tooltip-text
+{
+    color: #ACA1AB;
+}
+
+.tooltip-mod
+{
+    color: #5457FA;
 }
