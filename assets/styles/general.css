@@ -1,0 +1,95 @@
+@font-face {
+    font-family:'Minecraftia';
+    src: url('./../fonts/MinecraftiaRegular.ttf');
+}
+
+body {
+    font-family:'Minecraftia', sans-serif;
+    -webkit-font-smoothing: never;
+    font-smooth: never;
+    image-rendering: pixelated;
+    text-rendering: geometricPrecision;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow: hidden;
+}
+
+.text-count {
+    position: absolute;
+    font-size: 8px;
+    color: white;
+    text-shadow: 1px 1px #342C34;
+    bottom: -4px;
+    right: 2px;
+}
+
+.panel {
+    position: absolute;
+    border-style: solid;
+    border-width: 8px;
+    border-image: url('./../images/Panel.png') 4 fill;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+    background-size: 8192px;
+    background-repeat: no-repeat;
+
+    background-image: url('/data/atlas.webp');
+    background-position: 
+        calc(mod(var(--icon-id), 256) * (-32px))
+        calc(round(var(--icon-id)/256 - 0.5) * (-32px));
+}
+
+icon-box {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background-size: 36px;
+    background-repeat: no-repeat;
+    background-image: url("./../images/Slot.png");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+p {
+    margin: 0.5em 0;
+}
+
+#panels
+{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+.scrollbar-measure {
+	width: 100px;
+	height: 100px;
+	overflow: scroll;
+	position: absolute;
+	top: -9999px;
+}
+
+#loading
+{
+    font-size:64px;
+    padding: 100px 200px 50px;
+}
+
+.scroll-area
+{
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.hidden
+{
+    display: none;
+}

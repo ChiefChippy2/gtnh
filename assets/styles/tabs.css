@@ -1,0 +1,37 @@
+.panel-tab-bar
+{
+    position: absolute;
+    top: -64px;
+    left: -8px;
+    display: flex;
+    z-index: 10;
+}
+
+.with-tabs {
+    margin: 60px 0px 0px;
+}
+
+.panel-tab
+{
+    width: 40px;
+    height: 40px;
+    border-style: solid;
+    border-width: 16px 8px 8px;
+    border-image: url('./../images/Tab_Inactive.png') 8 4 4 fill;
+    cursor: pointer;
+}
+
+.panel-tab:checked
+{
+    border-image: url('./../images/Tab_Active.png') 8 4 4 fill;
+}
+
+.panel-tab:first-child
+{
+    border-image: url('./../images/Tab_Inactive_First.png') 8 4 4 fill;
+}
+
+.panel-tab:checked:first-child
+{
+    border-image: url('./../images/Tab_Active_First.png') 8 4 4 fill;
+}

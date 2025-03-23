@@ -1,13 +1,16 @@
 import { Goods } from "../data/repository.js";
 
+var currentTooltipElement:HTMLElement | undefined;
 const tooltip = document.getElementById("tooltip")!;
-const tooltipHeader = tooltip.querySelector("[data-tooltip-header]") as HTMLElement;
-const tooltipDebugInfo = tooltip.querySelector("[data-tooltip-debug]") as HTMLElement;
-const tooltipText = tooltip.querySelector("[data-tooltip-text]") as HTMLElement;
-const tooltipMod = tooltip.querySelector("[data-tooltip-mod]") as HTMLElement;
+const tooltipHeader = tooltip.querySelector("#tooltip-header") as HTMLElement;
+const tooltipDebugInfo = tooltip.querySelector("#tooltip-debug") as HTMLElement;
+const tooltipText = tooltip.querySelector("#tooltip-text") as HTMLElement;
+const tooltipMod = tooltip.querySelector("#tooltip-mod") as HTMLElement;
 
-export function ShowTooltip(target:HTMLElement, data:Goods):void
+export function ShowTooltip(target:HTMLElement, data:Goods | null):void
 {
+    if (data == null)
+        return;
     ShowTooltipRaw(target, data.name, data.tooltipDebugInfo, data.tooltip, data.mod);
 }
 
@@ -23,6 +26,8 @@ function SetTextOptional(element:HTMLElement, data: string | null)
 
 function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, description:string|null, mod:string|null)
 {
+    tooltip.style.display = "block";
+    currentTooltipElement = target;
     tooltipHeader.textContent = header;
     SetTextOptional(tooltipDebugInfo, debug);
     SetTextOptional(tooltipText, description);
@@ -33,10 +38,23 @@ function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, de
 
     const isRightHalf = targetRect.left > window.innerWidth / 2;
 
-    tooltip.style.top = `${targetRect.top}px`;
     if (isRightHalf) {
-        tooltip.style.right = `${targetRect.left}px`;
+        tooltip.style.left = `${targetRect.left - tooltipRect.width}px`;
     } else {
         tooltip.style.left = `${targetRect.right}px`;
     }
+
+    if (targetRect.top + tooltipRect.height > window.innerHeight) {
+        tooltip.style.top = `${window.innerHeight - tooltipRect.height}px`;
+    } else {
+        tooltip.style.top = `${Math.max(targetRect.top, 0)}px`;
+    }
+}
+
+export function HideTooltip(target:HTMLElement)
+{
+    if (currentTooltipElement !== target)
+        return;
+    currentTooltipElement = undefined;
+    tooltip.style.display = "none";
 }

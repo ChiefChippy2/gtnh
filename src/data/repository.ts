@@ -1,5 +1,7 @@
 export class Repository
 {
+    static current:Repository;
+
     elements: Int32Array;
     bytes: Uint8Array;
     textReader: TextDecoder;
@@ -12,8 +14,8 @@ export class Repository
         this.bytes = new Uint8Array(data);
         this.elements = new Int32Array(data);
         this.textReader = new TextDecoder();
-        this.items = this.ReadSlice(this.elements[0]);
-        this.fluids = this.ReadSlice(this.elements[1]);
+        this.items = this.GetSlice(this.elements[0]);
+        this.fluids = this.GetSlice(this.elements[1]);
     }
 
     GetString(pointer:number):string
@@ -54,7 +56,7 @@ export class Repository
     }
 }
 
-interface IMemMappedObjectPrototype<T extends MemMappedObject>
+export interface IMemMappedObjectPrototype<T extends MemMappedObject>
 {
     new(repository:Repository, offset:number):T
 }
@@ -77,17 +79,17 @@ class MemMappedObject
 
     protected GetString(offset:number)
     {
-        return this.repository.GetString(offset + this.objectOffset);
+        return this.repository.GetString(this.repository.elements[offset + this.objectOffset]);
     }
 
     protected GetSlice(offset:number)
     {
-        return this.repository.GetSlice(offset + this.objectOffset);
+        return this.repository.GetSlice(this.repository.elements[offset + this.objectOffset]);
     }
 
     protected GetObject<T extends MemMappedObject>(offset:number, prototype:IMemMappedObjectPrototype<T>)
     {
-        return this.repository.GetObject<T>(offset + this.objectOffset, prototype);
+        return this.repository.GetObject<T>(this.repository.elements[offset + this.objectOffset], prototype);
     }
 }
 
@@ -112,7 +114,7 @@ export abstract class Goods extends RecipeObject
     abstract get tooltipDebugInfo():string;
 }
 
-class Item extends Goods
+export class Item extends Goods
 {
     get stackSize():number {return this.GetInt(11);}
     get damage():number {return this.GetInt(12);}
@@ -128,7 +130,7 @@ class Item extends Goods
     }
 }
 
-class Fluid extends Goods
+export class Fluid extends Goods
 {
     get isGas():boolean {return this.GetInt(11) === 1;}
     get containers():Int32Array {return this.GetSlice(12);}
@@ -210,3 +212,10 @@ class Recipe extends MemMappedObject
         return result;
     }
 }
+
+var response = (await fetch("./../data/data.bin"));
+var stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
+var buffer = await new Response(stream).arrayBuffer();
+var repository = new Repository(buffer);
+Repository.current = repository;
+console.log("Repository loaded", repository);

@@ -3,23 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Browser App</title>
-    <link rel="stylesheet" href="./styles.css">
+    <title>GTNH Calculator</title>
+    <link rel="stylesheet" href="./assets/styles/general.css">
+    <link rel="stylesheet" href="./assets/styles/nei.css">
+    <link rel="stylesheet" href="./assets/styles/tabs.css">
+    <link rel="stylesheet" href="./assets/styles/tooltip.css">
 </head>
 <body>
-    <div class="panel">
-        <div class="slot">
-            <div class="icon" style="--icon-id: 2048"></div>
-            <span class="text-count">20</span>
-        </div>
-        Test
-    </div>
-    <div id="tooltip" class="tooltip">
-        <p data-tooltip-header class="tooltip-header">Header</p>
-        <p data-tooltip-debug class="tooltip-debug">Debug</p>
-        <p data-tooltip-text class="tooltip-text">Text</p>
-        <p data-tooltip-mod class="tooltip-mod">Mod</p>
-    </div>
     <script type="module" src="./dist/index.js"></script>
+    <div id="panels">
+        <div id="loading" class="panel">LOADING...</div>
+
+<!--               NEI               -->
+
+        <div id="nei" class="panel hidden with-tabs">
+            <div class="panel-tab-bar">
+                <div class="panel-tab"></div>
+                <div class="panel-tab"></div>
+                <div class="panel-tab"></div>
+            </div>
+            <div class="scroll-area">
+                <div id="nei-content"></div>
+            </div>
+        </div>
+
+
+    </div>
+    <div id="tooltip">
+        <p id="tooltip-header">Header</p>
+        <p id="tooltip-debug">Debug</p>
+        <p id="tooltip-text">Text</p>
+        <p id="tooltip-mod">Mod</p>
+    </div>
 </body>
 </html>
