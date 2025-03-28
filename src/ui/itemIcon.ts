@@ -16,14 +16,13 @@ export class IconBox extends HTMLElement
     GetDisplayObject():Goods | null
     {
         var dataObj = this.getAttribute("data-obj");
-        if (dataObj === null)
+        var dataType = this.getAttribute("data-type");
+        if (dataObj === null || dataType === null)
             return null;
         var ptr = Number.parseFloat(dataObj);
         if (ptr === 0)
             return null;
-        else if (ptr > 0)
-            return Repository.current.GetObject(ptr, Item);
-        else return Repository.current.GetObject(-ptr, Fluid);
+        return dataType === "fluid" ? Repository.current.GetObject(ptr, Fluid) : Repository.current.GetObject(ptr, Item);
     }
 
     disconnectedCallback()

@@ -11,6 +11,7 @@ export class Repository
     items:Int32Array;
     fluids:Int32Array;
     recipeTypes:Int32Array;
+    service:Int32Array;
 
     constructor(data: ArrayBuffer)
     {
@@ -20,6 +21,7 @@ export class Repository
         this.items = this.GetSlice(this.elements[0]);
         this.fluids = this.GetSlice(this.elements[1]);
         this.recipeTypes = this.GetSlice(this.elements[2]);
+        this.service = this.GetSlice(this.elements[3]);
     }
 
     public ObjectMatchQueryBits(query:SearchQuery, pointer:number):boolean

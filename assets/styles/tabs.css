@@ -34,11 +34,20 @@
     height: 32px;
     position: relative;
     top: -4px;
+    transition: top 0.1s ease;
 }
 
 .panel-tab.active
 {
     border-image: url('./../images/Tab_Active.png') 8 4 4 fill;
+}
+
+.panel-tab.active .icon {
+    top: -6px;
+}
+
+.panel-tab:not(.active) .icon {
+    top: -2px;
 }
 
 .panel-tab:first-child

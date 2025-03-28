@@ -112,7 +112,7 @@ item-icon {
 .item-amount-small
 {
     position: absolute;
-    bottom: -1px;
+    bottom: -5px;
     right: 1px;
     font-size: 8px;
     text-shadow: 1px 1px #342C34;

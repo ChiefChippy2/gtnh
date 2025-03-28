@@ -33,8 +33,8 @@ class ItemAllocator implements NeiRowAllocator<Goods>
         dom.push(`<div class="nei-items-row icon-grid" style="--grid-width:${elements.length}; top:${elementSize*rowY}px">`);
         for (var i=0; i<elements.length; i++) {
             var elem = elements[i];
-            var ptr = elements instanceof Item ? elem.objectOffset : -elem.objectOffset;
-            dom.push(`<item-icon style="--grid-position:${i}; --icon-id:${elem.iconId}" data-obj="${ptr}"></item-icon>`);
+            var isItem = elem instanceof Item;
+            dom.push(`<item-icon style="--grid-position:${i}; --icon-id:${elem.iconId}" data-obj="${elem.objectOffset}" data-type="${isItem ? "item" : "fluid"}"></item-icon>`);
         }
         dom.push(`<\div>`);
         return dom.join("");
@@ -87,8 +87,7 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             var goods = item.goods;
             if (goods instanceof Goods) {
                 var isItem = goods instanceof Item;
-                var ptr = isItem ? item.goodsPtr : -item.goodsPtr;
-                dom.push(`<item-icon style="--grid-position:${item.slot}; --icon-id:${goods.iconId}" data-obj="${ptr}">`);
+                dom.push(`<item-icon style="--grid-position:${item.slot}; --icon-id:${goods.iconId}" data-obj="${item.goodsPtr}" data-type="${isItem ? "item" : "fluid"}">`);
                 if (!isItem || item.amount != 1)
                     dom.push(`<span class="${isItem && item.amount > 0 ? "item-amount" : "item-amount-small"}">${item.amount == 0 ? "NC" : item.amount}</span>`)
                 dom.push(`</item-icon>`);
@@ -420,13 +419,13 @@ const tabs: NeiTab[] = [
     { 
         name: "All Items", 
         filler: FillNeiAllItems, 
-        iconId: 0,
+        iconId: repository.GetObject(repository.service[0], Item).iconId,
         isVisible: () => true // Always visible
     },
     { 
         name: "All Recipes", 
         filler: FillNeiAllRecipes, 
-        iconId: 1,
+        iconId: repository.GetObject(repository.service[1], Item).iconId,
         isVisible: () => currentGoods !== null // Visible only when viewing recipes
     }
 ];
@@ -436,7 +435,7 @@ allRecipeTypes.forEach(recipeType => {
     tabs.push({
         name: recipeType.name,
         filler: FillNeiSpecificRecipes(recipeType),
-        iconId: 2,
+        iconId: repository.GetObject(recipeType.craftItems[0], Item).iconId,
         isVisible: () => mapRecipeTypeToRecipeList[recipeType.name].length > 0
     });
 });
