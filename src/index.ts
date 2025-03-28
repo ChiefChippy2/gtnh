@@ -7,4 +7,4 @@ import { ShowNei, ShowNeiMode } from "./ui/nei.js";
 
 document.getElementById("loading")?.remove();
 
-//ShowNei(null, ShowNeiMode.Production);
+ShowNei(null, ShowNeiMode.Production, null);

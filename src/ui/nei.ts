@@ -137,10 +137,14 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
     BuildRowDom(elements:Recipe[], elementWidth:number, elementHeight:number, rowY:number):string
     {
         let dom:string[] = [];
+        const canSelectRecipe = showNeiCallback?.canSelectRecipe() ?? false;
+        const tagName = canSelectRecipe ? "button" : "div";
+        const recipeAttr = canSelectRecipe ? ` data-recipe="${elements[0].objectOffset}"` : "";
+        
         for (let i=0; i<elements.length; i++) {
             let recipe = elements[i];
             let recipeItems = recipe.items;
-            dom.push(`<div class="nei-recipe-box" style="left:${Math.round(i * elementWidth * elementSize)}px; top:${rowY*elementSize}px; width:${Math.round(elementWidth*elementSize)}px; height:${elementHeight*elementSize}px">`);
+            dom.push(`<${tagName} class="nei-recipe-box" style="left:${Math.round(i * elementWidth * elementSize)}px; top:${rowY*elementSize}px; width:${Math.round(elementWidth*elementSize)}px; height:${elementHeight*elementSize}px"${recipeAttr}>`);
             dom.push(`<div class="nei-recipe-io">`);
             let index = this.BuildRecipeIoDom(dom, recipeItems, 0, RecipeIoType.OreDictInput, RecipeIoType.FluidInput, 0);
             dom.push(`<div class="arrow"></div>`);
@@ -161,7 +165,7 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
                     dom.push(`</span>`);
                 }
             }
-            dom.push(`</div>`);
+            dom.push(`</${tagName}>`);
         }
         return dom.join("");
     }
@@ -246,16 +250,32 @@ export enum ShowNeiContext
     None, Click, SelectRecipe, SelectGoods
 }
 
-export type ShowNeiCallback
-{
+export type ShowNeiCallback = {
     canSelectGoods():boolean;
     canSelectRecipe():boolean;
-    onSelectGoods(goods:Goods):void;
+    onSelectGoods(goods:Goods, mode:ShowNeiMode):void;
     onSelectRecipe(recipe:Recipe):void;
+}
+
+let showNeiCallback:ShowNeiCallback | null = null;
+
+export function HideNei()
+{
+    nei.style.display = "none";
+    showNeiCallback = null;
+    currentGoods = null;
 }
 
 export function ShowNei(goods:Goods | null, mode:ShowNeiMode, callback:ShowNeiCallback | null = null)
 {
+    if (showNeiCallback != null && goods != null && showNeiCallback.canSelectGoods()) {
+        showNeiCallback.onSelectGoods(goods, mode);
+        HideNei();
+        return;
+    }
+    if (callback != null) {
+        showNeiCallback = callback;
+    }
     nei.style.display = "block";
     currentGoods = goods;
     
@@ -522,4 +542,16 @@ function switchTab(index: number) {
 
 // Initialize tabs
 createTabs();
+
+// Add global click handler for recipe selection
+neiContent.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const recipeBox = target.closest(".nei-recipe-box");
+    if (recipeBox && showNeiCallback?.canSelectRecipe()) {
+        const recipeOffset = parseInt(recipeBox.getAttribute("data-recipe") || "0");
+        const recipe = repository.GetObject(recipeOffset, Recipe);
+        showNeiCallback.onSelectRecipe(recipe);
+        HideNei();
+    }
+});
 

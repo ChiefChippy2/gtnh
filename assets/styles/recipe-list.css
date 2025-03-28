@@ -1,4 +1,18 @@
 /* Recipe List Panel Styles */
+#recipe-list {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #2C2C2C;
+    z-index: 1;
+}
+
+#recipe-list.panel-visible {
+    pointer-events: none;
+}
+
 .fullscreen-panel {
     position: fixed;
     top: 0;

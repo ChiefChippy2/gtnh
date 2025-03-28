@@ -24,8 +24,13 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
+    position: absolute;
+    background: none;
+    padding: 0;
+}
 
-    position:absolute;
+.nei-recipe-box:focus {
+    outline: none;
 }
 
 .nei-recipe-items
