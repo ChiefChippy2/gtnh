@@ -14,6 +14,22 @@ const elementSize = 36;
 
 let currentGoods: Goods | null = null;
 
+document.addEventListener("keydown", (event) => {
+    // Handle Escape key
+    if (event.key === "Escape") {
+        searchBox.value = "";
+        SearchChanged();
+        return;
+    }
+
+    // Only handle printable characters
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey && searchBox.value == "") {
+        if (document.activeElement !== searchBox) {
+            searchBox.focus();
+        }
+    }
+});
+
 searchBox.addEventListener("input", SearchChanged);
 neiScrollBox.addEventListener("scroll", UpdateVisibleItems);
 
