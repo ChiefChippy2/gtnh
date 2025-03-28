@@ -150,8 +150,18 @@ p {
     align-items: center;
     width: 100vw;
     height: 100vh;
+    margin: 0;
+    padding: 0;
     z-index: 1000;
     pointer-events: none;
+    background-color: #B3B3B3;
+    visibility: hidden;
+    top: 0;
+    left: 0;
+}
+
+#panels:has(.panel:not(.hidden)) {
+    visibility: visible;
 }
 
 .scrollbar-measure {

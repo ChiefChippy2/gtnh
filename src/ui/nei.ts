@@ -15,10 +15,16 @@ const elementSize = 36;
 let currentGoods: Goods | null = null;
 
 document.addEventListener("keydown", (event) => {
+    if (nei.classList.contains("hidden"))
+        return;
     // Handle Escape key
     if (event.key === "Escape") {
-        searchBox.value = "";
-        SearchChanged();
+        if (searchBox.value == "") {
+            HideNei();
+        } else {
+            searchBox.value = "";
+            SearchChanged();
+        }
         return;
     }
 
@@ -261,7 +267,7 @@ let showNeiCallback:ShowNeiCallback | null = null;
 
 export function HideNei()
 {
-    nei.style.display = "none";
+    nei.classList.add("hidden");
     showNeiCallback = null;
     currentGoods = null;
 }
@@ -276,7 +282,7 @@ export function ShowNei(goods:Goods | null, mode:ShowNeiMode, callback:ShowNeiCa
     if (callback != null) {
         showNeiCallback = callback;
     }
-    nei.style.display = "block";
+    nei.classList.remove("hidden");
     currentGoods = goods;
     
     var pointerList = goods == null ? [] : mode == ShowNeiMode.Production ? goods.production : goods.consumption;
