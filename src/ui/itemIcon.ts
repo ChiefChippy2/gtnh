@@ -11,6 +11,24 @@ export class IconBox extends HTMLElement
         this.addEventListener("mouseleave", () => HideTooltip(this));
         this.addEventListener('contextmenu', this.RightClick);
         this.addEventListener('click', this.LeftClick);
+        this.UpdateIconId();
+    }
+
+    UpdateIconId() {
+        const obj = this.GetDisplayObject();
+        if (obj) {
+            this.style.setProperty('--icon-id', obj.iconId.toString());
+        }
+    }
+
+    static get observedAttributes() {
+        return ['data-obj'];
+    }
+
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        if (name === 'data-obj') {
+            this.UpdateIconId();
+        }
     }
 
     GetDisplayObject():Goods | null

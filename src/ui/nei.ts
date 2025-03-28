@@ -34,7 +34,7 @@ class ItemAllocator implements NeiRowAllocator<Goods>
         for (var i=0; i<elements.length; i++) {
             var elem = elements[i];
             var isItem = elem instanceof Item;
-            dom.push(`<item-icon style="--grid-position:${i}; --icon-id:${elem.iconId}" data-obj="${elem.objectOffset}" data-type="${isItem ? "item" : "fluid"}"></item-icon>`);
+            dom.push(`<item-icon style="--grid-position:${i}" data-obj="${elem.objectOffset}" data-type="${isItem ? "item" : "fluid"}"></item-icon>`);
         }
         dom.push(`<\div>`);
         return dom.join("");
@@ -87,10 +87,12 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             var goods = item.goods;
             if (goods instanceof Goods) {
                 var isItem = goods instanceof Item;
-                dom.push(`<item-icon style="--grid-position:${item.slot}; --icon-id:${goods.iconId}" data-obj="${item.goodsPtr}" data-type="${isItem ? "item" : "fluid"}">`);
+                dom.push(`<item-icon style="--grid-position:${item.slot}" data-obj="${item.goodsPtr}" data-type="${isItem ? "item" : "fluid"}">`);
                 if (!isItem || item.amount != 1)
                     dom.push(`<span class="${isItem && item.amount > 0 ? "item-amount" : "item-amount-small"}">${item.amount == 0 ? "NC" : item.amount}</span>`)
                 dom.push(`</item-icon>`);
+            } else {
+                
             }
         }
         dom.push(`</div>`);
