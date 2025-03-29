@@ -47,10 +47,14 @@ class ModelObjectSerializer extends ModelObjectVisitor
     }
 }
 
+type iidScanResult = {current:ModelObject, parent:ModelObject} | null;
+
 class ModelObjectIidScanner extends ModelObjectVisitor
 {
     iid:number = 0;
+    parent:ModelObject | null = null;
     result:ModelObject | null = null;
+
     VisitData(key: string, data: any): void {}
     VisitObject(key: string, obj: ModelObject): void {
         if (obj.iid === this.iid) {
@@ -64,35 +68,27 @@ class ModelObjectIidScanner extends ModelObjectVisitor
         }
     }
 
-    Scan(obj:ModelObject):ModelObject | null
+    Scan(obj:ModelObject, iid:number):iidScanResult
     {
-        this.iid = obj.iid;
+        this.parent = obj;
+        this.iid = iid;
         obj.Visit(this);
-        return this.result;
+        return this.result === null ? null : {current:this.result, parent:this.parent};
     }
 }
 
-export let serializer = new ModelObjectSerializer();
-export let iidScanner = new ModelObjectIidScanner();
+let serializer = new ModelObjectSerializer();
+let iidScanner = new ModelObjectIidScanner();
+
+export function GetByIid(iid:number):iidScanResult
+{
+    return iidScanner.Scan(project.GetCurrentPage(), iid);
+}
 
 export abstract class ModelObject
 {
     iid:number;
     abstract Visit(visitor:ModelObjectVisitor):void;
-
-    protected IidScan(data:ModelObject[] | ModelObject, iid:number):ModelObject | null
-    {
-        if (data instanceof Array) {
-            for (const obj of data) {
-                let result = this.IidScan(obj, iid);
-                if (result) return result;
-            }
-            return null;
-        } else {
-            if (data.iid === iid) return data;
-            return data.IidScan(data, iid);
-        }
-    }
 
     constructor()
     {
@@ -103,8 +99,16 @@ export abstract class ModelObject
 export class ProjectModel extends ModelObject
 {
     pages: PageModel[];
+    selectedPage: number = 0;
+
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitArray("pages", this.pages);
+        visitor.VisitData("selectedPage", this.selectedPage);
+    }
+
+    public GetCurrentPage():PageModel
+    {
+        return this.pages[this.selectedPage];
     }
 
     constructor(source:any = undefined)
@@ -114,6 +118,8 @@ export class ProjectModel extends ModelObject
             if (source.pages instanceof Array)
                 this.pages = source.pages.map((page: any) => new PageModel(page));
             else this.pages = [new PageModel()];
+            if (source.selectedPage instanceof Number)
+                this.selectedPage = Math.max(0, Math.min(Math.trunc(source.selectedPage), this.pages.length - 1));
         } else this.pages = [new PageModel()];
     }
 }
@@ -121,8 +127,13 @@ export class ProjectModel extends ModelObject
 export class PageModel extends ModelObject
 {
     name: string = "New Page";
+    products: any[] = [];
+    rootGroup: RecipeGroupModel = new RecipeGroupModel();
+
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData("name", this.name);
+        visitor.VisitArray("products", this.products);
+        visitor.VisitObject("rootGroup", this.rootGroup);
     }
 
     constructor(source:any = undefined)
@@ -131,7 +142,22 @@ export class PageModel extends ModelObject
         if (source instanceof Object) {
             if (source.name instanceof String)
                 this.name = source.name;
+            if (source.products instanceof Array)
+                this.products = source.products;
+            if (source.rootGroup instanceof Object)
+                this.rootGroup = new RecipeGroupModel(source.rootGroup);
         }
+    }
+}
+
+export class ProductModel extends ModelObject
+{
+    goodsId: string = "";
+    amount: number = 1;
+
+    Visit(visitor: ModelObjectVisitor): void {
+        visitor.VisitData("goodsId", this.goodsId);
+        visitor.VisitData("amount", this.amount);
     }
 }
 
@@ -143,19 +169,41 @@ export class RecipeGroupModel extends RecipeGroupEntry
 {
     links: string[] = [];
     elements: RecipeGroupEntry[] = [];
+    collapsed: boolean = false;
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData("type", "recipe_group");
         visitor.VisitData("links", this.links);
         visitor.VisitArray("elements", this.elements);
+        visitor.VisitData("collapsed", this.collapsed);
+    }
+
+    constructor(source:any = undefined)
+    {
+        super();
+        if (source instanceof Object) {
+            if (source.links instanceof Array)
+                this.links = source.links;
+            if (source.elements instanceof Array)
+                this.elements = source.elements.map((element: any) => {
+                    if (element.type === "recipe")
+                        return new RecipeModel(element);
+                    else
+                        return new RecipeGroupModel(element);
+                });
+            if (source.collapsed === true)
+                this.collapsed = true;
+        }
     }
 }
 
 export class RecipeModel extends RecipeGroupEntry
 {
-    public recipeId: string = "";
+    type: string = "recipe";
+    recipeId: string = "";
+
     Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitData("type", "recipe");
+        visitor.VisitData("type", this.type);
         visitor.VisitData("recipeId", this.recipeId);
     }
 
