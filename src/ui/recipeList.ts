@@ -1,6 +1,6 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
 import { Goods, Repository, Item, Fluid } from "../data/repository.js";
-import { project, UpdateProject } from "../project.js";
+import { project, UpdateProject, addProjectChangeListener, removeProjectChangeListener } from "../project.js";
 
 interface Product {
     goods: Goods;
@@ -14,6 +14,14 @@ export class RecipeList {
         this.productItemsContainer = document.querySelector(".product-items")!;
         this.setupGlobalEventListeners();
         this.updateProductList();
+        
+        // Listen for project changes
+        addProjectChangeListener(() => this.updateProductList());
+    }
+
+    // Clean up when the component is destroyed
+    destroy() {
+        removeProjectChangeListener(() => this.updateProductList());
     }
 
     private setupGlobalEventListeners() {
@@ -25,7 +33,6 @@ export class RecipeList {
                 if (productItem) {
                     const index = Array.from(this.productItemsContainer.children).indexOf(productItem);
                     project.pages[0].links.splice(index, 1);
-                    this.updateProductList();
                     UpdateProject();
                 }
             }
@@ -70,21 +77,28 @@ export class RecipeList {
     private addProduct(goods: Goods, amount: number) {
         project.pages[0].links.push({
             goodsId: goods.id,
-            amount: amount
+            amount: goods instanceof Fluid ? 1000 : 1
         });
-        this.updateProductList();
         UpdateProject();
     }
 
     private updateProductList() {
-        this.productItemsContainer.innerHTML = project.pages[0].links.map(link => {
+        // Filter out zero amounts and sort by amount descending
+        const links = project.pages[0].links
+            .filter(link => link.amount !== 0)
+            .sort((a, b) => b.amount - a.amount);
+
+        this.productItemsContainer.innerHTML = links.map(link => {
             const goods = Repository.current.GetGoodsById(link.goodsId);
             if (!goods) return '';
             const isFluid = goods instanceof Fluid;
             return `
                 <div class="product-item">
                     <item-icon data-obj="${goods.objectOffset}" data-type="${isFluid ? 'fluid' : 'item'}"></item-icon>
-                    <input type="number" class="amount" value="${link.amount}" min="0" step="0.1">
+                    <div class="amount-container">
+                        <input type="number" class="amount" value="${link.amount}" min="-999999" step="0.1">
+                        <span class="amount-unit">/min</span>
+                    </div>
                     <div class="name">${goods.name}</div>
                     <button class="delete-btn">×</button>
                 </div>
