@@ -41,9 +41,10 @@ export class Repository
         }
     }
 
-    public GetGoodsById(id:string):Goods
+    public GetGoodsById(id:string):RecipeObject
     {
-        var type:IMemMappedObjectPrototype<Goods> = id.charCodeAt(0) == charCodeItem ? Item : Fluid;
+        var idCode = id.charCodeAt(0);
+        var type:IMemMappedObjectPrototype<RecipeObject> = idCode == charCodeItem ? Item : idCode == charCodeFluid ? Fluid : OreDict;
         return this.GetObject(this.objectPositionMap[id], type);
     }
 

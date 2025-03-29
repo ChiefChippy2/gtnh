@@ -1,5 +1,5 @@
 import { Repository, Goods, Item, Fluid, OreDict } from "../data/repository.js";
-import { ShowNei, ShowNeiMode } from "./nei.js";
+import { ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
 import { ShowTooltip, HideTooltip, IsHovered } from "./tooltip.js";
 
 // Global cycling state
@@ -28,14 +28,10 @@ export class IconBox extends HTMLElement
         this.UpdateIconId();
     }
 
-    private StartOredictCycle() {
-        const dataObj = this.getAttribute("data-obj");
-        if (!dataObj) return;
+    private StartOredictCycle(oredict: OreDict) {
+        if (!oredict || oredict.items.length === 0) return;
         
-        // Get oredict
-        this.oredict = Repository.current.GetObject(Number.parseFloat(dataObj), OreDict);
-        if (!this.oredict || this.oredict.items.length === 0) return;
-        
+        this.oredict = oredict;
         this.UpdateIconId();
         
         // Add to global cycle if not already there
@@ -64,14 +60,15 @@ export class IconBox extends HTMLElement
     }
 
     static get observedAttributes() {
-        return ['data-obj', 'data-type'];
+        return ['data-id'];
     }
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === 'data-obj' || name === 'data-type') {
+        if (name === 'data-id') {
             this.StopOredictCycle();
-            if (this.getAttribute('data-type') === 'oredict') {
-                this.StartOredictCycle();
+            const obj = Repository.current.GetGoodsById(newValue);
+            if (obj instanceof OreDict) {
+                this.StartOredictCycle(obj);
             } else {
                 this.UpdateIconId();
             }
@@ -80,23 +77,25 @@ export class IconBox extends HTMLElement
 
     GetDisplayObject():Goods | null
     {
-        var dataObj = this.getAttribute("data-obj");
-        var dataType = this.getAttribute("data-type");
-        if (dataObj === null || dataType === null)
-            return null;
-        var ptr = Number.parseFloat(dataObj);
-        if (ptr === 0)
-            return null;
+        const dataId = this.getAttribute("data-id");
+        if (!dataId) return null;
 
-        if (dataType === "oredict") {
+        const obj = Repository.current.GetGoodsById(dataId);
+        if (!obj) return null;
+
+        if (obj instanceof OreDict) {
             if (!this.oredict) {
-                this.StartOredictCycle();
+                this.StartOredictCycle(obj);
             }
             if (!this.oredict) return null;
             return Repository.current.GetObject(this.oredict.items[globalIndex % this.oredict.items.length], Item);
         }
 
-        return dataType === "fluid" ? Repository.current.GetObject(ptr, Fluid) : Repository.current.GetObject(ptr, Item);
+        if (obj instanceof Goods) {
+            return obj;
+        }
+
+        return null;
     }
 
     disconnectedCallback()
@@ -110,12 +109,12 @@ export class IconBox extends HTMLElement
         if (event.ctrlKey || event.metaKey)
             return;
         event.preventDefault();
-        ShowNei(this.GetDisplayObject(), ShowNeiMode.Consumption);
+        ShowNei(this.GetDisplayObject(), ShowNeiMode.Consumption, null);
     }
 
     LeftClick()
     {
-        ShowNei(this.GetDisplayObject(), ShowNeiMode.Production);
+        ShowNei(this.GetDisplayObject(), ShowNeiMode.Production, null);
     }
 }
 

@@ -76,6 +76,7 @@ function saveProject() {
         if (history.length > MAX_HISTORY) {
             history.shift();
         }
+        console.log(json);
     } catch (e) {
         console.error("Failed to save project:", e);
     }

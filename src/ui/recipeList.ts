@@ -126,12 +126,13 @@ export class RecipeList {
             .sort((a, b) => b.amount - a.amount);
 
         this.productItemsContainer.innerHTML = links.map(link => {
-            const goods = Repository.current.GetGoodsById(link.goodsId);
-            if (!goods) return '';
+            const obj = Repository.current.GetGoodsById(link.goodsId);
+            if (!obj || !(obj instanceof Goods)) return '';
+            const goods = obj as Goods;
             const isFluid = goods instanceof Fluid;
             return `
                 <div class="product-item">
-                    <item-icon data-obj="${goods.objectOffset}" data-type="${isFluid ? 'fluid' : 'item'}"></item-icon>
+                    <item-icon data-id="${goods.id}"></item-icon>
                     <div class="amount-container">
                         <input type="number" class="amount" value="${link.amount}" min="-999999" step="0.1">
                         <span class="amount-unit">/min</span>

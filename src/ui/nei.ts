@@ -55,8 +55,7 @@ class ItemAllocator implements NeiRowAllocator<Goods>
         dom.push(`<div class="nei-items-row icon-grid" style="--grid-width:${elements.length}; top:${elementSize*rowY}px">`);
         for (var i=0; i<elements.length; i++) {
             var elem = elements[i];
-            var isItem = elem instanceof Item;
-            dom.push(`<item-icon style="--grid-position:${i}" data-obj="${elem.objectOffset}" data-type="${isItem ? "item" : "fluid"}"></item-icon>`);
+            dom.push(`<item-icon style="--grid-position:${i}" data-id="${elem.id}"></item-icon>`);
         }
         dom.push(`<\div>`);
         return dom.join("");
@@ -110,7 +109,7 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             if (item.slot >= count)
                 continue;
             var goods = item.goods;
-            var iconAttrs = `style="--grid-position:${item.slot}" data-obj="${item.goodsPtr}"`;
+            var iconAttrs = `style="--grid-position:${item.slot}" data-id="${goods.id}"`;
             var amountText = item.amount == 0 ? "NC" : 
                            item.amount <= 100000 ? item.amount :
                            item.amount <= 10000000 ? Math.round(item.amount/1000) + "K" :
@@ -120,7 +119,7 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             var isGoods = goods instanceof Goods;
             var iconType = isGoods ? (isFluid ? "fluid" : "item") : "oredict";
             var amountClass = isFluid || item.amount == 0 ? "item-amount-small" : "item-amount";
-            dom.push(`<item-icon ${iconAttrs} data-type="${iconType}">`);
+            dom.push(`<item-icon ${iconAttrs}>`);
             if (isFluid || item.amount != 1)
                 dom.push(`<span class="${amountClass}">${amountText}</span>`);
             if (item.probability < 1 && (type == RecipeIoType.ItemOutput || type == RecipeIoType.FluidOutput))
