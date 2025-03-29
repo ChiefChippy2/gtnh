@@ -1,5 +1,8 @@
 import { SearchQuery } from "./searchQuery.js";
 
+const charCodeItem = "i".charCodeAt(0);
+const charCodeFluid = "f".charCodeAt(0);
+
 export class Repository
 {
     static current:Repository;
@@ -11,7 +14,10 @@ export class Repository
     items:Int32Array;
     fluids:Int32Array;
     recipeTypes:Int32Array;
+    mapping:Int32Array;
     service:Int32Array;
+
+    objectPositionMap: {[id:string]:number} = {};
 
     constructor(data: ArrayBuffer)
     {
@@ -21,7 +27,18 @@ export class Repository
         this.items = this.GetSlice(this.elements[0]);
         this.fluids = this.GetSlice(this.elements[1]);
         this.recipeTypes = this.GetSlice(this.elements[2]);
-        this.service = this.GetSlice(this.elements[3]);
+        this.mapping = this.GetSlice(this.elements[3]);
+        this.service = this.GetSlice(this.elements[4]);
+        for (var i=0; i<this.mapping.length; i+=2) {
+            var id = this.GetString(this.mapping[i]);
+            this.objectPositionMap[id] = this.mapping[i+1];
+        }
+    }
+
+    public GetGoodsById(id:string):Goods
+    {
+        var type:IMemMappedObjectPrototype<Goods> = id.charCodeAt(0) == charCodeItem ? Item : Fluid;
+        return this.GetObject(this.objectPositionMap[id], type);
     }
 
     public ObjectMatchQueryBits(query:SearchQuery, pointer:number):boolean

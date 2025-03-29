@@ -274,6 +274,7 @@ export function HideNei()
 
 export function ShowNei(goods:Goods | null, mode:ShowNeiMode, callback:ShowNeiCallback | null = null)
 {
+    console.log("ShowNei", goods, mode, callback);
     if (showNeiCallback != null && goods != null && showNeiCallback.canSelectGoods()) {
         showNeiCallback.onSelectGoods(goods, mode);
         HideNei();
