@@ -14,7 +14,7 @@ export class Repository
     items:Int32Array;
     fluids:Int32Array;
     recipeTypes:Int32Array;
-    mapping:Int32Array;
+    oreDicts:Int32Array;
     service:Int32Array;
 
     objectPositionMap: {[id:string]:number} = {};
@@ -26,12 +26,18 @@ export class Repository
         this.textReader = new TextDecoder();
         this.items = this.GetSlice(this.elements[0]);
         this.fluids = this.GetSlice(this.elements[1]);
-        this.recipeTypes = this.GetSlice(this.elements[2]);
-        this.mapping = this.GetSlice(this.elements[3]);
+        this.oreDicts = this.GetSlice(this.elements[2]);
+        this.recipeTypes = this.GetSlice(this.elements[3]);
         this.service = this.GetSlice(this.elements[4]);
-        for (var i=0; i<this.mapping.length; i+=2) {
-            var id = this.GetString(this.mapping[i]);
-            this.objectPositionMap[id] = this.mapping[i+1];
+        this.FillObjectPositionMap(this.items);
+        this.FillObjectPositionMap(this.fluids);
+        this.FillObjectPositionMap(this.oreDicts);
+    }
+
+    private FillObjectPositionMap(elements:Int32Array) {
+        for (var i=0; i<elements.length; i++) {
+            var id = this.GetString(this.elements[elements[i]+4]);
+            this.objectPositionMap[id] = elements[i];
         }
     }
 
@@ -153,12 +159,12 @@ abstract class SearchableObject extends MemMappedObject
 
 abstract class RecipeObject extends SearchableObject
 {
-    get name():string {return this.GetString(4);}
+    get id():string {return this.GetString(4);}
 }
 
 export abstract class Goods extends RecipeObject
 {
-    get id(): string {return this.GetString(5);}
+    get name(): string {return this.GetString(5);}
     get mod(): string {return this.GetString(6);}
     get internalName(): string {return this.GetString(7);}
     get numericId(): number {return this.GetInt(8);}

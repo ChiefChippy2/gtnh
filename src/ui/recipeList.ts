@@ -1,5 +1,5 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
-import { Goods, Repository, Item, Fluid } from "../data/repository.js";
+import { Goods, Repository, Item, Fluid, Recipe } from "../data/repository.js";
 import { project, UpdateProject, addProjectChangeListener, removeProjectChangeListener } from "../project.js";
 
 interface Product {
@@ -9,19 +9,28 @@ interface Product {
 
 export class RecipeList {
     private productItemsContainer: HTMLElement;
+    private recipeItemsContainer: HTMLElement;
 
     constructor() {
         this.productItemsContainer = document.querySelector(".product-items")!;
+        this.recipeItemsContainer = document.querySelector(".recipe-items")!;
         this.setupGlobalEventListeners();
         this.updateProductList();
+        this.updateRecipeList();
         
         // Listen for project changes
-        addProjectChangeListener(() => this.updateProductList());
+        addProjectChangeListener(() => {
+            this.updateProductList();
+            this.updateRecipeList();
+        });
     }
 
     // Clean up when the component is destroyed
     destroy() {
-        removeProjectChangeListener(() => this.updateProductList());
+        removeProjectChangeListener(() => {
+            this.updateProductList();
+            this.updateRecipeList();
+        });
     }
 
     private setupGlobalEventListeners() {
@@ -59,6 +68,14 @@ export class RecipeList {
                 this.showNeiForProductSelection();
             }
         });
+
+        // Global event listener for add recipe button
+        document.addEventListener("click", (e) => {
+            const addRecipeBtn = (e.target as HTMLElement).closest(".add-recipe-btn");
+            if (addRecipeBtn) {
+                this.showNeiForRecipeSelection();
+            }
+        });
     }
 
     private showNeiForProductSelection() {
@@ -74,10 +91,30 @@ export class RecipeList {
         ShowNei(null, ShowNeiMode.Production, callback);
     }
 
+    private showNeiForRecipeSelection() {
+        const callback: ShowNeiCallback = {
+            canSelectGoods: () => false,
+            canSelectRecipe: () => true,
+            onSelectGoods: () => {}, // Not used
+            onSelectRecipe: (recipe: Recipe) => {
+                this.addRecipe(recipe.objectOffset.toString());
+            }
+        };
+
+        ShowNei(null, ShowNeiMode.Production, callback);
+    }
+
     private addProduct(goods: Goods, amount: number) {
         project.pages[0].links.push({
             goodsId: goods.id,
             amount: goods instanceof Fluid ? 1000 : 1
+        });
+        UpdateProject();
+    }
+
+    private addRecipe(recipeId: string) {
+        project.pages[0].recipes.push({
+            recipeId: recipeId
         });
         UpdateProject();
     }
@@ -101,6 +138,16 @@ export class RecipeList {
                     </div>
                     <div class="name">${goods.name}</div>
                     <button class="delete-btn">×</button>
+                </div>
+            `;
+        }).join("");
+    }
+
+    private updateRecipeList() {
+        this.recipeItemsContainer.innerHTML = project.pages[0].recipes.map(recipe => {
+            return `
+                <div class="recipe-item">
+                    ${recipe.recipeId}
                 </div>
             `;
         }).join("");
