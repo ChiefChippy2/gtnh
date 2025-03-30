@@ -1,6 +1,6 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
 import { Goods, Repository, Item, Fluid, Recipe } from "../data/repository.js";
-import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page } from "../project.js";
+import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page, FlowInformation } from "../project.js";
 import { voltageTier, GtVoltageTier } from "../utils.js";
 
 interface Product {
@@ -227,25 +227,15 @@ export class RecipeList {
         UpdateProject();
     }
 
-    private renderIoInfo(flow: {[goodsId:string]:number}): string {
-        // Sort flow entries by amount (highest to lowest)
-        const sortedFlow = Object.entries(flow)
-            .sort(([,a], [,b]) => Math.abs(b) - Math.abs(a));
-
-        // Separate inputs and outputs
-        const inputs = sortedFlow.filter(([,amount]) => amount > 0);
-        const outputs = sortedFlow.filter(([,amount]) => amount < 0);
-
+    private renderIoInfo(flow: FlowInformation): string {
         const formatAmount = (amount: number) => {
-            const absAmount = Math.abs(amount);
-            return absAmount <= 100000 ? absAmount :
-                   absAmount <= 10000000 ? Math.round(absAmount/1000) + "K" :
-                   Math.round(absAmount/1000000) + "M";
+            return amount <= 100000 ? amount :
+                amount <= 10000000 ? Math.round(amount/1000) + "K" : Math.round(amount/1000000) + "M";
         };
 
-        const renderFlowItems = (items: [string, number][]) => {
-            return items.map(([goodsId, amount]) => {
-                const goods = Repository.current.GetById(goodsId);
+        const renderFlowItems = (items: {[key:string]:number}) => {
+            const sortedFlow = Object.entries(items).sort(([,a], [,b]) => Math.abs(b) - Math.abs(a));
+            return sortedFlow.map(([goodsId, amount]) => {
                 const amountText = formatAmount(amount);
                 return `
                     <item-icon data-id="${goodsId}" class="flow-item" data-amount="${amountText}"></item-icon>
@@ -256,12 +246,12 @@ export class RecipeList {
         return `
             <div class="io-column inputs">
                 <div class="io-items">
-                    ${renderFlowItems(inputs)}
+                    ${renderFlowItems(flow.input)}
                 </div>
             </div>
             <div class="io-column outputs">
                 <div class="io-items">
-                    ${renderFlowItems(outputs)}
+                    ${renderFlowItems(flow.output)}
                 </div>
             </div>
         `;

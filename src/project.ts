@@ -104,8 +104,16 @@ export abstract class ModelObject
     }
 }
 
+export type FlowInformation = {
+    input: {[key:string]:number};
+    output: {[key:string]:number};
+    energy: {[key:number]:number};
+}
+
+let emptyFlow:FlowInformation = {input: {}, output: {}, energy: {}};
+
 export abstract class RecipeGroupEntry extends ModelObject{
-    flow: {[goodsId:string]:number} = {};
+    flow: FlowInformation = emptyFlow;
 }
 
 export class RecipeGroupModel extends RecipeGroupEntry

@@ -1,6 +1,7 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
-import { PageModel, RecipeGroupModel, RecipeModel, ProductModel } from './project.js';
+import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation } from './project.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, Repository } from "./data/repository.js";
+import { voltageTier } from "./utils.js";
 
 type Capture = {[id:string]:string};
 
@@ -63,7 +64,8 @@ function CollectVariables(group:RecipeGroupModel, model:Model, capture:Capture, 
 
 function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
 {
-    recipeModel.flow = {};
+    let flow:FlowInformation = {input: {}, output: {}, energy: {}};
+    recipeModel.flow = flow;
     let name = `recipe_${recipeModel.iid}`;
     let recipe = Repository.current.GetById(recipeModel.recipeId) as Recipe;
     let solutionValue = (solution[name] || 0) as number;
@@ -75,34 +77,48 @@ function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
         else goods = item.goods as Goods;
 
         var isProduction = item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput;
-        recipeModel.flow[goods.id] = (isProduction ? -item.amount : item.amount) * solutionValue;
+        var element = isProduction ? flow.output : flow.input;
+        element[goods.id] = (element[goods.id] || 0) + item.amount * solutionValue;
+    }
+
+    if (recipe.gtRecipe) {
+        flow.energy[recipe.gtRecipe.voltageTier] = recipe.gtRecipe.durationSeconds * recipe.gtRecipe.voltage * solutionValue * 60;
     }
 }
 
-function AppendFlow(flow:{[key:string]:number}, source:{[key:string]:number}):void
+function AppendFlow(flow:FlowInformation, source:FlowInformation):void
 {
-    for (const key in source) {
-        flow[key] = (flow[key] || 0) + source[key];
+    for (const key in source.input) {
+        flow.input[key] = (flow.input[key] || 0) + source.input[key];
+    }
+    for (const key in source.output) {
+        flow.output[key] = (flow.output[key] || 0) + source.output[key];
+    }
+    for (const key in source.energy) {
+        flow.energy[key] = (flow.energy[key] || 0) + source.energy[key];
     }
 }
 
-function ApplySolutionGroup(group:RecipeGroupModel, solution:Solution):void
+function ApplySolutionGroup(group:RecipeGroupModel, solution:Solution, model:Model):void
 {
     for (const child of group.elements) {
         if (child instanceof RecipeModel)
             ApplySolutionRecipe(child, solution);
         else if (child instanceof RecipeGroupModel)
-            ApplySolutionGroup(child, solution);
+            ApplySolutionGroup(child, solution, model);
     }
 
-    group.flow = {};
+    let flow:FlowInformation = {input: {}, output: {}, energy: {}};
+    group.flow = flow;
     for (const child of group.elements) {
         AppendFlow(group.flow, child.flow);
     }
     for (const link of group.links) {
         let name = `link_${group.iid}_${link}`;
-        if (solution[name] === 0)
-            delete group.flow[link];
+        if (model.constraints[name]) {
+            delete flow.input[link];
+            delete flow.output[link];
+        }
     }
 }
 
@@ -146,5 +162,5 @@ export function SolvePage(page:PageModel):void
     let solution = window.solver.Solve(model);
     console.log("Solve solution",solution);
     if (solution.feasible)
-        ApplySolutionGroup(page.rootGroup, solution);
+        ApplySolutionGroup(page.rootGroup, solution, model);
 }
