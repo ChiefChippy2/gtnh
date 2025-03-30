@@ -1,6 +1,6 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
 import { Goods, Repository, Item, Fluid, Recipe } from "../data/repository.js";
-import { project, UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop } from "../project.js";
+import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page } from "../project.js";
 
 interface Product {
     goods: Goods;
@@ -212,7 +212,6 @@ export class RecipeList {
     }
 
     private addProduct(goods: Goods, amount: number) {
-        const page = project.GetCurrentPage();
         page.products.push(new ProductModel({
             goodsId: goods.id,
             amount: goods instanceof Fluid ? 1000 : 1
@@ -305,7 +304,6 @@ export class RecipeList {
     }
 
     private updateProductList() {
-        const page = project.GetCurrentPage();
         // Filter out zero amounts and sort by amount descending
         const products = page.products
             .filter(product => product instanceof ProductModel && product.amount !== 0)
@@ -334,7 +332,6 @@ export class RecipeList {
     }
 
     private updateRecipeList() {
-        const page = project.GetCurrentPage();
         this.recipeItemsContainer.innerHTML = this.renderRootGroup(page.rootGroup);
     }
 

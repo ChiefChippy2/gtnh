@@ -6,7 +6,12 @@ export abstract class ModelObjectVisitor
 {
     abstract VisitData(parent:ModelObject, key:string, data:any):void;
     abstract VisitObject(parent:ModelObject, key:string, obj:ModelObject):void;
-    abstract VisitArray(parent:ModelObject, key:string, array:ModelObject[]):void;
+    VisitArray(parent:ModelObject, key:string, array:ModelObject[]):void
+    {
+        for (const obj of array) {
+            this.VisitObject(parent, key, obj);
+        }
+    }
 }
 
 class ModelObjectSerializer extends ModelObjectVisitor
@@ -66,13 +71,6 @@ class ModelObjectIidScanner extends ModelObjectVisitor
         }
         obj.Visit(this);
     }
-    VisitArray(parent:ModelObject, key: string, array: ModelObject[]): void {
-        for (const obj of array) {
-            this.VisitObject(parent, key, obj);
-            if (this.result !== null)
-                return;
-        }
-    }
 
     Scan(obj:ModelObject, parent:ModelObject, iid:number):iidScanResult
     {
@@ -91,7 +89,7 @@ let iidScanner = new ModelObjectIidScanner();
 
 export function GetByIid(iid:number):iidScanResult
 {
-    return iidScanner.Scan(project.GetCurrentPage(), project, iid);
+    return iidScanner.Scan(page, page, iid);
 }
 
 export abstract class ModelObject
@@ -105,34 +103,6 @@ export abstract class ModelObject
     }
 }
 
-export class ProjectModel extends ModelObject
-{
-    pages: PageModel[];
-    selectedPage: number = 0;
-
-    Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitArray("pages", this.pages);
-        visitor.VisitData("selectedPage", this.selectedPage);
-    }
-
-    public GetCurrentPage():PageModel
-    {
-        return this.pages[this.selectedPage];
-    }
-
-    constructor(source:any = undefined)
-    {
-        super();
-        if (source instanceof Object) {
-            if (source.pages instanceof Array)
-                this.pages = source.pages.map((page: any) => new PageModel(page));
-            else this.pages = [new PageModel()];
-            if (source.selectedPage instanceof Number)
-                this.selectedPage = Math.max(0, Math.min(Math.trunc(source.selectedPage), this.pages.length - 1));
-        } else this.pages = [new PageModel()];
-    }
-}
-
 export class PageModel extends ModelObject
 {
     name: string = "New Page";
@@ -140,9 +110,9 @@ export class PageModel extends ModelObject
     rootGroup: RecipeGroupModel = new RecipeGroupModel();
 
     Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitData("name", this.name);
-        visitor.VisitArray("products", this.products);
-        visitor.VisitObject("rootGroup", this.rootGroup);
+        visitor.VisitData(this, "name", this.name);
+        visitor.VisitArray(this, "products", this.products);
+        visitor.VisitObject(this, "rootGroup", this.rootGroup);
     }
 
     constructor(source:any = undefined)
@@ -159,14 +129,16 @@ export class PageModel extends ModelObject
     }
 }
 
+export var currentPage:PageModel = new PageModel({});
+
 export class ProductModel extends ModelObject
 {
     goodsId: string;
     amount: number = 1;
 
     Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitData("goodsId", this.goodsId);
-        visitor.VisitData("amount", this.amount);
+        visitor.VisitData(this, "goodsId", this.goodsId);
+        visitor.VisitData(this, "amount", this.amount);
     }
 
     constructor(source:any = undefined)
@@ -191,10 +163,10 @@ export class RecipeGroupModel extends RecipeGroupEntry
     collapsed: boolean = false;
 
     Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitData("type", "recipe_group");
-        visitor.VisitData("links", this.links);
-        visitor.VisitArray("elements", this.elements);
-        visitor.VisitData("collapsed", this.collapsed);
+        visitor.VisitData(this, "type", "recipe_group");
+        visitor.VisitData(this, "links", this.links);
+        visitor.VisitArray(this, "elements", this.elements);
+        visitor.VisitData(this, "collapsed", this.collapsed);
     }
 
     constructor(source:any = undefined)
@@ -222,8 +194,8 @@ export class RecipeModel extends RecipeGroupEntry
     recipeId: string = "";
 
     Visit(visitor: ModelObjectVisitor): void {
-        visitor.VisitData("type", this.type);
-        visitor.VisitData("recipeId", this.recipeId);
+        visitor.VisitData(this, "type", this.type);
+        visitor.VisitData(this, "recipeId", this.recipeId);
     }
 
     constructor(source:any = undefined)
@@ -265,11 +237,11 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
     }
 }
 
-const STORAGE_KEY = "gtnh_calculator_project";
 const MAX_HISTORY = 50;
 
-export var project: ProjectModel = new ProjectModel();
-export var page: PageModel = project.pages[0];
+export var pageNames = Object.keys(localStorage).filter((key) => key.startsWith("page_")).sort();
+let currentPageName = pageNames.length > 0 ? pageNames[0] : "page_0";
+export var page: PageModel = loadPage(currentPageName)
 
 // Undo history
 let history: string[] = [];
@@ -293,25 +265,26 @@ function notifyListeners() {
     changeListeners.forEach(listener => listener());
 }
 
-// Load project from storage
-function loadProject() {
-    const stored = localStorage.getItem(STORAGE_KEY);
+function loadPage(key:string):PageModel
+{
+    currentPageName = key;
+    const stored = localStorage.getItem(key);
     if (stored) {
         try {
             let projectData = JSON.parse(stored);
-            project = new ProjectModel(projectData);
+            return new PageModel(projectData);
         } catch (e) {
             console.error("Failed to load project:", e);
         }
     }
-    console.log("Loaded project:", project);
+    return new PageModel();
 }
 
 // Save project to storage
-function saveProject() {
+function savePage() {
     try {
-        const json = JSON.stringify(serializer.Serialize(project));
-        localStorage.setItem(STORAGE_KEY, json);
+        const json = JSON.stringify(serializer.Serialize(page));
+        localStorage.setItem(currentPageName, json);
         
         // Add to history
         history.push(json);
@@ -325,7 +298,7 @@ function saveProject() {
 }
 
 export function UpdateProject() {
-    saveProject();
+    savePage();
     notifyListeners();
 }
 
@@ -334,16 +307,13 @@ export function Undo() {
         history.pop(); // Remove current state
         const previousState = history[history.length - 1];
         try {
-            project = new ProjectModel(JSON.parse(previousState));
+            page = new PageModel(JSON.parse(previousState));
             notifyListeners();
         } catch (e) {
             console.error("Failed to undo:", e);
         }
     }
 }
-
-// Load project on startup
-loadProject();
 
 // Add keyboard shortcut for undo
 document.addEventListener("keydown", (e) => {
