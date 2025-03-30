@@ -4,9 +4,9 @@ let nextIid = 0;
 
 export abstract class ModelObjectVisitor
 {
-    abstract VisitData(key:string, data:any):void;
-    abstract VisitObject(key:string, obj:ModelObject):void;
-    abstract VisitArray(key:string, array:ModelObject[]):void;
+    abstract VisitData(parent:ModelObject, key:string, data:any):void;
+    abstract VisitObject(parent:ModelObject, key:string, obj:ModelObject):void;
+    abstract VisitArray(parent:ModelObject, key:string, array:ModelObject[]):void;
 }
 
 class ModelObjectSerializer extends ModelObjectVisitor
@@ -14,11 +14,11 @@ class ModelObjectSerializer extends ModelObjectVisitor
     stack: object[] = [];
     current: {[key:string]: any} = {};
 
-    VisitData(key: string, data: any): void {
+    VisitData(parent:ModelObject, key: string, data: any): void {
         this.current[key] = data;
     }
 
-    VisitObject(key: string, obj: ModelObject): void {
+    VisitObject(parent:ModelObject, key: string, obj: ModelObject): void {
         this.stack.push(this.current);
         this.current = {};
         obj.Visit(this);
@@ -27,7 +27,7 @@ class ModelObjectSerializer extends ModelObjectVisitor
         this.current[key] = result;
     }
 
-    VisitArray(key: string, array: ModelObject[]): void {
+    VisitArray(parent:ModelObject, key: string, array: ModelObject[]): void {
         var arr = [];
         this.stack.push(this.current);
         for (const obj of array) {
@@ -52,27 +52,23 @@ type iidScanResult = {current:ModelObject, parent:ModelObject} | null;
 class ModelObjectIidScanner extends ModelObjectVisitor
 {
     iid:number = 0;
-    parent:ModelObject | null = null;
     result:ModelObject | null = null;
     resultParent:ModelObject | null = null;
 
-    VisitData(key: string, data: any): void {}
-    VisitObject(key: string, obj: ModelObject): void {
+    VisitData(parent:ModelObject, key: string, data: any): void {}
+    VisitObject(parent:ModelObject, key: string, obj: ModelObject): void {
         if (this.result !== null)
             return;
         if (obj.iid === this.iid) {
             this.result = obj;
-            this.resultParent = this.parent;
+            this.resultParent = parent;
             return;
         }
-        let prev = this.parent;
-        this.parent = obj;
         obj.Visit(this);
-        this.parent = prev;
     }
-    VisitArray(key: string, array: ModelObject[]): void {
+    VisitArray(parent:ModelObject, key: string, array: ModelObject[]): void {
         for (const obj of array) {
-            this.VisitObject(key, obj);
+            this.VisitObject(parent, key, obj);
             if (this.result !== null)
                 return;
         }
@@ -83,11 +79,10 @@ class ModelObjectIidScanner extends ModelObjectVisitor
         if (obj.iid === iid) {
             return {current:obj, parent:parent};
         }
-        this.parent = obj;
         this.result = null;
         this.iid = iid;
         obj.Visit(this);
-        return this.result === null ? null : {current:this.result, parent:this.resultParent};
+        return this.result === null || this.resultParent === null ? null : {current:this.result, parent:this.resultParent};
     }
 }
 

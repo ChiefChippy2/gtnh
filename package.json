@@ -11,5 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "javascript-lp-solver": "^0.4.24"
   }
 }
