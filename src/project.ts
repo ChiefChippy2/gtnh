@@ -113,12 +113,14 @@ export class RecipeGroupModel extends RecipeGroupEntry
     links: string[] = [];
     elements: RecipeGroupEntry[] = [];
     collapsed: boolean = false;
+    name: string = "New Group";
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "type", "recipe_group");
         visitor.VisitData(this, "links", this.links);
         visitor.VisitArray(this, "elements", this.elements);
         visitor.VisitData(this, "collapsed", this.collapsed);
+        visitor.VisitData(this, "name", this.name);
     }
 
     constructor(source:any = undefined)
@@ -136,6 +138,8 @@ export class RecipeGroupModel extends RecipeGroupEntry
                 });
             if (source.collapsed === true)
                 this.collapsed = true;
+            if (typeof source.name === "string")
+                this.name = source.name;
         }
     }
 }
@@ -242,6 +246,9 @@ export class PageModel extends ModelObject
 
 export function DragAndDrop(sourceIid:number, targetIid:number)
 {
+    if (sourceIid === targetIid)
+        return;
+
     var draggingObject = GetByIid(sourceIid);
     if (draggingObject === null || !(draggingObject.parent instanceof RecipeGroupModel) || !(draggingObject.current instanceof RecipeGroupEntry))
         return;
@@ -331,6 +338,7 @@ export function UpdateProject(visualOnly:boolean = false) {
         savePage();
         SolvePage(page);
     }
+    debugger;
     notifyListeners();
 }
 

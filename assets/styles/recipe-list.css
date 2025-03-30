@@ -240,10 +240,17 @@
     border-radius: 4px;
     padding: 8px;
     cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .recipe-group.collapsed:active {
     cursor: grabbing;
+}
+
+.recipe-group.collapsed:hover {
+    background-color: #4a4a4a;
 }
 
 .group-header {
@@ -353,4 +360,160 @@
     flex-grow: 1;
     color: #ffffff;
     font-size: 14px;
+}
+
+.group-links {
+    margin-bottom: 16px;
+    padding: 8px;
+    background-color: #363636;
+    border-radius: 4px;
+}
+
+.links-label {
+    display: block;
+    color: #ffffff;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.links-grid item-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.short-info {
+    width: 200px;
+    flex-shrink: 0;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.group-name-input {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    width: 100%;
+    padding: 0;
+}
+
+.group-name-input:focus {
+    outline: none;
+    border-bottom: 1px solid #4CAF50;
+}
+
+.io-info {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    margin: 0 10px;
+    min-width: 0;
+}
+
+.io-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.io-label {
+    color: #888888;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+/* Ensure consistent layout for recipe items and collapsed groups */
+.recipe-item, .recipe-group.collapsed {
+    display: grid;
+    grid-template-columns: 36px 200px 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.recipe-item .collapse-btn,
+.recipe-group.collapsed .collapse-btn {
+    grid-column: 1;
+}
+
+.recipe-item .short-info,
+.recipe-group.collapsed .short-info {
+    grid-column: 2;
+}
+
+.recipe-item .io-info,
+.recipe-group.collapsed .io-info {
+    grid-column: 3 / span 2;
+}
+
+.recipe-item .delete-btn,
+.recipe-group.collapsed .delete-btn {
+    grid-column: 5;
+    margin-left: auto;
+}
+
+/* Ensure consistent layout for expanded groups */
+.recipe-group:not(.collapsed) {
+    display: flex;
+    flex-direction: column;
+}
+
+.recipe-group:not(.collapsed) .group-header {
+    display: grid;
+    grid-template-columns: 36px 200px 1fr auto auto auto;
+    gap: 10px;
+    align-items: center;
+    min-height: 48px;
+}
+
+.recipe-group:not(.collapsed) .collapse-btn {
+    grid-column: 1;
+}
+
+.recipe-group:not(.collapsed) .group-name-input {
+    grid-column: 2;
+}
+
+.recipe-group:not(.collapsed) .add-recipe-btn {
+    grid-column: 4;
+}
+
+.recipe-group:not(.collapsed) .add-group-btn {
+    grid-column: 5;
+}
+
+.recipe-group:not(.collapsed) .delete-btn {
+    grid-column: 6;
+}
+
+/* Root group specific styles */
+.root-group .group-header {
+    display: grid;
+    grid-template-columns: 200px 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    min-height: 48px;
+}
+
+.root-group .group-name {
+    grid-column: 1;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.root-group .add-recipe-btn {
+    grid-column: 3;
+}
+
+.root-group .add-group-btn {
+    grid-column: 4;
 }

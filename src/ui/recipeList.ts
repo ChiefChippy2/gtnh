@@ -7,7 +7,7 @@ interface Product {
     amount: number;
 }
 
-type ActionHandler = (obj: ModelObject, parent: ModelObject) => void;
+type ActionHandler = (obj: ModelObject, parent: ModelObject, event: Event, target: HTMLElement) => void;
 
 export class RecipeList {
     private productItemsContainer: HTMLElement;
@@ -92,12 +92,18 @@ export class RecipeList {
                 }
             }
         });
+
+        this.actionHandlers.set("update_group_name", (obj, parent, event, target) => {
+            if (obj instanceof RecipeGroupModel) {
+                obj.name = (target as HTMLInputElement).value;
+            }
+        });
     }
 
     private setupGlobalEventListeners() {
         // Global event listener for all buttons with iid and action
         document.addEventListener("click", (e) => {
-            const button = (e.target as HTMLElement).closest("[data-iid][data-action]");
+            const button = (e.target as HTMLElement).closest("[data-iid][data-action]") as HTMLElement;
             if (button) {
                 const iid = parseInt(button.getAttribute("data-iid")!);
                 const action = button.getAttribute("data-action")!;
@@ -105,7 +111,7 @@ export class RecipeList {
                 if (result) {
                     const handler = this.actionHandlers.get(action);
                     if (handler) {
-                        handler(result.current, result.parent);
+                        handler(result.current, result.parent, e, button);
                     }
                 }
             }
@@ -113,9 +119,9 @@ export class RecipeList {
 
         // Global event listener for amount inputs
         document.addEventListener("change", (e) => {
-            const amountInput = (e.target as HTMLElement).closest(".amount");
+            const amountInput = (e.target as HTMLElement).closest(".amount") as HTMLElement;
             if (amountInput) {
-                const productItem = amountInput.closest(".product-item");
+                const productItem = amountInput.closest(".product-item") as HTMLElement;
                 if (productItem) {
                     const iid = parseInt(productItem.getAttribute("data-iid")!);
                     const result = GetByIid(iid);
@@ -123,9 +129,43 @@ export class RecipeList {
                         const handler = this.actionHandlers.get("update_amount");
                         if (handler) {
                             (result.current as any).amount = parseFloat((amountInput as HTMLInputElement).value);
-                            handler(result.current, result.parent);
+                            handler(result.current, result.parent, e, amountInput);
                         }
                     }
+                }
+            }
+        });
+
+        // Global event listener for group name inputs - blur event to save changes
+        document.addEventListener("blur", (e) => {
+            const nameInput = (e.target as HTMLElement).closest("[data-action='update_group_name']") as HTMLElement;
+            if (nameInput) {
+                const iid = parseInt(nameInput.getAttribute("data-iid")!);
+                const result = GetByIid(iid);
+                if (result) {
+                    const handler = this.actionHandlers.get("update_group_name");
+                    if (handler) {
+                        handler(result.current, result.parent, e, nameInput);
+                    }
+                }
+            }
+        });
+
+        // Global event listener for group name inputs - Enter key to save changes
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                const nameInput = (e.target as HTMLElement).closest("[data-action='update_group_name']") as HTMLElement;
+                if (nameInput) {
+                    const iid = parseInt(nameInput.getAttribute("data-iid")!);
+                    const result = GetByIid(iid);
+                    if (result) {
+                        const handler = this.actionHandlers.get("update_group_name");
+                        if (handler) {
+                            handler(result.current, result.parent, e, nameInput);
+                        }
+                    }
+                    // Blur the input to remove focus
+                    nameInput.blur();
                 }
             }
         });
@@ -229,10 +269,26 @@ export class RecipeList {
         UpdateProject();
     }
 
+    private renderIoInfo(): string {
+        return `
+            <div class="io-info">
+                <div class="io-column inputs">
+                    <div class="io-label">Input</div>
+                </div>
+                <div class="io-column outputs">
+                    <div class="io-label">Output</div>
+                </div>
+            </div>
+        `;
+    }
+
     private renderRecipe(recipe: RecipeModel): string {
         return `
             <div class="recipe-item" data-iid="${recipe.iid}" draggable="true">
-                ${recipe.recipeId}
+                <div class="short-info">
+                    ${recipe.recipeId}
+                </div>
+                ${this.renderIoInfo()}
                 <button class="button delete-btn" data-iid="${recipe.iid}" data-action="delete_recipe">×</button>
             </div>
         `;
@@ -245,7 +301,27 @@ export class RecipeList {
                     <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
                         <img src="assets/images/Arrow_Small_Right.png" alt="Expand">
                     </button>
-                    <span class="group-name">Group</span>
+                    <div class="short-info">
+                        <input type="text" class="group-name-input" value="${group.name}" data-iid="${group.iid}" data-action="update_group_name">
+                    </div>
+                </div>
+                ${this.renderIoInfo()}
+                <button class="button delete-btn" data-iid="${group.iid}" data-action="delete_group">×</button>
+            </div>
+        `;
+    }
+
+    private renderLinks(links: string[]): string {
+        if (links.length === 0) return '';
+        
+        return `
+            <div class="group-links">
+                <span class="links-label">Links:</span>
+                <div class="links-grid">
+                    ${links.map(linkId => {
+                        const goods = Repository.current.GetById<Goods>(linkId);
+                        return goods ? `<item-icon data-id="${linkId}"></item-icon>` : '';
+                    }).join('')}
                 </div>
             </div>
         `;
@@ -258,12 +334,13 @@ export class RecipeList {
                     <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
                         <img src="assets/images/Arrow_Small_Down.png" alt="Collapse">
                     </button>
-                    <span class="group-name">Group</span>
+                    <input type="text" class="group-name-input" value="${group.name}" data-iid="${group.iid}" data-action="update_group_name">
                     <button class="button add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
                     <button class="button add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
                     <button class="button delete-btn" data-iid="${group.iid}" data-action="delete_group">×</button>
                 </div>
                 <div class="group-content" data-group-iid="${group.iid}">
+                    ${this.renderLinks(group.links)}
                     ${group.elements.map(entry => {
                         if (entry instanceof RecipeModel) {
                             return this.renderRecipe(entry);
@@ -288,6 +365,7 @@ export class RecipeList {
                     <button class="button add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
                 </div>
                 <div class="group-content">
+                    ${this.renderLinks(group.links)}
                     ${group.elements.map(entry => {
                         if (entry instanceof RecipeModel) {
                             return this.renderRecipe(entry);
