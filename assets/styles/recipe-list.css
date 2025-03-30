@@ -517,3 +517,30 @@
 .root-group .add-group-btn {
     grid-column: 4;
 }
+
+.io-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 32px;
+}
+
+.io-items item-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Ensure tooltips work properly */
+.flow-item {
+    pointer-events: auto;
+}
+
+.io-items {
+    pointer-events: none;
+}
+
+.io-items item-icon {
+    pointer-events: auto;
+}

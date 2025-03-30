@@ -269,14 +269,43 @@ export class RecipeList {
         UpdateProject();
     }
 
-    private renderIoInfo(): string {
+    private renderIoInfo(flow: {[goodsId:string]:number}): string {
+        // Sort flow entries by amount (highest to lowest)
+        const sortedFlow = Object.entries(flow)
+            .sort(([,a], [,b]) => Math.abs(b) - Math.abs(a));
+
+        // Separate inputs and outputs
+        const inputs = sortedFlow.filter(([,amount]) => amount > 0);
+        const outputs = sortedFlow.filter(([,amount]) => amount < 0);
+
+        const formatAmount = (amount: number) => {
+            const absAmount = Math.abs(amount);
+            return absAmount <= 100000 ? absAmount :
+                   absAmount <= 10000000 ? Math.round(absAmount/1000) + "K" :
+                   Math.round(absAmount/1000000) + "M";
+        };
+
+        const renderFlowItems = (items: [string, number][]) => {
+            return items.map(([goodsId, amount]) => {
+                const goods = Repository.current.GetById(goodsId);
+                const amountText = formatAmount(amount);
+                return `
+                    <item-icon data-id="${goodsId}" class="flow-item"><span class="item-amount-small">${amountText}</span></item-icon>
+                `;
+            }).join('');
+        };
+
         return `
             <div class="io-info">
                 <div class="io-column inputs">
-                    <div class="io-label">Input</div>
+                    <div class="io-items">
+                        ${renderFlowItems(inputs)}
+                    </div>
                 </div>
                 <div class="io-column outputs">
-                    <div class="io-label">Output</div>
+                    <div class="io-items">
+                        ${renderFlowItems(outputs)}
+                    </div>
                 </div>
             </div>
         `;
@@ -288,7 +317,7 @@ export class RecipeList {
                 <div class="short-info">
                     ${recipe.recipeId}
                 </div>
-                ${this.renderIoInfo()}
+                ${this.renderIoInfo(recipe.flow)}
                 <button class="button delete-btn" data-iid="${recipe.iid}" data-action="delete_recipe">×</button>
             </div>
         `;
@@ -297,15 +326,13 @@ export class RecipeList {
     private renderCollapsedGroup(group: RecipeGroupModel): string {
         return `
             <div class="recipe-group collapsed" data-iid="${group.iid}" draggable="true">
-                <div class="group-header">
-                    <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
-                        <img src="assets/images/Arrow_Small_Right.png" alt="Expand">
-                    </button>
-                    <div class="short-info">
-                        <input type="text" class="group-name-input" value="${group.name}" data-iid="${group.iid}" data-action="update_group_name">
-                    </div>
+                <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
+                    <img src="assets/images/Arrow_Small_Right.png" alt="Expand">
+                </button>
+                <div class="short-info">
+                    <input type="text" class="group-name-input" value="${group.name}" data-iid="${group.iid}" data-action="update_group_name">
                 </div>
-                ${this.renderIoInfo()}
+                ${this.renderIoInfo(group.flow)}
                 <button class="button delete-btn" data-iid="${group.iid}" data-action="delete_group">×</button>
             </div>
         `;

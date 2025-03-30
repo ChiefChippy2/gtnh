@@ -75,7 +75,7 @@ function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
         else goods = item.goods as Goods;
 
         var isProduction = item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput;
-        recipeModel.flow[goods.id] = (isProduction ? item.amount : -item.amount) * solutionValue;
+        recipeModel.flow[goods.id] = (isProduction ? -item.amount : item.amount) * solutionValue;
     }
 }
 
