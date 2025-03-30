@@ -1,4 +1,4 @@
-import { Goods } from "./data/repository";
+import { Goods, Item } from "./data/repository";
 
 let nextIid = 0;
 
@@ -103,7 +103,9 @@ export abstract class ModelObject
     }
 }
 
-export abstract class RecipeGroupEntry extends ModelObject{}
+export abstract class RecipeGroupEntry extends ModelObject{
+    flow: {[goodsId:string]:number} = {};
+}
 
 export class RecipeGroupModel extends RecipeGroupEntry
 {
@@ -141,6 +143,9 @@ export class RecipeModel extends RecipeGroupEntry
 {
     type: string = "recipe";
     recipeId: string = "";
+
+    recipesPerMinute:number = 0;
+    selectedOreDicts:{[key:string]:Item} = {};
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "type", this.type);
@@ -238,10 +243,10 @@ export var currentPage:PageModel = new PageModel({});
 export function DragAndDrop(sourceIid:number, targetIid:number)
 {
     var draggingObject = GetByIid(sourceIid);
-    if (draggingObject === null || !(draggingObject.parent instanceof RecipeGroupModel))
+    if (draggingObject === null || !(draggingObject.parent instanceof RecipeGroupModel) || !(draggingObject.current instanceof RecipeGroupEntry))
         return;
     var targetObject = GetByIid(targetIid);
-    if (targetObject === null)
+    if (targetObject === null || !(targetObject.parent instanceof RecipeGroupModel) || !(targetObject.current instanceof RecipeGroupEntry))
         return;
     if (draggingObject.current instanceof RecipeGroupModel && !draggingObject.current.collapsed)
         return;

@@ -34,14 +34,20 @@ function CollectVariables(group:RecipeGroupModel, model:Model, capture:Capture, 
             for (const item of recipe.items) {
                 var goods:Goods | null = null;
                 if (item.type == RecipeIoType.OreDictInput) {
-                    var items = (item.goods as OreDict).items;
-                    goods = Repository.current.GetObject(items[0], Item);
-                    for (const variant of items) {
-                        var variantItem = Repository.current.GetObject(variant, Item);
-                        if (capture[variantItem.id]) {
-                            goods = variantItem;
-                            break;
+                    var oreDict = item.goods as OreDict;
+                    goods = child.selectedOreDicts[oreDict.id]
+                    if (!goods) {
+                        var items = oreDict.items;
+                        var selectedItem = Repository.current.GetObject(items[0], Item);
+                        for (const variant of items) {
+                            var variantItem = Repository.current.GetObject(variant, Item);
+                            if (capture[variantItem.id]) {
+                                selectedItem = variantItem;
+                                break;
+                            }
                         }
+                        child.selectedOreDicts[oreDict.id] = selectedItem;
+                        goods = selectedItem;
                     }
                 } else {
                     goods = item.goods as Goods;
@@ -58,10 +64,46 @@ function CollectVariables(group:RecipeGroupModel, model:Model, capture:Capture, 
     }
 }
 
-function ApplySolution(page:PageModel, solution:Solution):void
+function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
 {
-    for (const product of page.products) {
-        
+    recipeModel.flow = {};
+    let name = `var_${recipeModel.iid}`;
+    let recipe = Repository.current.GetById(recipeModel.recipeId) as Recipe;
+    let solutionValue = (solution[name] || 0) as number;
+    recipeModel.recipesPerMinute = solutionValue;
+    for (const item of recipe.items) {
+        var goods:Goods | null = null;
+        if (item.type == RecipeIoType.OreDictInput)
+            goods = recipeModel.selectedOreDicts[item.goods.id];
+        else goods = item.goods as Goods;
+
+        var isProduction = item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput;
+        recipeModel.flow[goods.id] = (isProduction ? item.amount : -item.amount) * solutionValue;
+    }
+}
+
+function AppendFlow(flow:{[key:string]:number}, source:{[key:string]:number}):void
+{
+    for (const key in source) {
+        flow[key] = (flow[key] || 0) + source[key];
+    }
+}
+
+function ApplySolutionGroup(group:RecipeGroupModel, solution:Solution):void
+{
+    for (const child of group.elements) {
+        if (child instanceof RecipeModel)
+            ApplySolutionRecipe(child, solution);
+        else if (child instanceof RecipeGroupModel)
+            ApplySolutionGroup(child, solution);
+    }
+
+    group.flow = {};
+    for (const child of group.elements) {
+        AppendFlow(group.flow, child.flow);
+    }
+    for (const link of group.links) {
+        delete group.flow[link];
     }
 }
 
@@ -81,5 +123,5 @@ export function SolvePage(page:PageModel):void
 
     let solution = Solve(model);
     console.log("Solve solution",solution);
-    ApplySolution(page, solution);
+    ApplySolutionGroup(page.rootGroup, solution);
 }
