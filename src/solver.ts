@@ -1,65 +1,107 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
-import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation } from './project.js';
+import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm } from './project.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, Repository } from "./data/repository.js";
-import { voltageTier } from "./utils.js";
 
-type Capture = {[id:string]:string};
+type LinkCollection = {
+    output: {[key:string]:{[key:string]:number}},
+    input: {[key:string]:{[key:string]:number}},
+    inputOreDict: {[key:string]:{[key:string]:number}},
+}
 
-function CollectVariables(group:RecipeGroupModel, model:Model, capture:Capture, products:ProductModel[] | null):void
+function MatchVariablesToConstraints(model:Model, name:string, variableList: {[key:string]:number}):void
 {
-    capture = {...capture};
-
-    for (const link of group.links) {
-        let name = `link_${group.iid}_${link}`;
-        model.constraints[name] = {equal:0};
-        capture[link] = name;
+    for (const key in variableList) {
+        model.variables[key][name] = variableList[key];
     }
+}
 
-    if (products) {
-        for (const product of products) {
-            let name = `link_${group.iid}_${product.goodsId}`;
-            model.constraints[name] = {equal:-product.amount};
-            capture[product.goodsId] = name;
-        }
+function CreateLinkByAlgorithm(model:Model, algorithm:LinkAlgorithm, group:RecipeGroupModel, goodsId:string, collectionKey:string,
+    collection:{[key:string]:{[key:string]:number}}, matchedOutputs:{[key:string]:boolean})
+{
+    var linkName = `link_${group.iid}_${goodsId}`;
+    MatchVariablesToConstraints(model, linkName, collection[collectionKey]);
+    let amount = collection[collectionKey]["_amount"] || 0;
+    matchedOutputs[goodsId] = true;
+    delete collection[collectionKey];
+    group.actualLinks[goodsId] = algorithm;
+
+    switch (algorithm) {
+        case LinkAlgorithm.AtLeast:
+            model.variables[linkName] = {min:amount};
+        case LinkAlgorithm.AtMost:
+            model.variables[linkName] = {max:amount};
+        default:
+            model.variables[linkName] = {equal:amount};
     }
+}
 
+function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:LinkCollection)
+{
     for (const child of group.elements) {
         if (child instanceof RecipeModel) {
-            let coefficients: {[key:string]:number} = {"obj":1};
-            let name = `recipe_${child.iid}`;
-            model.variables[name] = coefficients;
             let recipe = Repository.current.GetById(child.recipeId) as Recipe;
+            let varName = `recipe_${child.iid}`;
+            model.variables[varName] = {"obj":1};
             for (const item of recipe.items) {
-                var goods:Goods | null = null;
-                if (item.type == RecipeIoType.OreDictInput) {
-                    var oreDict = item.goods as OreDict;
-                    goods = child.selectedOreDicts[oreDict.id]
-                    if (!goods) {
-                        var items = oreDict.items;
-                        var selectedItem = Repository.current.GetObject(items[0], Item);
-                        for (const variant of items) {
-                            var variantItem = Repository.current.GetObject(variant, Item);
-                            if (capture[variantItem.id]) {
-                                selectedItem = variantItem;
-                                break;
-                            }
-                        }
-                        child.selectedOreDicts[oreDict.id] = selectedItem;
-                        goods = selectedItem;
-                    }
-                } else {
-                    goods = item.goods as Goods;
+                if (item.type == RecipeIoType.ItemOutput || item.type == RecipeIoType.FluidOutput) {
+                    collection.output[item.goods.id] = collection.output[item.goods.id] || {};
+                    collection.output[item.goods.id][varName] = (collection.output[item.goods.id][varName] || 0) - item.amount;
+                } else if (item.type == RecipeIoType.ItemInput || item.type == RecipeIoType.FluidInput) {
+                    if (item.amount === 0) continue;
+                    collection.input[item.goods.id] = collection.input[item.goods.id] || {};
+                    collection.input[item.goods.id][varName] = (collection.input[item.goods.id][varName] || 0) + item.amount;
+                } else if (item.type == RecipeIoType.OreDictInput) {
+                    if (item.amount === 0) continue;
+                    collection.inputOreDict[item.goods.id] = collection.inputOreDict[item.goods.id] || {};
+                    collection.inputOreDict[item.goods.id][varName] = (collection.inputOreDict[item.goods.id][varName] || 0) + item.amount;
                 }
-
-                var captureVar = capture[goods.id];
-                if (!captureVar) continue;
-                var isProduction = item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput;
-                coefficients[captureVar] = isProduction ? -item.amount : item.amount;
             }
         } else if (child instanceof RecipeGroupModel) {
-            CollectVariables(child, model, capture, null);
+            let childCollection:LinkCollection = {output: {}, input: {}, inputOreDict: {}};
+            CreateAndMatchLinks(child, model, childCollection);
+            for (const key in childCollection.output) {
+                collection.output[key] = {...collection.output[key], ...childCollection.output[key]};
+            }
+            for (const key in childCollection.input) {
+                collection.input[key] = {...collection.input[key], ...childCollection.input[key]};
+            }
+            for (const key in childCollection.inputOreDict) {
+                collection.inputOreDict[key] = {...collection.inputOreDict[key], ...childCollection.inputOreDict[key]};
+            }
         }
     }
+
+    let matchedOutputs: {[key:string]:boolean} = {};
+    group.actualLinks = {};
+
+    for (const key of Object.keys(collection.inputOreDict)) {
+        var oreDict = Repository.current.GetById<OreDict>(key);
+        for (const itemId of oreDict.items) {
+            var item = Repository.current.GetObject(itemId, Item);
+            let algorithm = group.links[item.id] || LinkAlgorithm.Ignore;
+            if (algorithm === LinkAlgorithm.Ignore || collection.output[item.id] === undefined)
+                continue;
+
+            CreateLinkByAlgorithm(model, algorithm, group, item.id, key, collection.inputOreDict, matchedOutputs);
+            break
+        }
+    }
+
+    for (const key of Object.keys(collection.input)) {
+        var algorithm = group.links[key] || LinkAlgorithm.Ignore;
+        if (algorithm === LinkAlgorithm.Ignore || collection.output[key] === undefined)
+            continue;
+
+        CreateLinkByAlgorithm(model, algorithm, group, key, key, collection.input, matchedOutputs);
+    }
+
+    for (const key in matchedOutputs) {
+        var linkName = `link_${group.iid}_${key}`;
+        MatchVariablesToConstraints(model, linkName, collection.output[key]);
+        delete collection.output[key];
+    }
+
+    return collection;
 }
 
 function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
@@ -118,7 +160,7 @@ function ApplySolutionGroup(group:RecipeGroupModel, solution:Solution, model:Mod
     for (const child of group.elements) {
         AppendFlow(group.flow, child.flow);
     }
-    for (const link of group.links) {
+    for (const link in group.links) {
         let name = `link_${group.iid}_${link}`;
         if (model.constraints[name]) {
             delete flow.input[link];
@@ -161,7 +203,15 @@ export function SolvePage(page:PageModel):void
     }
 
     console.log("Solve model",model);
-    CollectVariables(page.rootGroup, model, {}, page.products);
+    let collection:LinkCollection = {output: {}, input: {}, inputOreDict: {}};
+    for (const product of page.products) {
+        if (product.amount > 0) {
+            collection.input[product.goodsId] = {"_amount": product.amount};
+        } else {
+            collection.output[product.goodsId] = {"_amount": -product.amount};
+        }
+    }
+    CreateAndMatchLinks(page.rootGroup, model, collection);
     CleanupModel(model);
 
     let solution = window.solver.Solve(model);

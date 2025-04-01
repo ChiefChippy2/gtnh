@@ -110,6 +110,13 @@ export type FlowInformation = {
     energy: {[key:number]:number};
 }
 
+export enum LinkAlgorithm {
+    Match,
+    Ignore,
+    AtLeast,
+    AtMost,
+}
+
 let emptyFlow:FlowInformation = {input: {}, output: {}, energy: {}};
 
 export abstract class RecipeGroupEntry extends ModelObject{
@@ -118,7 +125,8 @@ export abstract class RecipeGroupEntry extends ModelObject{
 
 export class RecipeGroupModel extends RecipeGroupEntry
 {
-    links: string[] = [];
+    links: {[key:string]:LinkAlgorithm} = {};
+    actualLinks: {[key:string]:LinkAlgorithm} = {};
     elements: RecipeGroupEntry[] = [];
     collapsed: boolean = false;
     name: string = "New Group";
@@ -135,7 +143,7 @@ export class RecipeGroupModel extends RecipeGroupEntry
     {
         super();
         if (source instanceof Object) {
-            if (source.links instanceof Array)
+            if (source.links instanceof Object)
                 this.links = source.links;
             if (source.elements instanceof Array)
                 this.elements = source.elements.map((element: any) => {
