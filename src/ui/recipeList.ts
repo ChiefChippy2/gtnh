@@ -298,7 +298,7 @@ export class RecipeList {
                 <div class="grid-row" style="--nest-level: ${level}">
                     ${this.renderRecipeShortInfo(recipe, recipeModel)}
                     ${this.renderIoInfo(recipeModel.flow)}
-                    <button class="button delete-btn" data-iid="${recipeModel.iid}" data-action="delete_recipe">×</button>
+                    <button class="delete-btn" data-iid="${recipeModel.iid}" data-action="delete_recipe"></button>
                 </div>
             </div>
         `;
@@ -308,14 +308,12 @@ export class RecipeList {
         return `
             <div class="recipe-group collapsed" data-iid="${group.iid}" draggable="true">
                 <div class="grid-row" style="--nest-level: ${level}">
-                    <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
-                        <img src="assets/images/Arrow_Small_Right.png" alt="Expand">
-                    </button>
+                    <button class="expand-btn icon-button" data-iid="${group.iid}" data-action="toggle_collapse"></button>
                     <div class="short-info">
                         <div class="group-name">${group.name}</div>
                     </div>
                     ${this.renderIoInfo(group.flow)}
-                    <button class="button delete-btn" data-iid="${group.iid}" data-action="delete_group">×</button>
+                    <button class="delete-btn" data-iid="${group.iid}" data-action="delete_group"></button>
                 </div>
             </div>
         `;
@@ -325,17 +323,15 @@ export class RecipeList {
         return `
             <div class="recipe-group" data-iid="${group.iid}">
                 <div class="grid-row" style="--nest-level: ${level}">
-                    <button class="collapse-btn" data-iid="${group.iid}" data-action="toggle_collapse">
-                        <img src="assets/images/Arrow_Small_Down.png" alt="Collapse">
-                    </button>
+                    <button class="collapse-btn icon-button" data-iid="${group.iid}" data-action="toggle_collapse"></button>
                     <div class="short-info">
                         <input type="text" class="group-name-input" value="${group.name}" data-iid="${group.iid}" data-action="update_group_name">
                     </div>
                     <div class="group-buttons">
-                        <button class="button add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
-                        <button class="button add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
+                        <button class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
+                        <button class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
                     </div>
-                    <button class="button delete-btn" data-iid="${group.iid}" data-action="delete_group">×</button>
+                    <button class="delete-btn" data-iid="${group.iid}" data-action="delete_group"></button>
                 </div>
                 ${this.renderLinks(group.links)}
                     ${group.elements.map(entry => {
@@ -367,8 +363,8 @@ export class RecipeList {
                 <div class="grid-row" style="--nest-level: 0">
                     <div></div>
                     <div class="group-buttons">
-                        <button class="button add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
-                        <button class="button add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
+                        <button class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
+                        <button class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
                     </div>
                     ${this.renderIoInfo(group.flow)}
                 </div>
@@ -423,7 +419,7 @@ export class RecipeList {
                             <span class="amount-unit">/min</span>
                         </div>
                         <div class="name">${goods.name}</div>
-                        <button class="button delete-btn" data-iid="${product.iid}" data-action="delete_product">×</button>
+                        <button class="delete-btn" data-iid="${product.iid}" data-action="delete_product"></button>
                     </div>
                 `;
             }).join("")}

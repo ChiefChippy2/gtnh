@@ -67,3 +67,11 @@
     --grid-height: 1;
     position: absolute !important;
 }
+
+.arrow-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}

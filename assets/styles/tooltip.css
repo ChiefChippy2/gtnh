@@ -2,7 +2,7 @@
     max-width: 500px;
     border-style: solid;
     border-width: 4px;
-    border-image: url('./../images/Tooltip.png') 2 fill;
+    border-image: url('./../images/Tooltip.png') fill 2;
     text-shadow: 2px 2px #342C34;
     display: table;
     padding: 2px 10px 0px;

@@ -16,7 +16,7 @@ window.setInterval(() => {
 
 export class IconBox extends HTMLElement
 {
-    private oredict: OreDict | null = null;
+    private obj:RecipeObject | null = null;
 
     constructor()
     {
@@ -31,7 +31,6 @@ export class IconBox extends HTMLElement
     private StartOredictCycle(oredict: OreDict) {
         if (!oredict || oredict.items.length === 0) return;
         
-        this.oredict = oredict;
         this.UpdateIconId();
         
         // Add to global cycle if not already there
@@ -66,9 +65,9 @@ export class IconBox extends HTMLElement
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (name === 'data-id') {
             this.StopOredictCycle();
-            const obj = Repository.current.GetById<RecipeObject>(newValue);
-            if (obj instanceof OreDict) {
-                this.StartOredictCycle(obj);
+            this.obj = Repository.current.GetById<RecipeObject>(newValue);
+            if (this.obj instanceof OreDict) {
+                this.StartOredictCycle(this.obj);
             } else {
                 this.UpdateIconId();
             }
@@ -77,22 +76,12 @@ export class IconBox extends HTMLElement
 
     GetDisplayObject():Goods | null
     {
-        const dataId = this.getAttribute("data-id");
-        if (!dataId) return null;
-
-        const obj = Repository.current.GetById<RecipeObject>(dataId);
-        if (!obj) return null;
-
-        if (obj instanceof OreDict) {
-            if (!this.oredict) {
-                this.StartOredictCycle(obj);
-            }
-            if (!this.oredict) return null;
-            return Repository.current.GetObject(this.oredict.items[globalIndex % this.oredict.items.length], Item);
+        if (this.obj instanceof Goods) {
+            return this.obj;
         }
 
-        if (obj instanceof Goods) {
-            return obj;
+        if (this.obj instanceof OreDict) {
+            return Repository.current.GetObject(this.obj.items[globalIndex % this.obj.items.length], Item);
         }
 
         return null;
@@ -109,12 +98,12 @@ export class IconBox extends HTMLElement
         if (event.ctrlKey || event.metaKey)
             return;
         event.preventDefault();
-        ShowNei(this.GetDisplayObject(), ShowNeiMode.Consumption, null);
+        ShowNei(this.obj, ShowNeiMode.Consumption, null);
     }
 
     LeftClick()
     {
-        ShowNei(this.GetDisplayObject(), ShowNeiMode.Production, null);
+        ShowNei(this.obj, ShowNeiMode.Production, null);
     }
 }
 

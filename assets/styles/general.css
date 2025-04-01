@@ -28,8 +28,32 @@ button {
     font-family:'Minecraftia', sans-serif;
     font-size: 16px;
     line-height: 22px;
-    color: #3F3F3F;
+    border-style: solid;
+    border-width: 6px;
+    border-image: url('./../images/Button.png') 3 fill;
+    pointer-events: all;
+    color: white;
+    text-shadow: 2px 2px #342C34;
+    cursor: pointer;
 }
+
+button:hover {
+    border-image: url('./../images/Button_Hover.png') 3 fill;
+}
+
+.icon-button {
+    border: none;
+    border-image: none;
+    background-color: transparent;
+}
+
+.icon-button:hover {
+    border:none;
+    border-image: none;
+    background-color: transparent;
+}
+
+
 
 input {
     font-family:'Minecraftia', sans-serif;
@@ -104,26 +128,16 @@ item-icon {
     background-position-y: calc(round(var(--icon-id)/256 - 0.5) * (-32px));
     left: calc(mod(var(--grid-position), var(--grid-width)) * 36px + 2px);
     top: calc(round(var(--grid-position)/var(--grid-width) - 0.5) * 36px + 2px);
-
-    color: white;
 }
 
-.item-amount
-{
+item-icon::after {
+    content: attr(data-amount);
     position: absolute;
-    bottom: -4px;
-    right: 0px;
-    text-shadow: 2px 2px #342C34;
-    pointer-events: none;
-}
-
-.item-amount-small
-{
-    position: absolute;
-    bottom: -5px;
+    bottom: -6px;
     right: 1px;
     font-size: 8px;
     text-shadow: 1px 1px #342C34;
+    color: white;
     pointer-events: none;
 }
 
