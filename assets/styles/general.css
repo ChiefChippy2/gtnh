@@ -109,7 +109,7 @@ item-icon {
     background-size: 8192px;
     background-repeat: no-repeat;
     pointer-events: auto;
-    background-image: url('./data/atlas.webp');
+    background-image: url('./../../data/atlas.webp');
     background-position-x: calc(mod(var(--icon-id), 256) * (-32px));
     background-position-y: calc(round(var(--icon-id)/256 - 0.5) * (-32px));
 }
