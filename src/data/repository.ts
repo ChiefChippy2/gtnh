@@ -1,4 +1,3 @@
-import { getAssetPath } from "../config.js";
 import { SearchQuery } from "./searchQuery.js";
 
 const charCodeItem = "i".charCodeAt(0);
