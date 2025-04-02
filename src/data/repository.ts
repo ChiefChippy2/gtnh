@@ -1,3 +1,4 @@
+import { getAssetPath } from "../config.js";
 import { SearchQuery } from "./searchQuery.js";
 
 const charCodeItem = "i".charCodeAt(0);
@@ -314,7 +315,7 @@ export class Recipe extends SearchableObject
     }
 }
 
-var response = (await fetch("./../data/data.bin"));
+var response = (await fetch(import.meta.resolve("./data.bin")));
 var stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
 var buffer = await new Response(stream).arrayBuffer();
 var repository = new Repository(buffer);
