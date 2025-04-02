@@ -4,9 +4,8 @@
   "description": "GregTech: New Horizons calculator",
   "main": "index.js",
   "scripts": {
-    "copy-files": "copyfiles -u 0 index.html .nojekyll assets/**/* data/**/* dist/",
-    "watch-files": "copyfiles -u 0 -w index.html .nojekyll assets/**/* data/**/* dist/",
-    "start": "npm run copy-files && concurrently \"tsc --watch\" \"npm run watch-files\" \"cd dist && live-server --port=5500 --no-browser",
+    "copy-files": "copyfiles -u 0 index.html assets/**/* data/**/* dist/",
+    "start": "npm run copy-files && concurrently \"tsc --watch\" \"live-server --mount=/:./dist --mount=/data/:./data/ --mount=/assets/:./assets/ --port=5500",
     "build": "tsc && npm run copy-files"
   },
   "keywords": [

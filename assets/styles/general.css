@@ -102,6 +102,18 @@ input::placeholder {
     background-image: url("./../images/Slot.png");
 }
 
+.icon {
+    width: 32px;
+    height: 32px;
+    background-size: 8192px;
+    background-repeat: no-repeat;
+
+    background-image: url('./../../data/atlas.webp');
+    background-position: 
+        calc(mod(var(--icon-id), 256) * (-32px))
+        calc(round(var(--icon-id)/256 - 0.5) * (-32px));
+}
+
 item-icon {
     width: 32px;
     height: 32px;
