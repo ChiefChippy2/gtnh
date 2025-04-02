@@ -20,7 +20,7 @@ interface Product {
     amount: number;
 }
 
-type ActionHandler = (obj: ModelObject, parent: ModelObject, event: Event) => void;
+type ActionHandler = (obj: ModelObject, event: Event, parent: ModelObject) => void;
 
 export class RecipeList {
     private productItemsContainer: HTMLElement;
@@ -44,8 +44,8 @@ export class RecipeList {
     }
 
     private setupActionHandlers() {
-        this.actionHandlers.set("delete_product", (obj, parent) => {
-            if (obj instanceof ProductModel && parent instanceof PageModel) {
+        this.actionHandlers.set("delete_product", (obj, event, parent) => {
+            if (obj instanceof ProductModel && parent instanceof PageModel && event.type === "click") {
                 const index = parent.products.findIndex((p: ProductModel) => p.iid === obj.iid);
                 if (index !== -1) {
                     parent.products.splice(index, 1);
@@ -54,40 +54,40 @@ export class RecipeList {
             }
         });
 
-        this.actionHandlers.set("update_amount", (obj, parent, event) => {
+        this.actionHandlers.set("update_amount", (obj, event) => {
             if (obj instanceof ProductModel && event.type === "change") {
                 obj.amount = parseFloat((event.target as HTMLInputElement).value);
                 UpdateProject();
             }
         });
 
-        this.actionHandlers.set("add_recipe", (obj) => {
-            if (obj instanceof RecipeGroupModel) {
+        this.actionHandlers.set("add_recipe", (obj, event, parent) => {
+            if (obj instanceof RecipeGroupModel && event.type === "click") {
                 this.showNeiForRecipeSelection(obj);
             }
         });
 
-        this.actionHandlers.set("add_group", (obj) => {
-            if (obj instanceof RecipeGroupModel) {
+        this.actionHandlers.set("add_group", (obj, event, parent) => {
+            if (obj instanceof RecipeGroupModel && event.type === "click") {
                 this.addGroup(obj);
             }
         });
 
-        this.actionHandlers.set("toggle_collapse", (obj) => {
-            if (obj instanceof RecipeGroupModel) {
+        this.actionHandlers.set("toggle_collapse", (obj, event, parent) => {
+            if (obj instanceof RecipeGroupModel && event.type === "click") {
                 obj.collapsed = !obj.collapsed;
                 UpdateProject(true);
             }
         });
 
-        this.actionHandlers.set("add_product", (obj) => {
-            if (obj instanceof PageModel) {
+        this.actionHandlers.set("add_product", (obj, event, parent) => {
+            if (obj instanceof PageModel && event.type === "click") {
                 this.showNeiForProductSelection();
             }
         });
 
-        this.actionHandlers.set("delete_recipe", (obj, parent) => {
-            if (obj instanceof RecipeModel && parent instanceof RecipeGroupModel) {
+        this.actionHandlers.set("delete_recipe", (obj, event, parent) => {
+            if (obj instanceof RecipeModel && parent instanceof RecipeGroupModel && event.type === "click") {
                 const index = parent.elements.findIndex(el => el.iid === obj.iid);
                 if (index !== -1) {
                     parent.elements.splice(index, 1);
@@ -96,8 +96,8 @@ export class RecipeList {
             }
         });
 
-        this.actionHandlers.set("delete_group", (obj, parent) => {
-            if (obj instanceof RecipeGroupModel && parent instanceof RecipeGroupModel) {
+        this.actionHandlers.set("delete_group", (obj, event, parent) => {
+            if (obj instanceof RecipeGroupModel && parent instanceof RecipeGroupModel && event.type === "click") {
                 const index = parent.elements.findIndex(el => el.iid === obj.iid);
                 if (index !== -1) {
                     parent.elements.splice(index, 1);
@@ -106,13 +106,13 @@ export class RecipeList {
             }
         });
 
-        this.actionHandlers.set("update_group_name", (obj, parent, event) => {
+        this.actionHandlers.set("update_group_name", (obj, event, parent) => {
             if (obj instanceof RecipeGroupModel && event.type === "change") {
                 obj.name = (event.target as HTMLInputElement).value;
             }
         });
 
-        this.actionHandlers.set("update_voltage_tier", (obj, parent, event) => {
+        this.actionHandlers.set("update_voltage_tier", (obj, event, parent) => {
             if (obj instanceof RecipeModel && event.type === "change") {
                 obj.voltageTier = parseInt((event.target as HTMLSelectElement).value);
                 UpdateProject();
@@ -122,7 +122,9 @@ export class RecipeList {
 
     private setupGlobalEventListeners() {
         let commonHandler = (e: Event) => {
-        const element = (e.target as HTMLElement).closest("[data-iid][data-action]") as HTMLElement;
+            if (e.type === "contextmenu" && e instanceof MouseEvent && !e.ctrlKey && !e.metaKey)
+                return;
+            const element = (e.target as HTMLElement).closest("[data-iid][data-action]") as HTMLElement;
             if (element) {
                 const iid = parseInt(element.getAttribute("data-iid")!) || page.iid;
                 const action = element.getAttribute("data-action")!;
@@ -130,7 +132,7 @@ export class RecipeList {
                 if (result) {
                     const handler = this.actionHandlers.get(action);
                     if (handler) {
-                        handler(result.current, result.parent, e);
+                        handler(result.current, e, result.parent);
                     }
                 }
             }
@@ -139,6 +141,7 @@ export class RecipeList {
         // Global event listener for all elements with iid and action
         document.addEventListener("click", commonHandler);
         document.addEventListener("change", commonHandler);
+        document.addEventListener("contextmenu", commonHandler);
         // Tooltip handling
         document.addEventListener("mouseenter", (e) => {
             const element = (e.target as HTMLElement).closest("[data-tooltip]");
