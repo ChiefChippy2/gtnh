@@ -1,5 +1,4 @@
 import "./data/repository.js";
-import "./ui/recipeBox.js";
 import "./ui/itemIcon.js";
 import "./ui/tooltip.js";
 import "./ui/nei.js";
