@@ -256,10 +256,10 @@ export enum ShowNeiMode
 export enum ShowNeiContext
 {
     None, Click, SelectRecipe, SelectGoods
-}
+}   
 
 export type ShowNeiCallback = {
-    onSelectGoods?(goods:Goods, mode:ShowNeiMode):void;
+    onSelectGoods?(goods:Goods):void;
     onSelectRecipe?(recipe:Recipe):void;
 }
 
@@ -272,15 +272,18 @@ export function HideNei()
     currentGoods = null;
 }
 
+export function NeiSelect(goods:Goods)
+{
+    console.log("ShowNei select (Goods): ", goods);
+    if (showNeiCallback != null && showNeiCallback.onSelectGoods) {
+        showNeiCallback.onSelectGoods(goods);
+    }
+    HideNei();
+}
+
 export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:ShowNeiCallback | null = null)
 {
     console.log("ShowNei", goods, mode, callback);
-    if (showNeiCallback != null && goods instanceof Goods && showNeiCallback.onSelectGoods) {
-        console.log("ShowNei result (Goods): ", goods.id, goods);
-        showNeiCallback.onSelectGoods(goods, mode);
-        HideNei();
-        return;
-    }
     if (callback != null) {
         showNeiCallback = callback;
     }

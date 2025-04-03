@@ -1,5 +1,5 @@
 import { Repository, Goods, Item, Fluid, OreDict, RecipeObject } from "../data/repository.js";
-import { ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
+import { NeiSelect, ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
 import { ShowTooltip, HideTooltip, IsHovered } from "./tooltip.js";
 
 // Global cycling state
@@ -109,14 +109,14 @@ export class IconBox extends HTMLElement
         HideTooltip(this);
     }
 
-    private HasCustomAction():boolean
+    private CustomAction():string | null
     {
-        return this.getAttribute('data-action') !== null;
+        return this.getAttribute('data-action');
     }
 
     RightClick(event:any)
     {
-        if (this.HasCustomAction())
+        if (this.CustomAction())
             return;
         if (event.ctrlKey || event.metaKey)
             return;
@@ -126,7 +126,10 @@ export class IconBox extends HTMLElement
 
     LeftClick()
     {
-        if (this.HasCustomAction())
+        let action = this.CustomAction();
+        if (action === "select")
+            NeiSelect(this.GetDisplayObject() as Goods);
+        if (action)
             return;
         ShowNei(this.obj, ShowNeiMode.Production, null);
     }

@@ -1,12 +1,7 @@
 /* Main layout */
 #recipe-list {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     background-color: #2C2C2C;
-    z-index: 1;
     display: flex;
     padding: 20px;
     gap: 20px;
@@ -110,13 +105,6 @@
     flex: 1;
     background-color: #363636;
     border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    height: calc(100vh - 40px);
-    box-sizing: border-box;
-    overflow-y: auto;
 }
 
 .recipe-list-header {
@@ -131,113 +119,43 @@
     color: #ffffff;
 }
 
-/* Base grid layout for all items */
-.recipe-item, .recipe-group:not(.root-group), .recipe-group.collapsed:not(.root-group) {
-    background-color: #2a2a2a;
+/* Base table layout */
+.recipe-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0;
+    color: #888888;
+}
+
+.recipe-table tr td {
+    border: 1px solid #ffffff;
+}
+
+/* Column widths */
+.icon-cell {
+    width: 36px;
+}
+
+.short-info-cell {
+    width: 300px;
+}
+
+.energy-cell {
+    width: 70px;
+}
+
+.action-cell {
+    width: 36px;
+}
+
+/* Expanded group styles */
+
+.expanded-group-cell .recipe-table {
     border: 1px solid #404040;
     border-radius: 4px;
-    padding: 4px;
-}
-
-.grid-row {
-    display: grid;
-    grid-template-columns: 36px calc(300px - var(--nest-level, 0) * 4px) 60px 1fr 1fr 36px;
-    gap: 10px;
-    align-items: center;
-}
-
-/* Common grid column assignments */
-.collapse-btn {
-    grid-column: 1;
-    padding: 0;
-    width: 22px;
-    height: 22px;
-    background-image: url('./../images/Arrow_Small_Down.png');
-    background-size: 22px 22px;
-}
-
-.expand-btn {
-    grid-column: 1;
-    padding: 0;
-    width: 22px;
-    height: 22px;
-    background-image: url('./../images/Arrow_Small_Right.png');
-    background-size: 22px 22px;
-}
-
-.short-info {
-    grid-column: 2;
-    color: #ffffff;
-    font-size: 16px;
-}
-
-.io-label {
-    color: #888888;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-}
-
-.io-items {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    gap: 4px;
-    min-height: 32px;
-    pointer-events: none;
-    flex: 1;
-    min-width: 0;
-}
-
-.white-text {
-    color: #ffffff;
-}
-
-.delete-btn {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    cursor: pointer;
-    background-image: url('./../images/Button_Close.png');
-    background-size: 28px 28px;
-    border: none;
-}
-
-.delete-btn:hover {
-    background-image: url('./../images/Button_Close_Hover.png');
-    border: none;
-}
-
-.notification {
-    width: 16px;
-    height: 16px;
-    padding: 0;
-    cursor: pointer;
-    background-image: url('./../images/Notification.png');
-    background-size: 16px 16px;
-    border: none;
-}
-
-/* Root group specific styles */
-.root-group {
-    background-color: #363636;
-}
-
-
-.root-group .group-buttons {
-    grid-column: 2;
-    display: flex;
-    gap: 8px;
-    justify-content: flex-start;
-}
-
-/* Expanded group specific styles */
-.recipe-group:not(.collapsed):not(.root-group) .group-buttons {
-    grid-column: 5;
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    background-color: #2a2a2a;
+    padding: 8px;
 }
 
 /* Input styles */
@@ -363,4 +281,88 @@
 
 #dropdown {
     font-family: Minecraftia;
+}
+
+/* Button styles */
+.collapse-btn {
+    padding: 0;
+    width: 22px;
+    height: 22px;
+    background-image: url('./../images/Arrow_Small_Down.png');
+    background-size: 22px 22px;
+    border: none;
+    cursor: pointer;
+}
+
+.expand-btn {
+    padding: 0;
+    width: 22px;
+    height: 22px;
+    background-image: url('./../images/Arrow_Small_Right.png');
+    background-size: 22px 22px;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    cursor: pointer;
+    background-image: url('./../images/Button_Close.png');
+    background-size: 28px 28px;
+    border: none;
+}
+
+.delete-btn:hover {
+    background-image: url('./../images/Button_Close_Hover.png');
+    border: none;
+}
+
+/* Text and content styles */
+.short-info {
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.white-text {
+    color: #ffffff;
+}
+
+.io-items {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 4px;
+    min-height: 32px;
+    pointer-events: none;
+    min-width: 0;
+}
+
+/* Links section */
+.group-links {
+    padding: 8px;
+}
+
+.links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.links-grid item-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+/* Drag and drop styles */
+.recipe-item.dragging td, .recipe-group.collapsed.dragging td {
+    opacity: 0.5;
+    background-color: #404040;
+}
+
+.recipe-item.drag-over td, .recipe-group.drag-over td {
+    border: 2px dashed #4CAF50;
 }
