@@ -215,7 +215,7 @@ export function SolvePage(page:PageModel):void
 
         let solution = window.solver.Solve(model);
         console.log("Solve solution",solution);
-        page.feasible = solution.feasible;
+        page.status = solution.feasible ? solution.bounded ? "solved" : "unbounded" : "infeasible";
         ApplySolutionGroup(page.rootGroup, solution, model, solution.feasible);
     } catch (error) {
         console.error("Error solving page",error);

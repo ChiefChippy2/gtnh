@@ -282,3 +282,34 @@
     height: 32px;
     flex-shrink: 0;
 }
+
+.status-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    font-size: 24px;
+}
+
+.status-message {
+    color: #ffffff;
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.status-message:not(.solved) {
+    background-color: #ff6b6b;
+    position: sticky;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-message.solved {
+    color: #ffffff;
+    position: sticky;
+    background-color: #4CAF50;
+}

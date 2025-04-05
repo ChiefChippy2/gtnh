@@ -26,19 +26,23 @@ type ActionHandler = (obj: ModelObject, event: Event, parent: ModelObject) => vo
 export class RecipeList {
     private productItemsContainer: HTMLElement;
     private recipeItemsContainer: HTMLElement;
+    private statusMessageElement: HTMLElement;
     private actionHandlers: Map<string, ActionHandler> = new Map();
 
     constructor() {
         this.productItemsContainer = document.querySelector(".product-items")!;
         this.recipeItemsContainer = document.querySelector(".recipe-list")!;
+        this.statusMessageElement = document.querySelector('.status-message') as HTMLElement;
         this.setupActionHandlers();
         this.setupGlobalEventListeners();
         this.setupDragAndDrop();
+        this.renderStatus();
         this.renderProductList();
         this.updateRecipeList();
         
         // Listen for project changes
         addProjectChangeListener(() => {
+            this.renderStatus();
             this.renderProductList();
             this.updateRecipeList();
         });
@@ -512,6 +516,28 @@ export class RecipeList {
                 </td>
             </tr>
         `;
+    }
+
+    private renderStatus() {
+        let statusMessage = "";
+        let statusClass = "";
+        if (page.status === "infeasible") {
+            statusMessage = "Infeasible - There is no solution - You probably need to ignore some links";
+        } else if (page.status === "unbounded") {
+            statusMessage = "Unbounded - Some items can be produced infinitely";
+        } else if (page.status === "solved") {
+            statusMessage = `"${page.name}" is solved`;
+            statusClass = "solved";
+        }
+
+        if (this.statusMessageElement) {
+            if (statusMessage) {
+                this.statusMessageElement.textContent = statusMessage;
+                this.statusMessageElement.className = `status-message ${statusClass}`;
+            } else {
+                this.statusMessageElement.style.display = 'none';
+            }
+        }
     }
 
     private renderProductList() {
