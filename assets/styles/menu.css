@@ -12,7 +12,8 @@
     gap: 12px;
     flex-shrink: 0;
     overflow-y: auto;
-    background-color: #51493A;
+    background-color: #C6C6C6;
+    color: #3F3F3F;
 }
 
 .menu-container {
@@ -39,7 +40,6 @@
     background-size: auto 200px;
     background-position: center;
     text-align: center;
-    text-shadow: 3px 3px #342C34;
 }
 
 .menu-links {
@@ -54,7 +54,7 @@
 .page-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .page-button {
@@ -70,10 +70,9 @@
 
 .page-button.active {
     color: white;
-    background-color: #B688AE;
-    border-color: #FAB9EF #654C61 #654C61 #FAB9EF;
+    background-color: #51493A;
+    border-color: #211D17 #332E24 #332E24 #211D17;
     border-width: 2px;
-    box-shadow: 0px 0px 0px 4px black;
 }
 
 .new-page-widget {

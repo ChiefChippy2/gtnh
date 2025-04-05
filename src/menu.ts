@@ -1,9 +1,10 @@
-import { PageModel, loadPage, serializer } from './page.js';
+import { PageModel, serializer, SetCurrentPage, addProjectChangeListener, page } from './page.js';
 
 export class PageManager {
     private pages: string[] = [];
     private currentPage: string | null = null;
     private pageListContainer: HTMLElement;
+    private pageCache: Map<string, PageModel> = new Map();
 
     constructor() {
         this.pageListContainer = document.querySelector('.page-list')!;
@@ -11,6 +12,32 @@ export class PageManager {
         this.render();
         this.loadFirstPage();
         this.setupEventListeners();
+        this.setupPageChangeListener();
+        this.setupUndoHandler();
+        this.setupUrlHashHandler();
+    }
+
+    private setupUndoHandler() {
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+                e.preventDefault();
+                this.undo();
+            }
+        });
+    }
+
+    private setupPageChangeListener() {
+        addProjectChangeListener(() => {
+            if (this.currentPage && page) {
+                // Serialize and save the current page when it changes
+                const serialized = JSON.stringify(serializer.Serialize(page));
+                localStorage.setItem(`p:${this.currentPage}`, serialized);
+                // Update cache
+                this.pageCache.set(this.currentPage, page);
+                // Add to history
+                page.addToHistory(serialized);
+            }
+        });
     }
 
     private setupEventListeners() {
@@ -22,7 +49,7 @@ export class PageManager {
             }
         });
 
-        this.pageListContainer.addEventListener('click', () => {
+        document.querySelector('[data-action="create-page"]')?.addEventListener('click', () => {
             const input = document.querySelector('[data-action="page-name-input"]') as HTMLInputElement;
             if (input && input.value.trim()) {
                 this.createNewPage(input.value.trim());
@@ -65,7 +92,25 @@ export class PageManager {
         if (this.currentPage === pageName) return;
         
         this.currentPage = pageName;
-        loadPage(`p:${pageName}`);
+        
+        // Try to get page from cache first
+        let page = this.pageCache.get(pageName);
+        
+        if (!page) {
+            // If not in cache, load from localStorage
+            const stored = localStorage.getItem(`p:${pageName}`);
+            if (stored) {
+                page = new PageModel(JSON.parse(stored));
+                this.pageCache.set(pageName, page);
+                // Initialize history with the loaded state
+                page.addToHistory(stored);
+            }
+        }
+        
+        if (page) {
+            SetCurrentPage(page);
+        }
+        
         this.render();
     }
 
@@ -79,11 +124,109 @@ export class PageManager {
         
         const page = new PageModel();
         page.name = finalName;
-        localStorage.setItem(`p:${finalName}`, JSON.stringify(serializer.Serialize(page)));
+        const serialized = JSON.stringify(serializer.Serialize(page));
+        localStorage.setItem(`p:${finalName}`, serialized);
         
         this.pages.push(finalName);
         this.pages.sort();
+        this.pageCache.set(finalName, page);
+        // Initialize history with the initial state
+        page.addToHistory(serialized);
         this.switchPage(finalName);
+        this.render();
+    }
+
+    private undo() {
+        if (page && page.undo()) {
+            // After undo, update the cache and localStorage
+            const serialized = JSON.stringify(serializer.Serialize(page));
+            if (this.currentPage) {
+                localStorage.setItem(`p:${this.currentPage}`, serialized);
+                this.pageCache.set(this.currentPage, page);
+            }
+            // Notify listeners about the change
+            SetCurrentPage(page);
+        }
+    }
+
+    private setupUrlHashHandler() {
+        window.addEventListener('hashchange', () => this.handleUrlHashChange());
+        this.handleUrlHashChange();
+    }
+
+    private async handleUrlHashChange() {
+        const hash = window.location.hash.slice(1); // Remove the # symbol
+        if (!hash) return;
+
+        try {
+            // Convert from URL-safe base64 back to normal base64
+            const base64 = hash.replace(/-/g, '+').replace(/_/g, '/');
+            // Decode base64
+            const compressed = atob(base64);
+            // Decompress
+            const data = new Uint8Array(compressed.split('').map(c => c.charCodeAt(0)));
+            const decompressedStream = new DecompressionStream('deflate');
+            const writer = decompressedStream.writable.getWriter();
+            writer.write(data);
+            writer.close();
+            const decompressed = await new Response(decompressedStream.readable).arrayBuffer();
+            const json = new TextDecoder().decode(decompressed);
+            console.log("Loaded page", json);
+            const importedPage = new PageModel(JSON.parse(json));
+            this.importPage(importedPage);
+        } catch (e) {
+            console.error("Failed to load from URL fragment:", e);
+        }
+    }
+
+    private generateUniquePageName(baseName: string): string {
+        let finalName = baseName;
+        let counter = 1;
+        while (this.pages.includes(finalName)) {
+            finalName = `${baseName} ${counter}`;
+            counter++;
+        }
+        return finalName;
+    }
+
+    private async askUserForPageAction(existingName: string): Promise<'create' | 'replace'> {
+        // TODO: Implement user dialog
+        return 'create';
+    }
+
+    public importPage(model: PageModel) {
+        if (!model.name) return;
+
+        const existingIndex = this.pages.indexOf(model.name);
+        if (existingIndex !== -1) {
+            // Page with this name exists
+            this.askUserForPageAction(model.name).then(action => {
+                if (action === 'create') {
+                    const newName = this.generateUniquePageName(model.name);
+                    this.saveAndSwitchToPage(newName, model);
+                } else {
+                    // Replace existing page
+                    this.saveAndSwitchToPage(model.name, model);
+                }
+            });
+        } else {
+            // New page name
+            this.saveAndSwitchToPage(model.name, model);
+        }
+    }
+
+    private saveAndSwitchToPage(pageName: string, model: PageModel) {
+        const serialized = JSON.stringify(serializer.Serialize(model));
+        localStorage.setItem(`p:${pageName}`, serialized);
+        
+        if (!this.pages.includes(pageName)) {
+            this.pages.push(pageName);
+            this.pages.sort();
+        }
+        
+        this.pageCache.set(pageName, model);
+        model.addToHistory(serialized);
+        this.switchPage(pageName);
         this.render();
     }
 }

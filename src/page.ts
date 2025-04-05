@@ -300,8 +300,6 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
 
 
 const changeListeners: ProjectChangeListener[] = [];
-export var pageNames = Object.keys(localStorage).filter((key) => key.startsWith("p:")).sort();
-let currentPageName = "p:New";
 export var page: PageModel;
 
 // Event system
@@ -322,114 +320,13 @@ function notifyListeners() {
     changeListeners.forEach(listener => listener());
 }
 
-export function loadPage(pageName:string):void
-{
-    currentPageName = pageName;
-    if (pageName) {
-        try {
-            let pageData = JSON.parse(localStorage.getItem(pageName) ?? "{}");
-            let pageModel = new PageModel(pageData);
-            SolvePage(pageModel);
-            console.log("Loaded page", pageModel);
-            page = pageModel;
-            notifyListeners();
-        } catch (e) {
-            console.error("Failed to load project:", e);
-        }
-    }
-    page = new PageModel();
+export function SetCurrentPage(newPage: PageModel) {
+    page = newPage;
     notifyListeners();
-}
-
-function savePage() {
-    try {
-        const json = JSON.stringify(serializer.Serialize(page));
-        localStorage.setItem(currentPageName, json);
-        console.log("Saved page", json);
-        page.addToHistory(json);
-    } catch (e) {
-        console.error("Failed to save project:", e);
-    }
 }
 
 export function UpdateProject(visualOnly:boolean = false) {
-    if (!visualOnly) {
-        savePage();
+    if (!visualOnly)
         SolvePage(page);
-    }
     notifyListeners();
 }
-
-export function Undo() {
-    if (page.undo()) {
-        notifyListeners();
-    }
-}
-
-// Add keyboard shortcut for undo
-document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        Undo();
-    }
-});
-
-async function updateUrlFragment(json:string) {
-    try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(json);
-        const compressedStream = new CompressionStream('deflate');
-        const writer = compressedStream.writable.getWriter();
-        writer.write(data);
-        writer.close();
-        const compressedBytes = await new Response(compressedStream.readable).arrayBuffer();
-        const compressed = String.fromCharCode(...new Uint8Array(compressedBytes));
-        const base64 = btoa(compressed).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        window.location.hash = base64;
-    } catch (e) {
-        console.error("Failed to update URL fragment:", e);
-    }
-}
-
-async function loadFromUrlFragment(): Promise<PageModel | null> {
-    try {
-        const hash = window.location.hash.slice(1); // Remove the # symbol
-        if (!hash) return null;
-
-        // Convert from URL-safe base64 back to normal base64
-        const base64 = hash.replace(/-/g, '+').replace(/_/g, '/');
-        // Decode base64
-        const compressed = atob(base64);
-        // Decompress
-        const data = new Uint8Array(compressed.split('').map(c => c.charCodeAt(0)));
-        const decompressedStream = new DecompressionStream('deflate');
-        const writer = decompressedStream.writable.getWriter();
-        writer.write(data);
-        writer.close();
-        const decompressed = await new Response(decompressedStream.readable).arrayBuffer();
-        const json = new TextDecoder().decode(decompressed);
-        console.log("Loaded page", json);
-        return new PageModel(JSON.parse(json));
-    } catch (e) {
-        console.error("Failed to load from URL fragment:", e);
-        return null;
-    }
-}
-
-// Update the URL fragment handling to be async
-window.addEventListener('hashchange', async () => {
-    const newPage = await loadFromUrlFragment();
-    if (newPage) {
-        page = newPage;
-        notifyListeners();
-    }
-});
-
-// Initialize page from URL fragment if available
-(async () => {
-    const pageFromUrl = await loadFromUrlFragment();
-    if (pageFromUrl) {
-        page = pageFromUrl;
-        page.addToHistory(JSON.stringify(serializer.Serialize(page))); // Initialize history with the loaded state
-    }
-})();
