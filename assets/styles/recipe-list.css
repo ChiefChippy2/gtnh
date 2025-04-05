@@ -149,41 +149,6 @@
     gap: 8px;
 }
 
-/* Drag and drop styles */
-.recipe-item.dragging, .recipe-group.collapsed.dragging {
-    opacity: 0.5;
-    background-color: #404040;
-}
-
-.recipe-item.drag-over, .recipe-group.drag-over {
-    border: 2px dashed #4CAF50;
-}
-
-.recipe-item.drag-over::before, .recipe-group.drag-over::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: #4CAF50;
-}
-
-.recipe-item.drag-over::before {
-    top: -2px;
-}
-
-.recipe-group.drag-over::before {
-    top: -2px;
-}
-
-.group-content.drag-over {
-    background-color: #404040;
-    border: 1px dashed #4CAF50;
-    border-radius: 4px;
-    padding: 8px;
-    min-height: 20px;
-}
-
 .voltage-tier-select {
     font-family: Minecraftia;
     font-size: 16px;
@@ -313,3 +278,24 @@
     position: sticky;
     background-color: #4CAF50;
 }
+
+/* Drag and Drop styles */
+.recipe-item.dragging,
+.recipe-group.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.recipe-item.drag-over td,
+.recipe-group:not(.expanded).drag-over tr {
+    border-top: 2px solid #4CAF50;
+}
+
+.recipe-group.expanded.drag-over tr:last-child {
+    border-top: 2px solid #4CAF50;
+}
+
+.recipe-item,
+.recipe-group {
+    position: relative;
+} 

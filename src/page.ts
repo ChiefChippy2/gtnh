@@ -220,6 +220,7 @@ export class PageModel extends ModelObject
     rootGroup: RecipeGroupModel = new RecipeGroupModel();
     private history: string[] = [];
     private readonly MAX_HISTORY = 50;
+    status: "not solved" | "solved" | "infeasible" | "unbounded" = "not solved";
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "name", this.name);
@@ -284,9 +285,11 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
     let success = false;
 
     if (targetObject.current instanceof RecipeGroupModel && !targetObject.current.collapsed) {
+        draggingObject.parent.elements.splice(draggingObject.parent.elements.indexOf(draggingObject.current), 1);
         targetObject.current.elements.push(draggingObject.current);
         success = true;
     } else if (targetObject.parent instanceof RecipeGroupModel) {
+        draggingObject.parent.elements.splice(draggingObject.parent.elements.indexOf(draggingObject.current), 1);
         var index = targetObject.parent.elements.indexOf(targetObject.current);
         if (index === -1)
             return;
@@ -294,7 +297,6 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
         success = true;
     }
     if (success) {
-        draggingObject.parent.elements.splice(draggingObject.parent.elements.indexOf(draggingObject.current), 1);
         UpdateProject();
     }
 }

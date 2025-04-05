@@ -208,49 +208,53 @@ export class RecipeList {
     }
 
     private setupDragAndDrop() {
+        // Handle drag start
         document.addEventListener("dragstart", (e) => {
-            const draggable = (e.target as HTMLElement).closest("[draggable]");
+            const draggable = (e.target as HTMLElement)?.closest("[draggable]");
             if (draggable) {
                 draggable.classList.add("dragging");
                 e.dataTransfer?.setData("text/plain", draggable.getAttribute("data-iid") || "");
             }
         });
 
+        // Handle drag end
         document.addEventListener("dragend", (e) => {
-            const draggable = (e.target as HTMLElement).closest("[draggable]");
+            const draggable = (e.target as HTMLElement)?.closest("[draggable]");
             if (draggable) {
                 draggable.classList.remove("dragging");
             }
         });
 
+        // Handle drag over
         document.addEventListener("dragover", (e) => {
             e.preventDefault();
-            const dropZone = (e.target as HTMLElement).closest(".recipe-item, .recipe-group, .group-content");
+            const dropZone = (e.target as HTMLElement)?.closest(".recipe-item, .recipe-group");
             if (dropZone) {
                 dropZone.classList.add("drag-over");
             }
         });
 
+        // Handle drag leave
         document.addEventListener("dragleave", (e) => {
-            const dropZone = (e.target as HTMLElement).closest(".recipe-item, .recipe-group, .group-content");
+            const dropZone = (e.target as HTMLElement)?.closest(".recipe-item, .recipe-group");
             if (dropZone) {
                 dropZone.classList.remove("drag-over");
             }
         });
 
+        // Handle drop
         document.addEventListener("drop", (e) => {
             e.preventDefault();
-            const dropZone = (e.target as HTMLElement).closest(".recipe-item, .recipe-group, .group-content");
+            const dropZone = (e.target as HTMLElement)?.closest(".recipe-item, .recipe-group");
             if (!dropZone) return;
-
+            
             dropZone.classList.remove("drag-over");
             const draggedIid = parseInt(e.dataTransfer?.getData("text/plain") || "0");
+            const targetIid = parseInt(dropZone.getAttribute("data-iid") || "0");
             
-            // Get the target iid
-            let targetIid: number;
-            targetIid = parseInt(dropZone.getAttribute("data-iid") || "0");
-            // Call DragAndDrop with the two iids
-            DragAndDrop(draggedIid, targetIid);
+            if (draggedIid && targetIid) {
+                DragAndDrop(draggedIid, targetIid);
+            }
         });
     }
 
