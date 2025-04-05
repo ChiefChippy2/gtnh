@@ -282,15 +282,12 @@
 /* Drag and Drop styles */
 .recipe-item.dragging,
 .recipe-group.dragging {
-    opacity: 0.5;
+    background-color: rgba(76, 175, 80, 0.2);
     cursor: grabbing;
 }
 
-.recipe-item.drag-over td,
-.recipe-group:not(.expanded).drag-over tr {
-    border-top: 2px solid #4CAF50;
-}
-
+.recipe-item.drag-over:not(.dragging) td,
+.recipe-group:not(.expanded).drag-over:not(.dragging) tr
 .recipe-group.expanded.drag-over tr:last-child {
     border-top: 2px solid #4CAF50;
 }
