@@ -1,4 +1,4 @@
-import { Repository, Goods, Item, Fluid, OreDict, RecipeObject } from "../data/repository.js";
+import { Repository, Goods, Item, Fluid, OreDict, RecipeObject } from "./repository.js";
 import { NeiSelect, ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
 import { ShowTooltip, HideTooltip, IsHovered } from "./tooltip.js";
 

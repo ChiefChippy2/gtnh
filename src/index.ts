@@ -1,9 +1,9 @@
-import "./data/repository.js";
-import "./ui/itemIcon.js";
-import "./ui/tooltip.js";
-import "./ui/nei.js";
-import "./ui/recipeList.js";
-import { ShowNei, ShowNeiMode } from "./ui/nei.js";
+import "./repository.js";
+import "./itemIcon.js";
+import "./tooltip.js";
+import "./nei.js";
+import "./recipeList.js";
+import { ShowNei, ShowNeiMode } from "./nei.js";
 
 document.getElementById("loading")?.remove();
 

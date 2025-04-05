@@ -1,4 +1,4 @@
-import { Goods, Item } from "./data/repository";
+import { Goods, Item } from "./repository";
 import { SolvePage } from "./solver.js";
 
 let nextIid = 0;

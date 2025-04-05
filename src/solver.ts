@@ -1,6 +1,6 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
 import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm } from './project.js';
-import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./data/repository.js";
+import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./repository.js";
 
 type LinkCollection = {
     output: {[key:string]:{[key:string]:number}},

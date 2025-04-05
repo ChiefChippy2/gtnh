@@ -1,4 +1,4 @@
-import { Goods } from "../data/repository.js";
+import { Goods } from "./repository.js";
 
 export var currentTooltipElement:HTMLElement | undefined;
 const tooltip = document.getElementById("tooltip")!;

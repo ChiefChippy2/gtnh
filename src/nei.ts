@@ -1,7 +1,7 @@
-import { GetScrollbarWidth, voltageTier } from "../utils.js";
-import { Goods, Fluid, Item, Repository, IMemMappedObjectPrototype, Recipe, RecipeType, RecipeIoType, RecipeInOut, RecipeObject, OreDict } from "../data/repository.js";
+import { GetScrollbarWidth, voltageTier } from "./utils.js";
+import { Goods, Fluid, Item, Repository, IMemMappedObjectPrototype, Recipe, RecipeType, RecipeIoType, RecipeInOut, RecipeObject, OreDict } from "./repository.js";
 import { IconBox } from "./itemIcon.js";
-import { SearchQuery } from "../data/searchQuery.js";
+import { SearchQuery } from "./searchQuery.js";
 import { ShowTooltip, HideTooltip } from "./tooltip.js";
 
 const repository = Repository.current;
