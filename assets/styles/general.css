@@ -106,6 +106,17 @@ input::placeholder {
     box-shadow: 0 0 0 2px black;
 }
 
+#confirm-dialog {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+}
+
+#confirm-dialog button {
+    min-width: 100px;
+}
+
 .icon-grid
 {
     position: relative;

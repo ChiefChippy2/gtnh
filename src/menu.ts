@@ -1,4 +1,5 @@
 import { PageModel, serializer, SetCurrentPage, addProjectChangeListener, page } from './page.js';
+import { showConfirmDialog } from './dialogues.js';
 
 export class PageManager {
     private pages: string[] = [];
@@ -224,25 +225,26 @@ export class PageManager {
         return finalName;
     }
 
-    private async askUserForPageAction(existingName: string): Promise<'create' | 'replace'> {
-        // TODO: Implement user dialog
-        return 'create';
-    }
-
     public importPage(model: PageModel) {
         if (!model.name) return;
 
         const existingIndex = this.pages.indexOf(model.name);
         if (existingIndex !== -1) {
             // Page with this name exists
-            this.askUserForPageAction(model.name).then(action => {
-                if (action === 'create') {
+            showConfirmDialog(
+                `A page named "${model.name}" already exists. What would you like to do?`,
+                "Create New",
+                "Replace Existing",
+                "Cancel"
+            ).then(action => {
+                if (action === "yes") {
                     const newName = this.generateUniquePageName(model.name);
                     this.saveAndSwitchToPage(newName, model);
-                } else {
+                } else if (action === "no") {
                     // Replace existing page
                     this.saveAndSwitchToPage(model.name, model);
                 }
+                // If cancel, do nothing
             });
         } else {
             // New page name
