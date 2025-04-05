@@ -86,16 +86,19 @@
     width: 30%;
 }
 
-.page-rename {
+.active-page {
     color: white;
     background-color: #51493A;
     border-color: #211D17 #332E24 #332E24 #211D17;
     border-width: 2px;
     padding: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
 }
 
-.page-rename input {
-    width: 90%;
+.active-page input {
+    flex-grow: 1;
     background-color: transparent;
     border: none;
     color: white;

@@ -19,17 +19,18 @@
         <div id="menu" class="menu-container">
             <div class="logo">Greg Tech: New Horizons Calculator</div>
             <div class="menu-links">
-                <a href="#" data-action="link" data-link="nei">NEI</a>•
+                <a href="#" id="nei-link">NEI</a>•
                 <a href="https://github.com/ShadowTheAge/gtnh/" target="_blank">Github</a>•
                 <a href="https://gtnh.miraheze.org/" target="_blank">Wiki</a>•
                 <a href="http://bit.ly/gtnh-datasheets" target="_blank">Spreadsheet</a>
             </div>
             <div class="menu-pages">
-                <h2>Pages</h2>
+                <div class="header"><h2 style="display: inline;">Pages</h2> (<a href="#" id="load-file">Load from file</a>)</div>
                 <div class="page-list">
                     <!-- Page buttons will be inserted here -->
                 </div>
             </div>
+            <span class="text-small">Pages are stored in local storage. This may not be reliable. Please save important pages as files or URLs.</span>
             <div class="new-page-widget">
                 <h2>New Page</h2>
                 <div class="new-page-form">
@@ -49,8 +50,7 @@
     <div id="panels">
         <div id="loading" class="panel">LOADING...</div>
 
-        <!--               NEI               -->
-        <div id="nei" class="hidden panel with-tabs">
+        <div id="nei" class="panel hidden with-tabs">
             <div class="panel-tab-bar">
                 <div id="nei-tabs" class="panel-tabs"></div>
             </div>
@@ -63,9 +63,8 @@
             </div>
         </div>
 
-        <!--               Confirm Dialog               -->
-        <div id="confirm-dialog" class="hidden panel">
-            <p id="confirm-text" style="text-align: center; flex-grow: 1;"></p>
+        <div id="confirm-dialog" class="panel hidden">
+            <p id="confirm-text" style="text-align: center; flex-grow: 1; max-width: 550px;"></p>
             <div class="hgroup" style="justify-content: center; gap: 10px;">
                 <button id="confirm-yes">Yes</button>
                 <button id="confirm-no">No</button>

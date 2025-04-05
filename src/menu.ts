@@ -1,5 +1,6 @@
 import { PageModel, serializer, SetCurrentPage, addProjectChangeListener, page } from './page.js';
 import { showConfirmDialog } from './dialogues.js';
+import { ShowNei, ShowNeiMode } from "./nei.js";
 
 export class PageManager {
     private pages: string[] = [];
@@ -16,6 +17,7 @@ export class PageManager {
         this.setupPageChangeListener();
         this.setupUndoHandler();
         this.setupUrlHashHandler();
+        this.setupFileLoadHandler();
     }
 
     private setupUndoHandler() {
@@ -44,10 +46,20 @@ export class PageManager {
     private setupEventListeners() {
         this.pageListContainer.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
-            if (target.matches('[data-action="switch-page"]')) {
+            const action = target.dataset.action;
+            if (action === "switch-page") {
                 const pageName = target.dataset.pageName;
                 if (pageName) this.switchPage(pageName);
+            } else if (action === "delete-page") {
+                const pageName = target.dataset.pageName;
+                if (pageName) this.deletePage(pageName);
             }
+        });
+
+        // Add NEI link handler
+        document.getElementById('nei-link')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            ShowNei(null, ShowNeiMode.Production, null);
         });
 
         this.pageListContainer.addEventListener('blur', (e) => {
@@ -97,11 +109,12 @@ export class PageManager {
         this.pageListContainer.innerHTML = this.pages.map(pageName => {
             if (pageName === this.currentPage) {
                 return `
-                    <div class="page-rename">
+                    <div class="active-page">
                         <input type="text" 
                                value="${pageName}"
                                data-action="rename-page"
                                data-page-name="${pageName}">
+                        <button class="delete-btn" data-action="delete-page" data-page-name="${pageName}">x</button>
                     </div>
                 `;
             } else {
@@ -137,6 +150,7 @@ export class PageManager {
             const stored = localStorage.getItem(`p:${pageName}`);
             if (stored) {
                 page = new PageModel(JSON.parse(stored));
+                page.name = pageName;
                 this.pageCache.set(pageName, page);
                 // Initialize history with the loaded state
                 page.addToHistory(stored);
@@ -237,10 +251,10 @@ export class PageManager {
                 "Replace Existing",
                 "Cancel"
             ).then(action => {
-                if (action === "yes") {
+                if (action === "option1") {
                     const newName = this.generateUniquePageName(model.name);
                     this.saveAndSwitchToPage(newName, model);
-                } else if (action === "no") {
+                } else if (action === "option2") {
                     // Replace existing page
                     this.saveAndSwitchToPage(model.name, model);
                 }
@@ -298,6 +312,65 @@ export class PageManager {
         }
 
         this.render();
+    }
+
+    private setupFileLoadHandler() {
+        const loadFileLink = document.getElementById('load-file');
+        if (!loadFileLink) return;
+
+        loadFileLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Create file input
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.gtnh';
+            
+            input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (!file) return;
+
+                try {
+                    const text = await file.text();
+                    const json = JSON.parse(text);
+                    const pageModel = new PageModel(json);
+                    this.importPage(pageModel);
+                } catch (error) {
+                    console.error('Failed to load file:', error);
+                    // TODO: Show error to user
+                }
+            };
+
+            input.click();
+        });
+    }
+
+    private deletePage(pageName: string) {
+        showConfirmDialog(
+            `You are deleting page "${pageName}". This action cannot be undone. Are you sure you want to continue?`,
+            `Delete ${pageName}`,
+            null,
+            `Cancel`
+        ).then(action => {
+            if (action === "option1") {
+                // Remove from storage
+                localStorage.removeItem(`p:${pageName}`);
+                // Remove from cache
+                this.pageCache.delete(pageName);
+                // Remove from pages list
+                const index = this.pages.indexOf(pageName);
+                if (index !== -1) {
+                    this.pages.splice(index, 1);
+                }
+                // Switch to first page or create new one
+                if (this.pages.length > 0) {
+                    this.switchPage(this.pages[0]);
+                } else {
+                    this.createNewPage('New');
+                }
+                this.render();
+            }
+        });
     }
 }
 

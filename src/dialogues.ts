@@ -1,17 +1,18 @@
 export function showConfirmDialog(
     text: string,
-    yesText: string | null = "Yes",
-    noText: string | null = "No",
+    option1Text: string | null = "Yes",
+    option2Text: string | null = "No",
     cancelText: string | null = null
-): Promise<"yes" | "no" | "cancel"> {
+): Promise<"option1" | "option2" | "cancel"> {
+    console.log("showConfirmDialog", text, option1Text, option2Text, cancelText);
     return new Promise((resolve) => {
         const dialog = document.getElementById('confirm-dialog');
         const textElement = document.getElementById('confirm-text');
-        const yesButton = document.getElementById('confirm-yes');
-        const noButton = document.getElementById('confirm-no');
+        const option1Button = document.getElementById('confirm-yes');
+        const option2Button = document.getElementById('confirm-no');
         const cancelButton = document.getElementById('confirm-cancel');
 
-        if (!dialog || !textElement || !yesButton || !noButton || !cancelButton) {
+        if (!dialog || !textElement || !option1Button || !option2Button || !cancelButton) {
             resolve('cancel');
             return;
         }
@@ -20,35 +21,27 @@ export function showConfirmDialog(
         textElement.textContent = text;
 
         // Set button text and visibility
-        if (yesText) {
-            yesButton.textContent = yesText;
-            yesButton.classList.remove('hidden');
-        } else {
-            yesButton.classList.add('hidden');
-        }
+        const setButtonVisibility = (button: HTMLElement, text: string | null) => {
+            if (text) {
+                button.textContent = text;
+                button.classList.remove('hidden');
+            } else {
+                button.classList.add('hidden');
+            };
+        };
 
-        if (noText) {
-            noButton.textContent = noText;
-            noButton.classList.remove('hidden');
-        } else {
-            noButton.classList.add('hidden');
-        }
-
-        if (cancelText) {
-            cancelButton.textContent = cancelText;
-            cancelButton.classList.remove('hidden');
-        } else {
-            cancelButton.classList.add('hidden');
-        }
+        setButtonVisibility(option1Button, option1Text);
+        setButtonVisibility(option2Button, option2Text);
+        setButtonVisibility(cancelButton, cancelText);
 
         // Set up event listeners
-        const handleClick = (result: "yes" | "no" | "cancel") => {
+        const handleClick = (result: "option1" | "option2" | "cancel") => {
             dialog.classList.add('hidden');
             resolve(result);
         };
 
-        yesButton.onclick = () => handleClick('yes');
-        noButton.onclick = () => handleClick('no');
+        option1Button.onclick = () => handleClick('option1');
+        option2Button.onclick = () => handleClick('option2');
         cancelButton.onclick = () => handleClick('cancel');
 
         // Show the dialog

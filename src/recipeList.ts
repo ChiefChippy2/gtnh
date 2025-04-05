@@ -1,6 +1,6 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
 import { Goods, Repository, Item, Fluid, Recipe } from "./repository.js";
-import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page, FlowInformation, LinkAlgorithm } from "./page.js";
+import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page, FlowInformation, LinkAlgorithm, ShareCurrentPage } from "./page.js";
 import { voltageTier, GtVoltageTier } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
@@ -150,6 +150,12 @@ export class RecipeList {
             if (obj instanceof RecipeModel && event.type === "change") {
                 obj.voltageTier = parseInt((event.target as HTMLSelectElement).value);
                 UpdateProject();
+            }
+        });
+
+        this.actionHandlers.set("share", (obj, event, parent) => {
+            if (obj instanceof RecipeGroupModel && event.type === "click") {
+                ShareCurrentPage();
             }
         });
     }
@@ -470,7 +476,7 @@ export class RecipeList {
                         }
                         return '';
                     }).join("")}
-                    ${this.renderButtons(group)}
+                    ${this.renderButtons(group, true)}
                 </tbody>
             </table>
         `;
@@ -499,13 +505,14 @@ export class RecipeList {
         `;
     }
 
-    private renderButtons(group: RecipeGroupModel): string {
+    private renderButtons(group: RecipeGroupModel, renderShareButton: boolean = false): string {
         return `
             <tr class="group-links">
                 <td colspan="6">
                     <div class="group-buttons">
                         <button class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
                         <button class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
+                        ${renderShareButton ? `<button class="share-btn" data-iid="${group.iid}" data-action="share">Share</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -539,14 +546,6 @@ export class RecipeList {
 
     private updateRecipeList() {
         this.recipeItemsContainer.innerHTML = this.renderRootGroup(page.rootGroup);
-    }
-
-    // Clean up when the component is destroyed
-    destroy() {
-        removeProjectChangeListener(() => {
-            this.renderProductList();
-            this.updateRecipeList();
-        });
     }
 }
 

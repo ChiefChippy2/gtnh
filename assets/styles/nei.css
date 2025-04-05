@@ -11,10 +11,6 @@
 
 #nei-search
 {
-    border-style: solid;
-    border-width: 6px;
-    border-image: url('./../images/InputBox.png') 3 fill;
-    height: 16;
     flex:1;
 }
 
