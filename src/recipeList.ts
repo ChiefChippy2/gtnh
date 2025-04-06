@@ -454,6 +454,12 @@ export class RecipeList {
                                 </div>
                             </th>
                         </tr>
+                        <tr>
+                            <td></td>
+                            <td>Group total:</td>
+                            ${this.renderIoInfo(group.flow, group)}
+                            <td></td>
+                        </tr>
                         ${this.renderLinks(group.actualLinks, group)}
                         ${group.elements.map(entry => {
                             if (entry instanceof RecipeModel) {

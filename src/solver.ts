@@ -89,11 +89,14 @@ function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:Lin
         var oreDict = Repository.current.GetById<OreDict>(key)!;
         for (const item of oreDict.items) {
             let algorithm = group.links[item.id] || LinkAlgorithm.Match;
-            if (algorithm === LinkAlgorithm.Ignore || collection.output[item.id] === undefined)
+            if (collection.output[item.id] === undefined)
                 continue;
-
+            // Despite the fact that we are ignoring the link, we still need to select the ore dict item to have the same item in production and consumption
             for (const recipe of collection.inputOreDictRecipe[key])
                 recipe.selectedOreDicts[key] = item;
+            if (algorithm === LinkAlgorithm.Ignore)
+                continue;
+
             CreateLinkByAlgorithm(model, algorithm, group, item.id, key, collection.inputOreDict, matchedOutputs, collection.output[item.id]);
             break
         }
