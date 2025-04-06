@@ -39,7 +39,7 @@ function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:Lin
             for (const slot of recipe.items) {
                 const goods = slot.goods;
                 let matchKey = goods.id;
-                let amount = slot.amount;
+                let amount = slot.amount * slot.probability;
                 if (goods instanceof Item && goods.fluid) {
                     matchKey = goods.fluid.id;
                     amount *= goods.fluidAmount;
@@ -129,7 +129,7 @@ function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
             goods = recipeModel.selectedOreDicts[item.goods.id];
 
         var isProduction = item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput;
-        let amount = item.amount * solutionValue;
+        let amount = item.amount * item.probability * solutionValue;
         if (goods instanceof Item && goods.fluid) {
             amount *= goods.fluidAmount;
             goods = goods.fluid;
