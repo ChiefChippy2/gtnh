@@ -1,4 +1,4 @@
-import { Goods, Item } from "./repository";
+import { Goods, Item } from "./repository.js";
 import { SolvePage } from "./solver.js";
 import { showConfirmDialog } from './dialogues.js';
 
@@ -171,6 +171,9 @@ export class RecipeModel extends RecipeGroupEntry
 
     recipesPerMinute:number = 0;
     overclockFactor:number = 1;
+    parallels:number = 0;
+    overclockTiers:number = 0;
+    perfectOverclock:boolean = false;
     selectedOreDicts:{[key:string]:Item} = {};
 
     Visit(visitor: ModelObjectVisitor): void {
@@ -307,7 +310,7 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
 
 
 const changeListeners: ProjectChangeListener[] = [];
-export var page: PageModel;
+export let page: PageModel;
 
 // Event system
 type ProjectChangeListener = () => void;
@@ -328,6 +331,7 @@ function notifyListeners() {
 }
 
 export function SetCurrentPage(newPage: PageModel) {
+    console.log("SetCurrentPage", newPage);
     page = newPage;
     UpdateProject();
 }

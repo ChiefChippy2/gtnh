@@ -1,6 +1,6 @@
 import { ShowNei, ShowNeiMode, ShowNeiCallback } from "./nei.js";
 import { Goods, Repository, Item, Fluid, Recipe } from "./repository.js";
-import { UpdateProject, addProjectChangeListener, removeProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page, FlowInformation, LinkAlgorithm, ShareCurrentPage } from "./page.js";
+import { UpdateProject, addProjectChangeListener, GetByIid, RecipeModel, RecipeGroupModel, ProductModel, ModelObject, PageModel, DragAndDrop, page, FlowInformation, LinkAlgorithm, ShareCurrentPage } from "./page.js";
 import { voltageTier, GtVoltageTier, formatAmount } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
@@ -17,11 +17,6 @@ const tooltips: { [key: string]: {header: string, text: string} } = {
     If this is not desired, you can choose to ignore the link by clicking on it."}
 };
 
-interface Product {
-    goods: Goods;
-    amount: number;
-}
-
 type ActionHandler = (obj: ModelObject, event: Event, parent: ModelObject) => void;
 
 export class RecipeList {
@@ -37,9 +32,6 @@ export class RecipeList {
         this.setupActionHandlers();
         this.setupGlobalEventListeners();
         this.setupDragAndDrop();
-        this.renderStatus();
-        this.renderProductList();
-        this.updateRecipeList();
         
         // Listen for project changes
         addProjectChangeListener(() => {
@@ -376,6 +368,15 @@ export class RecipeList {
             let machineCounts = recipeModel.recipesPerMinute * gtRecipe.durationMinutes / recipeModel.overclockFactor;
             machineCountsText = `${Math.ceil(machineCounts * 100) / 100}`;
 
+            if (recipeModel.parallels > 1 || recipeModel.overclockTiers > 0) {
+                let info = [];
+                if (recipeModel.parallels > 1)
+                    info.push(`${recipeModel.parallels} parallels`);
+                if (recipeModel.overclockTiers > 0)
+                    info.push(`${recipeModel.perfectOverclock ? "Perfect OC" : "OC"} x${recipeModel.overclockTiers}`);
+                shortInfoContent += `<span class="text-small white-text">(${info.join(", ")})</span>`;
+            }
+
             shortInfoContent = `
                 <select class="voltage-tier-select" data-iid="${recipeModel.iid}" data-action="update_voltage_tier">
                     ${options}
@@ -598,4 +599,4 @@ export class RecipeList {
 }
 
 // Initialize the recipe list
-new RecipeList(); 
+new RecipeList();

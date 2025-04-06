@@ -1,6 +1,6 @@
-import { Goods, Item, Repository } from "./repository";
+import { Goods, Item, Repository } from "./repository.js";
 
-type MachineCoefficient = number | ((tier:number, choice:number) => number);
+export type MachineCoefficient = number | ((tier:number, choice:number) => number);
 
 type Machine = {
     perfectOverclock: boolean;
@@ -23,6 +23,13 @@ const coils:Goods[] = new Array(COIL_TIERS);
 for (var i=0; i<COIL_TIERS; i++) {
     coils[i] = Repository.current.GetById<Item>(`i:gregtech:gt.blockcasings5:${i}`)!;
 }
+
+export const defaultMachine:Machine = {
+    perfectOverclock: false,
+    speed: 1,
+    power: 1,
+    parallels: 1,
+};
 
 machines["Electric Blast Furnace"] = {
     perfectOverclock: false,

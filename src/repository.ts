@@ -29,7 +29,7 @@ export class Repository
         this.textReader = new TextDecoder();
         let dataVersion = this.elements[0];
         if (dataVersion != DATA_VERSION)
-            throw new Error(`Unsupported data version: ${dataVersion}`);
+            throw new Error(`Unsupported data version: ${dataVersion} (Required: ${DATA_VERSION}). This may be caused by the browser cache. Please try reloading using F5 or Ctrl+F5.`);
 
         this.items = this.GetSlice(this.elements[1]);
         this.fluids = this.GetSlice(this.elements[2]);

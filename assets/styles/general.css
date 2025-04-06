@@ -220,6 +220,7 @@ h2 {
     justify-content: center;
     text-align: center;
     padding: 50px 100px;
+    max-width: 600px;
 }
 
 .scrollbar-measure {
