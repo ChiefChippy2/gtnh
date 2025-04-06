@@ -15,7 +15,7 @@ type MachineList = {
     [key: string]: Machine;
 }
 
-const machines: MachineList = {};
+export const machines: MachineList = {};
 
 const COIL_TIERS = 14;
 const coils:Goods[] = new Array(COIL_TIERS);

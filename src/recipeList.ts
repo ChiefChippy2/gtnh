@@ -100,7 +100,7 @@ export class RecipeList {
                 if (!recipe) return;
                 let recipeType = recipe.recipeType;
                 if (recipeType.singleblocks.length > 0)
-                    options.push(recipeType.defaultCrafter)
+                    options.push(recipeType.singleblocks[obj.voltageTier] ?? recipeType.defaultCrafter);
                 options.push(...recipeType.multiblocks);
                 ShowDropdown(event.target as HTMLElement, options, (selected: Goods) => {
                     obj.crafter = recipeType.multiblocks.includes(selected as Item) ? selected.id : undefined;
@@ -359,11 +359,12 @@ export class RecipeList {
         let crafter:Item | null = null;
         if (recipeModel.crafter)
             crafter = Repository.current.GetById(recipeModel.crafter) as Item;
-        if (!crafter)
-            crafter = recipe.recipeType.defaultCrafter;
+        if (!crafter) {
+            crafter = recipe.recipeType.singleblocks[recipeModel.voltageTier] ?? recipe.recipeType.defaultCrafter;
+        }
         
         let gtRecipe = recipe.gtRecipe;
-        let shortInfoContent = recipe.recipeType.name;
+        let shortInfoContent = crafter?.name ?? recipe.recipeType.name;
         let machineCountsText = "";
         if (gtRecipe && gtRecipe.durationTicks > 0) {
             const minTier = gtRecipe.voltageTier;
@@ -383,7 +384,7 @@ export class RecipeList {
             `;
         }
 
-        let iconCell = `<td><div class="icon-container"><item-icon data-id="${crafter.id}" data-action="crafter_click" data-iid="${group.iid}" data-amount="${machineCountsText}"></item-icon></div></td>`;
+        let iconCell = `<td><div class="icon-container"><item-icon data-id="${crafter.id}" data-action="crafter_click" data-iid="${recipeModel.iid}" data-amount="${machineCountsText}"></item-icon></div></td>`;
 
         let shortInfoCell = `<td><div class="short-info">${shortInfoContent}</div></td>`;
         return iconCell + shortInfoCell;

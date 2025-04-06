@@ -82,7 +82,7 @@
 }
 
 .short-info-cell {
-    width: 300px;
+    width: 400px;
 }
 
 .energy-cell {
@@ -287,7 +287,7 @@
 }
 
 .recipe-item.drag-over:not(.dragging) td,
-.recipe-group:not(.expanded).drag-over:not(.dragging) tr
+.recipe-group:not(.expanded).drag-over:not(.dragging) tr,
 .recipe-group.expanded.drag-over tr:last-child {
     border-top: 2px solid #4CAF50;
 }

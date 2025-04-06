@@ -3,17 +3,20 @@ import { Goods, Repository, Item } from "./repository.js";
 export class Dropdown {
     private static instance: Dropdown;
     private dropdown: HTMLElement;
-    private content: HTMLElement;
     private currentTarget: HTMLElement | null = null;
     private clickCallback: ((goods: Goods) => void) | null = null;
 
     private constructor() {
         this.dropdown = document.getElementById("dropdown")!;
-        this.content = document.getElementById("dropdown-content")!;
         
         // Hide dropdown when clicking anywhere
         document.addEventListener("click", (e) => {
             if (this.currentTarget) {
+                // Ignore clicks on the target element that triggered the dropdown
+                if (e.target === this.currentTarget || this.currentTarget.contains(e.target as Node)) {
+                    return;
+                }
+
                 const target = e.target as HTMLElement;
                 const itemIcon = target.closest('item-icon');
                 
@@ -42,23 +45,29 @@ export class Dropdown {
         this.clickCallback = clickCallback || null;
         
         // Clear previous content
-        this.content.innerHTML = "";
+        this.dropdown.innerHTML = "";
         
         // Create icon grid
         const grid = document.createElement('div');
         grid.className = 'icon-grid';
-        grid.style.setProperty('--grid-width', goodsList.length.toString());
+        let width = Math.min(goodsList.length, 3);
+        let height = Math.ceil(goodsList.length / width);
+        grid.style.setProperty('--grid-width', width.toString());
+        grid.style.setProperty('--grid-height', height.toString());
         
         // Add item icons
-        for (const goods of goodsList) {
+        for (let index = 0; index < goodsList.length; index++) {
+            const goods = goodsList[index];
             const itemIcon = document.createElement('item-icon');
             itemIcon.className = 'item-icon-grid';
             itemIcon.setAttribute('data-id', goods.id.toString());
             itemIcon.setAttribute('data-action', 'select');
+            itemIcon.style.setProperty('--grid-position', index.toString());
             grid.appendChild(itemIcon);
         }
         
-        this.content.appendChild(grid);
+        this.dropdown.appendChild(grid);
+        this.dropdown.style.display = "block";
         
         // Position the dropdown
         const targetRect = target.getBoundingClientRect();
@@ -78,19 +87,16 @@ export class Dropdown {
         
         // Center horizontally relative to target
         this.dropdown.style.left = `${targetRect.left + (targetRect.width - dropdownRect.width) / 2}px`;
-        
-        // Show the dropdown
-        this.dropdown.classList.remove("hidden");
     }
 
     public hide(): void {
         this.currentTarget = null;
         this.clickCallback = null;
-        this.dropdown.classList.add("hidden");
+        this.dropdown.style.display = "none";
     }
 
     public isVisible(): boolean {
-        return !this.dropdown.classList.contains("hidden");
+        return this.dropdown.style.display === "block";
     }
 }
 
