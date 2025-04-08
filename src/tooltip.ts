@@ -1,4 +1,5 @@
-import { Goods } from "./repository.js";
+import { GetSingleRecipeDom } from "./nei.js";
+import { Goods, Recipe } from "./repository.js";
 
 export var currentTooltipElement:HTMLElement | undefined;
 const tooltip = document.getElementById("tooltip")!;
@@ -7,12 +8,13 @@ const tooltipDebugInfo = tooltip.querySelector("#tooltip-debug") as HTMLElement;
 const tooltipText = tooltip.querySelector("#tooltip-text") as HTMLElement;
 const tooltipAction = tooltip.querySelector("#tooltip-action") as HTMLElement;
 const tooltipMod = tooltip.querySelector("#tooltip-mod") as HTMLElement;
-
+const tooltipRecipe = tooltip.querySelector("#tooltip-recipe") as HTMLElement;
 interface TooltipData {
     header?: string;
     text?: string | null;
     action?: string | null;
     goods?: Goods;
+    recipe?: Recipe | null;
 }
 
 export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
@@ -24,8 +26,8 @@ export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
     const text = data.goods?.tooltip ?? data.text ?? null;
     const mod = data.goods?.mod ?? null;
     const action = data.action ?? null;
-
-    ShowTooltipRaw(target, header, debug, text, mod, action);
+    const recipe = data.recipe ?? null;
+    ShowTooltipRaw(target, header, debug, text, mod, action, recipe);
     target.addEventListener("mouseleave", () => HideTooltip(target), { once: true });
 }
 
@@ -39,7 +41,7 @@ function SetTextOptional(element:HTMLElement, data: string | null)
     }
 }
 
-function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, description:string|null, mod:string|null, action:string|null)
+function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, description:string|null, mod:string|null, action:string|null, recipe:Recipe|null)
 {
     tooltip.style.display = "block";
     currentTooltipElement = target;
@@ -64,6 +66,12 @@ function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, de
         tooltip.style.top = `${window.innerHeight - tooltipRect.height}px`;
     } else {
         tooltip.style.top = `${Math.max(targetRect.top, 0)}px`;
+    }
+
+    tooltipRecipe.style.display = "none";
+    if (recipe) {
+        tooltipRecipe.style.display = "block";
+        tooltipRecipe.innerHTML = GetSingleRecipeDom(recipe);
     }
 }
 

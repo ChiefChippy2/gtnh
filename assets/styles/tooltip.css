@@ -57,3 +57,8 @@
     z-index: 1000;
     padding: 8px;
 }
+
+#tooltip-recipe .nei-recipe-box
+{
+    position: relative;
+}

@@ -171,10 +171,12 @@ export class RecipeModel extends RecipeGroupEntry
 
     recipesPerMinute:number = 0;
     overclockFactor:number = 1;
+    powerFactor:number = 1;
     parallels:number = 0;
     overclockTiers:number = 0;
     perfectOverclock:boolean = false;
     selectedOreDicts:{[key:string]:Item} = {};
+    solverInfo?:string;
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "type", this.type);

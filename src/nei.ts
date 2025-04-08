@@ -647,6 +647,16 @@ function switchTab(index: number) {
     RefreshNeiContents();
 }
 
+export function GetSingleRecipeDom(recipe:Recipe)
+{
+    let recipeType = recipe.recipeType;
+    let builder = mapRecipeTypeToRecipeList[recipeType.name];
+    let width = builder.CalculateWidth();
+    let height = builder.CalculateHeight(recipe);
+    let dom = builder.BuildRowDom([recipe], width, height, 0);
+    return dom;
+}
+
 // Initialize tabs
 createTabs();
 

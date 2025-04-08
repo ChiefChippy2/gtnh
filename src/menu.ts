@@ -225,6 +225,7 @@ export class PageManager {
             const json = new TextDecoder().decode(decompressed);
             console.log("Loaded page", json);
             const importedPage = new PageModel(JSON.parse(json));
+            window.location.hash = "";
             this.importPage(importedPage);
         } catch (e) {
             console.error("Failed to load from URL fragment:", e);

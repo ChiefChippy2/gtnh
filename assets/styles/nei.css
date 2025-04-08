@@ -27,8 +27,9 @@
     justify-content: center;
     gap: 4px;
     position: absolute;
-    background: none;
     padding: 0;
+    color: #3F3F3F;
+    text-shadow: none;
 }
 
 .nei-recipe-box:focus {

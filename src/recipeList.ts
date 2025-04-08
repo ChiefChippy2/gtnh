@@ -11,12 +11,6 @@ const linkAlgorithmNames: { [key in LinkAlgorithm]: string } = {
     [LinkAlgorithm.Ignore]: "Ignore",
 };
 
-const tooltips: { [key: string]: {header: string, text: string} } = {
-    "link": {header: "Links", text: "When some item has both production and consumption (or it is a required product), a link is created.\n\n\
-    By default, the link will attempt to match production and consumption exactly.\n\n\
-    If this is not desired, you can choose to ignore the link by clicking on it."}
-};
-
 type ActionHandler = (obj: ModelObject, event: Event, parent: ModelObject) => void;
 
 export class RecipeList {
@@ -201,16 +195,38 @@ export class RecipeList {
             const element = (e.target as HTMLElement).closest("[data-tooltip]");
             if (element) {
                 const tooltip = element.getAttribute("data-tooltip");
-                if (tooltip) {
-                    let formattedTooltip = tooltips[tooltip];
-                    if (formattedTooltip) {
+                switch (tooltip) {
+                    case "recipe":
+                        let obj = GetByIid(parseInt(element.getAttribute("data-iid")!))?.current as RecipeModel;
+                        if (obj) {
+                            let recipe = Repository.current.GetById<Recipe>(obj.recipeId);
+                            let text = `${obj.recipesPerMinute} recipes per minute`;
+                            if (recipe?.gtRecipe) {
+                                let initialTier = recipe.gtRecipe.voltageTier;
+                                let finalTier = initialTier + obj.overclockTiers;
+                                let initialTierName = voltageTier[initialTier].name;
+                                let finalTierName = voltageTier[finalTier].name;
+                                text = `${obj.parallels} parallels\n` +
+                                       `${obj.overclockTiers}${(obj.perfectOverclock ? " perfect" : "")} overclocks ${initialTier == finalTier ? `(${initialTierName})` : `(${initialTierName} → ${finalTierName})`}\n` +
+                                       text + `\n${obj.overclockFactor}x machine speed\n` +
+                                       `${obj.powerFactor}x eu per recipe\n` +
+                                       `${obj.solverInfo ?? ""}`;
+                            }
+                            ShowTooltip(element as HTMLElement, {
+                                header: recipe?.recipeType.name + " recipe",
+                                text: text,
+                                recipe: recipe
+                            });
+                        }
+                        break;
+                    case "link":
                         ShowTooltip(element as HTMLElement, {
-                            header: formattedTooltip.header,
-                            text: formattedTooltip.text
+                            header: "Links",
+                            text: "When some item has both production and consumption (or it is a required product), a link is created.\n\n\
+    By default, the link will attempt to match production and consumption exactly.\n\n\
+    If this is not desired, you can choose to ignore the link by clicking on it."
                         });
-                    } else {
-                        ShowTooltip(element as HTMLElement, { header: tooltip });
-                    }
+                        break;
                 }
             }
         }, true);
@@ -381,13 +397,13 @@ export class RecipeList {
                 <select class="voltage-tier-select" data-iid="${recipeModel.iid}" data-action="update_voltage_tier">
                     ${options}
                 </select>
-                ${shortInfoContent}
+                ${shortInfoContent} 
             `;
         }
 
         let iconCell = `<td><div class="icon-container"><item-icon data-id="${crafter.id}" data-action="crafter_click" data-iid="${recipeModel.iid}" data-amount="${machineCountsText}"></item-icon></div></td>`;
 
-        let shortInfoCell = `<td><div class="short-info">${shortInfoContent}</div></td>`;
+        let shortInfoCell = `<td><div class="short-info" data-tooltip="recipe" data-iid="${recipeModel.iid}">${shortInfoContent}</div></td>`;
         return iconCell + shortInfoCell;
     }
 
