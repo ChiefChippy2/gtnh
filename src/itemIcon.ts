@@ -22,6 +22,8 @@ window.setInterval(() => {
     }
 }, 500);
 
+let highlightStyle: HTMLStyleElement = document.getElementById('item-icon-highlight-style') as HTMLStyleElement;
+
 export class IconBox extends HTMLElement
 {
     public obj:RecipeObject | null = null;
@@ -29,7 +31,6 @@ export class IconBox extends HTMLElement
     constructor()
     {
         super();
-        const highlightStyle = document.getElementById('item-icon-highlight-style') as HTMLStyleElement;
         
         this.addEventListener("mouseenter", () => {
             const obj = this.GetDisplayObject();
@@ -41,21 +42,11 @@ export class IconBox extends HTMLElement
                     action: actionText ?? "Left/Right click to view Production/Consumption for this item"
                 });
                 
-                // Update highlight style
-                const currentIconId = this.style.getPropertyValue('--icon-id');
-                if (currentIconId) {
-                    highlightStyle.textContent = `
-                        item-icon[style*="--icon-id: ${currentIconId}"] {
-                            box-shadow: 0 0 0 2px #4CAF50;
-                            background-color: #4CAF5020;
-                        }
-                    `;
-                }
+                this.UpdateHighlightStyle();
             }
         });
         
         this.addEventListener("mouseleave", () => {
-            // Clear highlight style
             highlightStyle.textContent = '';
         });
         
@@ -82,6 +73,18 @@ export class IconBox extends HTMLElement
         }
     }
 
+    private UpdateHighlightStyle() {
+        const currentIconId = this.style.getPropertyValue('--icon-id');
+        if (currentIconId) {
+            highlightStyle.textContent = `
+                item-icon[style*="--icon-id: ${currentIconId}"] {
+                    box-shadow: 0 0 0 2px #4CAF50;
+                    background-color: #4CAF5020;
+                }
+            `;
+        }
+    }
+
     UpdateIconId() {
         const obj = this.GetDisplayObject();
         if (obj) {
@@ -90,6 +93,7 @@ export class IconBox extends HTMLElement
             // Update tooltip if this element is currently being hovered
             if (IsHovered(this)) {
                 ShowTooltip(this, { goods: obj });
+                this.UpdateHighlightStyle();
             }
         }
     }
@@ -127,6 +131,9 @@ export class IconBox extends HTMLElement
     {
         this.StopOredictCycle();
         HideTooltip(this);
+        if (IsHovered(this)) {
+            highlightStyle.textContent = '';
+        }
     }
 
     private CustomAction():string | null
