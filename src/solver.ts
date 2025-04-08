@@ -15,7 +15,7 @@ function MatchVariablesToConstraints(model:Model, name:string, variableList: {[k
 {
     for (const key in variableList) {
         if (key === "_amount") continue;
-        model.variables[key][name] = variableList[key];
+        model.variables[key][name] = (model.variables[key][name] || 0) + variableList[key];
     }
 }
 
@@ -48,18 +48,18 @@ function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:Lin
                 }
 
                 if (slot.type == RecipeIoType.ItemOutput || slot.type == RecipeIoType.FluidOutput) {
-                    collection.output[matchKey] = collection.output[matchKey] || {};
-                    collection.output[matchKey][varName] = (collection.output[matchKey][varName] || 0) - amount;
+                    let output = collection.output[matchKey] ||= {};
+                    output[varName] = (output[varName] || 0) - amount;
                 } else if (slot.type == RecipeIoType.ItemInput || slot.type == RecipeIoType.FluidInput) {
                     if (slot.amount === 0) continue;
-                    collection.input[matchKey] = collection.input[matchKey] || {};
-                    collection.input[matchKey][varName] = (collection.input[matchKey][varName] || 0) + amount;
+                    let input = collection.input[matchKey] ||= {};
+                    input[varName] = (input[varName] || 0) + amount;
                 } else if (slot.type == RecipeIoType.OreDictInput) {
                     if (slot.amount === 0) continue;
-                    collection.inputOreDict[matchKey] = collection.inputOreDict[matchKey] || {};
-                    collection.inputOreDict[matchKey][varName] = (collection.inputOreDict[matchKey][varName] || 0) + amount;
-                    collection.inputOreDictRecipe[matchKey] = collection.inputOreDictRecipe[matchKey] || [];
-                    collection.inputOreDictRecipe[matchKey].push(child);
+                    let inputOreDict = collection.inputOreDict[matchKey] ||= {};
+                    inputOreDict[varName] = (inputOreDict[varName] || 0) + amount;
+                    let inputOreDictRecipe = collection.inputOreDictRecipe[matchKey] ||= [];
+                    inputOreDictRecipe.push(child);
                 }
             }
         } else if (child instanceof RecipeGroupModel) {

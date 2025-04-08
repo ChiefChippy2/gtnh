@@ -9,6 +9,7 @@ const neiScrollBox = nei.querySelector("#nei-scroll") as HTMLElement;
 const neiContent = nei.querySelector("#nei-content") as HTMLElement;
 const searchBox = nei.querySelector("#nei-search") as HTMLInputElement;
 const neiTabs = nei.querySelector("#nei-tabs") as HTMLElement;
+const neiBack = nei.querySelector("#nei-back") as HTMLButtonElement;
 const elementSize = 36;
 
 let currentGoods: RecipeObject | null = null;
@@ -27,6 +28,11 @@ document.addEventListener("keydown", (event) => {
         return;
     }
 
+    if (event.key === "Backspace") {
+        Back();
+        return;
+    }
+
     // Only handle printable characters
     if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey && searchBox.value == "") {
         if (document.activeElement !== searchBox) {
@@ -37,6 +43,7 @@ document.addEventListener("keydown", (event) => {
 
 searchBox.addEventListener("input", SearchChanged);
 neiScrollBox.addEventListener("scroll", UpdateVisibleItems);
+neiBack.addEventListener("click", Back);
 
 let unitWidth = 0, unitHeight = 0;
 let scrollWidth = GetScrollbarWidth();
@@ -264,6 +271,14 @@ let allRecipeTypes:RecipeType[];
 let filler:NeiFiller = FillNeiAllItems;
 let search:SearchQuery | null = null;
 
+type NeiHistory = {
+    goods:RecipeObject | null;
+    mode:ShowNeiMode;
+    tabIndex:number;
+}
+
+let neiHistory:NeiHistory[] = [];
+
 {
     let allRecipeTypePointers = repository.recipeTypes;
     allRecipeTypes = new Array(allRecipeTypePointers.length);
@@ -279,6 +294,8 @@ export enum ShowNeiMode
 {
     Production, Consumption
 }
+
+let currentMode:ShowNeiMode = ShowNeiMode.Production;
 
 export enum ShowNeiContext
 {
@@ -332,14 +349,31 @@ function GetAllFluidRecipes(set:Set<Recipe>, goods:Fluid, mode:ShowNeiMode):void
     }
 }
 
+function Back()
+{
+    const last = neiHistory.pop();
+    if (last)
+        ShowNeiInternal(last.goods, last.mode, last.tabIndex);
+}
+
 export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:ShowNeiCallback | null = null)
 {
     console.log("ShowNei", goods, mode, callback);
     if (callback != null) {
         showNeiCallback = callback;
+        neiHistory.length = 0;
+    } else {
+        if (!nei.classList.contains("hidden"))
+            neiHistory.push({goods:currentGoods, mode:currentMode, tabIndex:activeTabIndex});
     }
     nei.classList.remove("hidden");
+    ShowNeiInternal(goods, mode);
+}
+
+function ShowNeiInternal(goods:RecipeObject | null, mode:ShowNeiMode, tabIndex:number = -1)
+{
     currentGoods = goods;
+    currentMode = mode;
     let recipes:Set<Recipe> = new Set();
     if (goods instanceof OreDict) {
         GetAllOreDictRecipes(recipes, goods, mode);
@@ -369,9 +403,12 @@ export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:Sh
     // Update tab visibility
     updateTabVisibility();
 
+    // Update back button visibility
+    neiBack.style.display = neiHistory.length > 0 ? "" : "none";
+
     // Update filler and switch to appropriate tab
     filler = goods === null ? FillNeiAllItems : FillNeiAllRecipes;
-    const newTabIndex = goods === null ? 0 : 1;
+    const newTabIndex = tabIndex === -1 ? (goods === null ? 0 : 1) : tabIndex;
     switchTab(newTabIndex);
     
     Resize();
@@ -625,4 +662,3 @@ neiContent.addEventListener("click", (event) => {
         HideNei();
     }
 });
-
