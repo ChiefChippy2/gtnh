@@ -262,7 +262,7 @@ function FillNeiSpecificRecipes(recipeType:RecipeType) : NeiFiller
 function SearchChanged()
 {
     search = searchBox.value === "" ? null : new SearchQuery(searchBox.value);
-    if (search !== null && search.words.length === 0)
+    if (search !== null && (search.words.length === 0 && search.mod === null))
         search = null;
     RefreshNeiContents();
 }

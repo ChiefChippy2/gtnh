@@ -13,16 +13,24 @@ export class SearchQuery
     original:string;
     words:string[];
     indexBits:Int32Array;
+    mod:string | null;
 
     constructor(text:string)
     {
         this.original = text;
-        this.words = text.match(/[A-Za-z0-9]+/g) || [];
+        this.words = text.match(/[A-Za-z0-9@]+/g) || [];
         this.indexBits = new Int32Array(4);
+        this.mod = null;
 
         for (var i=0; i<this.words.length; i++)
         {
             var word = this.words[i];
+            if (word.startsWith('@')) {
+                this.mod = word.substring(1).toLowerCase();
+                this.words.splice(i, 1);
+                i--;
+                continue;
+            }
             this.words[i] = word = word.toLowerCase();
             var len = word.length;
             var c1=0, c2=0;

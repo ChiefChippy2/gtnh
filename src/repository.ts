@@ -192,6 +192,9 @@ export abstract class Goods extends RecipeObject
     abstract get tooltipDebugInfo():string;
 
     MatchSearchText(query: SearchQuery): boolean {
+        if (query.mod !== null && !this.mod.toLowerCase().includes(query.mod)) {
+            return false;
+        }
         return query.Match(this.name) || query.Match(this.tooltip);
     }
 }
