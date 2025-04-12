@@ -10,6 +10,7 @@ const neiContent = nei.querySelector("#nei-content") as HTMLElement;
 const searchBox = nei.querySelector("#nei-search") as HTMLInputElement;
 const neiTabs = nei.querySelector("#nei-tabs") as HTMLElement;
 const neiBack = nei.querySelector("#nei-back") as HTMLButtonElement;
+const neiClose = nei.querySelector("#nei-close") as HTMLButtonElement;
 const elementSize = 36;
 
 let currentGoods: RecipeObject | null = null;
@@ -44,6 +45,7 @@ document.addEventListener("keydown", (event) => {
 searchBox.addEventListener("input", SearchChanged);
 neiScrollBox.addEventListener("scroll", UpdateVisibleItems);
 neiBack.addEventListener("click", Back);
+neiClose.addEventListener("click", HideNei);
 
 let unitWidth = 0, unitHeight = 0;
 let scrollWidth = GetScrollbarWidth();
@@ -403,11 +405,7 @@ function ShowNeiInternal(goods:RecipeObject | null, mode:ShowNeiMode, tabIndex:n
     // Update tab visibility
     updateTabVisibility();
 
-    // Update back button visibility
     neiBack.style.display = neiHistory.length > 0 ? "" : "none";
-
-    // Update filler and switch to appropriate tab
-    filler = goods === null ? FillNeiAllItems : FillNeiAllRecipes;
     const newTabIndex = tabIndex === -1 ? (goods === null ? 0 : 1) : tabIndex;
     switchTab(newTabIndex);
     

@@ -273,6 +273,10 @@ export class ProductModel extends ModelObject
     }
 }
 
+type Settings = {
+    minVoltage?: number;
+}
+
 export class PageModel extends ModelObject
 {
     name: string = "New Page";
@@ -281,11 +285,13 @@ export class PageModel extends ModelObject
     private history: string[] = [];
     private readonly MAX_HISTORY = 50;
     status: "not solved" | "solved" | "infeasible" | "unbounded" = "not solved";
+    settings: Settings = {};
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "name", this.name);
         visitor.VisitArray(this, "products", this.products);
         visitor.VisitObject(this, "rootGroup", this.rootGroup);
+        visitor.VisitData(this, "settings", this.settings);
     }
 
     constructor(source:any = undefined)
@@ -298,6 +304,8 @@ export class PageModel extends ModelObject
                 this.products = source.products.map((product: any) => new ProductModel(product));
             if (source.rootGroup instanceof Object)
                 this.rootGroup = new RecipeGroupModel(source.rootGroup);
+            if (source.settings instanceof Object)
+                this.settings = source.settings;
         }
     }
 

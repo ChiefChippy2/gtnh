@@ -161,6 +161,13 @@ export class RecipeList {
             }
         });
 
+        this.actionHandlers.set("update_min_voltage", (obj, event, parent) => {
+            if (obj instanceof PageModel && event.type === "change") {
+                obj.settings.minVoltage = parseInt((event.target as HTMLSelectElement).value);
+                // No need to update project as this only affects new recipes
+            }
+        });
+
         this.actionHandlers.set("update_machine_choice", (obj, event, parent) => {
             if (obj instanceof RecipeModel && event.type === "change") {
                 const target = event.target as HTMLInputElement | HTMLSelectElement;
@@ -323,7 +330,10 @@ export class RecipeList {
     }
 
     private addRecipe(recipe: Recipe, targetGroup: RecipeGroupModel) {
-        targetGroup.elements.push(new RecipeModel({ recipeId: recipe.id, voltageTier: recipe.gtRecipe?.voltageTier ?? 0 }));
+        const minVoltage = page.settings.minVoltage ?? 0;
+        const recipeVoltage = recipe.gtRecipe?.voltageTier ?? 0;
+        const voltageTier = Math.max(recipeVoltage, minVoltage);
+        targetGroup.elements.push(new RecipeModel({ recipeId: recipe.id, voltageTier }));
         UpdateProject();
     }
 
@@ -619,14 +629,24 @@ export class RecipeList {
         `;
     }
 
-    private renderButtons(group: RecipeGroupModel, renderShareButton: boolean = false): string {
+    private renderButtons(group: RecipeGroupModel, renderExtraButtons: boolean = false): string {
+        const minVoltageOptions = renderExtraButtons ? voltageTier.map((tier, index) => 
+            `<option value="${index}" ${index === page.settings.minVoltage ? 'selected' : ''}>${tier.name}</option>`
+        ).join('') : '';
+
         return `
             <tr class="group-links">
                 <td colspan="6">
-                    <div class="group-buttons">
+                    <div>
                         <button class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
                         <button class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
-                        ${renderShareButton ? `<button class="share-btn" data-iid="${group.iid}" data-action="share">Share</button>` : ''}
+                        ${renderExtraButtons ? `
+                            <button class="share-btn" data-iid="${group.iid}" data-action="share">Share</button>
+                            <label>Min. voltage tier:</label>
+                            <select data-iid="${page.iid}" data-action="update_min_voltage">
+                                ${minVoltageOptions}
+                            </select>
+                        ` : ''}
                     </div>
                 </td>
             </tr>
