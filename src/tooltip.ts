@@ -31,13 +31,16 @@ export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
     target.addEventListener("mouseleave", () => HideTooltip(target), { once: true });
 }
 
-function SetTextOptional(element:HTMLElement, data: string | null)
+function SetTextOptional(element:HTMLElement, data: string | null, html: boolean)
 {
-    if (data === undefined)
+    if (data === undefined || data === null)
         element.style.display = "none";
     else {
         element.style.display = "block";
-        element.textContent = data;
+        if (html)
+            element.innerHTML = data;
+        else
+            element.textContent = data;
     }
 }
 
@@ -45,11 +48,11 @@ function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, de
 {
     tooltip.style.display = "block";
     currentTooltipElement = target;
-    tooltipHeader.textContent = header;
-    SetTextOptional(tooltipDebugInfo, debug);
-    SetTextOptional(tooltipText, description);
-    SetTextOptional(tooltipAction, action);
-    SetTextOptional(tooltipMod, mod);
+    SetTextOptional(tooltipHeader, header, true);
+    SetTextOptional(tooltipDebugInfo, debug, false);
+    SetTextOptional(tooltipText, description, true);
+    SetTextOptional(tooltipAction, action, false);
+    SetTextOptional(tooltipMod, mod, false);
 
     tooltipRecipe.style.display = "none";
     if (recipe) {

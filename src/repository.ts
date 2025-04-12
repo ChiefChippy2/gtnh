@@ -113,6 +113,8 @@ export class Repository
         if (!this.ObjectMatchQueryBits(query, pointer))
             return null;
         var inst = this.GetObject(pointer, prototype);
+        if (query.original.length === 1)
+            return inst;
         return inst.MatchSearchText(query) ? inst : null;
     }
 
@@ -122,6 +124,8 @@ export class Repository
             return true;
         if (!this.ObjectMatchQueryBits(query, obj.objectOffset))
             return false;
+        if (query.original.length === 1)
+            return true;
         return obj.MatchSearchText(query);
     }
 }

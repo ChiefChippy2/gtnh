@@ -1,4 +1,4 @@
-import { Goods, Item, RecipeObject } from "./repository.js";
+import { Goods, Item, Recipe, RecipeObject } from "./repository.js";
 import { SolvePage } from "./solver.js";
 import { showConfirmDialog } from './dialogues.js';
 
@@ -189,8 +189,10 @@ export class RecipeModel extends RecipeGroupEntry
 {
     type: string = "recipe";
     recipeId: string = "";
+    recipe?:Recipe;
     voltageTier: number = 0;
     crafter: string | undefined;
+    choices: number[] = [];
 
     recipesPerMinute:number = 0;
     overclockFactor:number = 1;
@@ -206,6 +208,7 @@ export class RecipeModel extends RecipeGroupEntry
         visitor.VisitData(this, "recipeId", this.recipeId);
         visitor.VisitData(this, "voltageTier", this.voltageTier);
         visitor.VisitData(this, "crafter", this.crafter);
+        visitor.VisitData(this, "choices", this.choices);
     }
 
     constructor(source:any = undefined)
@@ -218,6 +221,8 @@ export class RecipeModel extends RecipeGroupEntry
                 this.voltageTier = source.voltageTier;
             if (typeof source.crafter === "string")
                 this.crafter = source.crafter;
+            if (source.choices instanceof Array)
+                this.choices = source.choices;
         }
     }
 }

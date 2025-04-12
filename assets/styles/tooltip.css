@@ -23,6 +23,7 @@
 #tooltip-header
 {
     color: white;
+    white-space: pre-line;
 }
 
 #tooltip-debug

@@ -40,6 +40,22 @@ export var voltageTier:GtVoltageTier[] = [
     {name: "MAX", voltage: 2147483640}
   ];
 
+export const TIER_LV = 0;
+export const TIER_MV = 1;
+export const TIER_HV = 2;
+export const TIER_EV = 3;
+export const TIER_IV = 4;
+export const TIER_LUV = 5;
+export const TIER_ZPM = 6;    
+export const TIER_UV = 7;
+export const TIER_UHV = 8;
+export const TIER_UEV = 9;
+export const TIER_UIV = 10;
+export const TIER_UMV = 11;
+export const TIER_UXV = 12;
+export const TIER_MAX = 13;
+
+
 export function formatAmount(amount: number): string {
     if (amount === 0) {
         return "0";

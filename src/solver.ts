@@ -1,7 +1,7 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
 import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm } from './page.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./repository.js";
-import { defaultMachine, MachineCoefficient, machines } from "./machines.js";
+import { singleBlockMachine, MachineCoefficient, machines } from "./machines.js";
 import { voltageTier } from "./utils.js";
 
 class LinkCollection {
@@ -70,6 +70,7 @@ function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:Lin
     for (const child of group.elements) {
         if (child instanceof RecipeModel) {
             let recipe = Repository.current.GetById(child.recipeId) as Recipe;
+            child.recipe = recipe;
             let varName = `recipe_${child.iid}`;
             model.variables[varName] = {"obj":1};
             for (const slot of recipe.items) {
@@ -175,7 +176,7 @@ function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
         if (!recipeModel.crafter && recipe.recipeType.singleblocks.length == 0)
             recipeModel.crafter = recipe.recipeType.defaultCrafter.id;
         let crafter = recipeModel.crafter ? Repository.current.GetById(recipeModel.crafter) as Item : null;
-        let machineInfo = crafter ? machines[crafter.name] || defaultMachine : defaultMachine;
+        let machineInfo = crafter ? machines[crafter.name] || singleBlockMachine : singleBlockMachine;
         let actualVoltage = voltageTier[recipeModel.voltageTier].voltage;
         let machineParallels = Math.max(1, GetParameter(machineInfo.parallels, recipeModel.voltageTier));
         let maxParallels = Math.floor(actualVoltage / gtRecipe.voltage);
