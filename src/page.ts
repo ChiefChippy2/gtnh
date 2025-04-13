@@ -274,7 +274,8 @@ export class ProductModel extends ModelObject
 }
 
 type Settings = {
-    minVoltage?: number;
+    minVoltage: number;
+    timeUnit: "min" | "sec" | "tick";
 }
 
 export class PageModel extends ModelObject
@@ -285,7 +286,8 @@ export class PageModel extends ModelObject
     private history: string[] = [];
     private readonly MAX_HISTORY = 50;
     status: "not solved" | "solved" | "infeasible" | "unbounded" = "not solved";
-    settings: Settings = {};
+    settings: Settings = {minVoltage: 0, timeUnit: "min"};
+    timeScale: number = 1;
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "name", this.name);
@@ -304,8 +306,12 @@ export class PageModel extends ModelObject
                 this.products = source.products.map((product: any) => new ProductModel(product));
             if (source.rootGroup instanceof Object)
                 this.rootGroup = new RecipeGroupModel(source.rootGroup);
-            if (source.settings instanceof Object)
-                this.settings = source.settings;
+            if (source.settings instanceof Object) {
+                if (typeof source.settings.minVoltage === "number")
+                    this.settings.minVoltage = source.settings.minVoltage;
+                if (typeof source.settings.timeUnit === "string")
+                    this.settings.timeUnit = source.settings.timeUnit as "min" | "sec" | "tick";
+            }
         }
     }
 

@@ -244,7 +244,9 @@ export function SolvePage(page:PageModel):void
             constraints: {},
             variables: {},
         }
-
+        let timeUnit = page.settings.timeUnit;
+        let timeScale = timeUnit === "sec" ? 60 : timeUnit === "tick" ? 20 * 60 : 1;
+        page.timeScale = timeScale;
         let collection:LinkCollection = new LinkCollection();
         for (const product of page.products) {
             if (product.amount > 0) {

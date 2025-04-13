@@ -98,7 +98,7 @@ export class RecipeList {
 
         this.actionHandlers.set("update_amount", (obj, event) => {
             if (obj instanceof ProductModel && event.type === "change") {
-                obj.amount = parseFloat((event.target as HTMLInputElement).value);
+                obj.amount = parseFloat((event.target as HTMLInputElement).value) * page.timeScale;
                 UpdateProject();
             }
         });
@@ -165,6 +165,13 @@ export class RecipeList {
             if (obj instanceof PageModel && event.type === "change") {
                 obj.settings.minVoltage = parseInt((event.target as HTMLSelectElement).value);
                 // No need to update project as this only affects new recipes
+            }
+        });
+
+        this.actionHandlers.set("update_time_unit", (obj, event, parent) => {
+            if (obj instanceof PageModel && event.type === "change") {
+                obj.settings.timeUnit = (event.target as HTMLSelectElement).value as "min" | "sec" | "tick";
+                UpdateProject();
             }
         });
 
@@ -346,7 +353,7 @@ export class RecipeList {
         const renderFlowItems = (items: {[key:string]:number}, group: RecipeGroupModel) => {
             const sortedFlow = Object.entries(items).sort(([,a], [,b]) => Math.abs(b) - Math.abs(a));
             return sortedFlow.map(([goodsId, amount]) => {
-                const amountText = formatAmount(amount);
+                const amountText = formatAmount(amount/page.timeScale);
                 return `
                     <item-icon data-id="${goodsId}" class="flow-item" data-amount="${amountText}" data-action="item_icon_click" data-iid="${group.iid}"></item-icon>
                 `;
@@ -537,8 +544,8 @@ export class RecipeList {
                                 </div>
                             </th>
                             <th class="energy-cell">POWER</th>
-                            <th class="inputs-cell">INPUTS/min</th>
-                            <th class="outputs-cell">OUTPUTS/min</th>
+                            <th class="inputs-cell">INPUTS/${page.settings.timeUnit}</th>
+                            <th class="outputs-cell">OUTPUTS/${page.settings.timeUnit}</th>
                             <th class="action-cell">
                                 <div class="icon-container">
                                     <button class="delete-btn" data-iid="${group.iid}" data-action="delete_group">x</button>
@@ -569,6 +576,32 @@ export class RecipeList {
         `;
     }
 
+    private renderSettings(): string {
+        const minVoltageOptions = voltageTier.map((tier, index) => 
+            `<option value="${index}" ${index === page.settings.minVoltage ? 'selected' : ''}>${tier.name}</option>`
+        ).join('');
+
+        return `
+            <div class="settings-panel">
+                <button class="share-btn" data-iid="${page.rootGroup.iid}" data-action="share">Share</button>
+                <div class="setting-item">
+                    <label>Voltage tier for new recipes:</label>
+                    <select data-iid="${page.iid}" data-action="update_min_voltage">
+                        ${minVoltageOptions}
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Time unit:</label>
+                    <select data-iid="${page.iid}" data-action="update_time_unit">
+                        <option value="min" ${page.settings.timeUnit === "min" ? 'selected' : ''}>Minutes</option>
+                        <option value="sec" ${page.settings.timeUnit === "sec" ? 'selected' : ''}>Seconds</option>
+                        <option value="tick" ${page.settings.timeUnit === "tick" ? 'selected' : ''}>Ticks</option>
+                    </select>
+                </div>
+            </div>
+        `;
+    }
+
     private renderRootGroup(group: RecipeGroupModel): string {
         return `
             <table class="recipe-table root-group" data-iid="${group.iid}">
@@ -577,8 +610,8 @@ export class RecipeList {
                         <th class="icon-cell"></th>
                         <th class="short-info-cell"></th>
                         <th class="energy-cell">POWER</th>
-                        <th class="inputs-cell">INPUTS/min</th>
-                        <th class="outputs-cell">OUTPUTS/min</th>
+                        <th class="inputs-cell">INPUTS/${page.settings.timeUnit}</th>
+                        <th class="outputs-cell">OUTPUTS/${page.settings.timeUnit}</th>
                         <th class="action-cell"></th>
                     </tr>
                     <tr>
@@ -600,9 +633,10 @@ export class RecipeList {
                         }
                         return '';
                     }).join("")}
-                    ${this.renderButtons(group, true)}
+                    ${this.renderButtons(group)}
                 </tbody>
             </table>
+            ${this.renderSettings()}
         `;
     }
 
@@ -629,24 +663,13 @@ export class RecipeList {
         `;
     }
 
-    private renderButtons(group: RecipeGroupModel, renderExtraButtons: boolean = false): string {
-        const minVoltageOptions = renderExtraButtons ? voltageTier.map((tier, index) => 
-            `<option value="${index}" ${index === page.settings.minVoltage ? 'selected' : ''}>${tier.name}</option>`
-        ).join('') : '';
-
+    private renderButtons(group: RecipeGroupModel): string {
         return `
             <tr class="group-links">
                 <td colspan="6">
                     <div>
                         <button class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</button>
                         <button class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</button>
-                        ${renderExtraButtons ? `
-                            <button class="share-btn" data-iid="${group.iid}" data-action="share">Share</button>
-                            <label>Min. voltage tier:</label>
-                            <select data-iid="${page.iid}" data-action="update_min_voltage">
-                                ${minVoltageOptions}
-                            </select>
-                        ` : ''}
                     </div>
                 </td>
             </tr>
@@ -689,8 +712,8 @@ export class RecipeList {
                 return `
                     <div class="product-item">
                         <item-icon data-id="${goods.id}" data-action="item_icon_click" data-iid="${page.rootGroup.iid}"></item-icon>
-                        <input type="number" class="amount" value="${product.amount}" min="-999999" step="0.1" data-iid="${product.iid}" data-action="update_amount">
-                        <span class="amount-unit">/min</span>
+                        <input type="number" class="amount" value="${product.amount/page.timeScale}" step="0" data-iid="${product.iid}" data-action="update_amount">
+                        <span class="amount-unit">/${page.settings.timeUnit}</span>
                         ${goods.name}
                         <button class="delete-btn" data-iid="${product.iid}" data-action="delete_product">x</button>
                     </div>
