@@ -258,37 +258,37 @@ function GetEbfRecipeBaseCoilTier(recipe?: Recipe): number {
     return coilTier;
 }
 
+let ebfPerfectOverclock:MachineCoefficient = (recipe, choices) => {
+    let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
+    return Math.floor((choices.coilTier - tier)/2);
+}
+
+let ebfPower:MachineCoefficient = (recipe, choices) => {
+    let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
+    return Math.pow(0.95, choices.coilTier - tier);
+}
+
 machines["Electric Blast Furnace"] = {
-    perfectOverclock: (recipe, choices) => {
-        let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-        return Math.floor((choices.coilTier - tier)/2);
-    },
+    perfectOverclock: ebfPerfectOverclock,
     speed: 1,
-    power: (recipe, choices) => {
-        let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-        return Math.pow(0.95, choices.coilTier - tier);
-    },
+    power: ebfPower,
     parallels: 1,
     choices: {coilTier: CoilTierChoice},
 };
 
 machines["Volcanus"] = {
-    perfectOverclock: 0,
+    perfectOverclock: ebfPerfectOverclock,
     speed: 2.2,
-    power: 0.9,
+    power: (recipe, choices) => ebfPower(recipe, choices) * 0.9,
     parallels: 8,
+    choices: {coilTier: CoilTierChoice},
+    info: "Blazing pyrotheum required (Not calculated)",
 };
 
 machines["Mega Blast Furnace"] = {
-    perfectOverclock: (recipe, choices) => {
-        let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-        return Math.floor((choices.coilTier - tier)/2);
-    },
+    perfectOverclock: ebfPerfectOverclock,
     speed: 1,
-    power: (recipe, choices) => {
-        let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-        return Math.pow(0.95, choices.coilTier - tier);
-    },
+    power: ebfPower,
     parallels: 256,
     choices: {coilTier: CoilTierChoice},
 };
@@ -797,7 +797,7 @@ machines["Reactor Fuel Processing Plant"] = {
 };
 
 machines["Flotation Cell Regulator"] = {
-    perfectOverclock: 0,
+    perfectOverclock: MAX_OVERCLOCK,
     speed: 1,
     power: 1,
     parallels: 1,
@@ -876,7 +876,7 @@ machines["Nuclear Salt Processing Plant"] = {
 };
 
 machines["IsaMill Grinding Machine"] = {
-    perfectOverclock: 0,
+    perfectOverclock: MAX_OVERCLOCK,
     speed: 1,
     power: 1,
     parallels: 1,

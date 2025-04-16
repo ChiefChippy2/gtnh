@@ -4,8 +4,10 @@ try {
     const atlas = new Image();
     atlas.src = "./data/atlas.webp";
 
+    // Trying to fix safari issue by importing the repository first
+    await import("./repository.js");
+
     await Promise.all([
-        import("./repository.js"),
         import("./itemIcon.js"),
         import("./tooltip.js"),
         import("./nei.js"),
