@@ -150,7 +150,7 @@ item-icon {
     width: 32px;
     height: 32px;
     position: relative;
-    background-size: 8192px;
+    background-size: 8192px auto;
     background-repeat: no-repeat;
     pointer-events: auto;
     background-image: url('./../../data/atlas.webp');
