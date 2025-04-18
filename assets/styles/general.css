@@ -137,25 +137,20 @@ input::placeholder {
 .icon {
     width: 32px;
     height: 32px;
-    background-size: 8192px;
     background-repeat: no-repeat;
 
     background-image: url('./../../data/atlas.webp');
-    background-position: 
-        var(--pos-x)
-        var(--pos-y);
+    background-position: var(--pos-x) var(--pos-y);
 }
 
 item-icon {
     width: 32px;
     height: 32px;
     position: relative;
-    background-size: 8192px auto;
     background-repeat: no-repeat;
     pointer-events: auto;
     background-image: url('./../../data/atlas.webp');
-    background-position-x: var(--pos-x);
-    background-position-y: var(--pos-y);
+    background-position: var(--pos-x) var(--pos-y);
 }
 
 item-icon::after {
