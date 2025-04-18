@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using Source.Data;
-using UnityEngine;
-using Object = UnityEngine.Object;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Webp;
 
 namespace Source
 {
     public class AtlasBuilder : IDisposable
     {
-        private Texture2D currentAtlas;
-        private readonly Texture2D singleTexture = new Texture2D(64, 64, TextureFormat.RGBA32, false);
-
         private readonly ZipArchive archive;
         private readonly string savePath;
         
@@ -22,7 +20,7 @@ namespace Source
             this.savePath = savePath;
         }
 
-        private Texture2D GetPngTexture(string path)
+        private Image<Rgba32> LoadImageFromArchive(string path)
         {
             var entry = archive.GetEntry(path);
             if (entry == null)
@@ -40,53 +38,87 @@ namespace Source
 
             if (entry == null)
             {
-                Debug.LogError("Unable to find archive entry for " + path);
+                Console.WriteLine("Unable to find archive entry for " + path);
                 return null;
             }
 
-            using var reader = entry.Open();
-            using var ms = new MemoryStream((int)entry.Length);
-            reader.CopyTo(ms);
-            singleTexture.LoadImage(ms.GetBuffer());
-            return singleTexture;
+            using var stream = entry.Open();
+            return Image.Load<Rgba32>(stream);
         }
         
-        public List<string> BuildAtlases(List<string> iconsPaths)
+        public string BuildAtlas(List<string> iconsPaths)
         {
-            var count = iconsPaths.Count;
-            var atlases = ((count - 1) / IconAtlas.SpritesPerPage) + 1;
-            var pagesPath = new List<string>();
-            for (var atlasId = 0; atlasId < atlases; atlasId++)
+            Console.WriteLine($"Starting atlas creation with {iconsPaths.Count} icons...");
+            
+            var images = new List<Image<Rgba32>>();
+            for (var i = 0; i < iconsPaths.Count; i++)
             {
-                var min = atlasId * IconAtlas.SpritesPerPage;
-                var max = Mathf.Min(min + IconAtlas.SpritesPerPage, iconsPaths.Count);
-                var iconsInThisAtlas = max - min;
-                var requiredHeight = (iconsInThisAtlas - 1) / (1 << IconAtlas.DimensionBits) + 1;
-                currentAtlas = new Texture2D(IconAtlas.TextureSize, requiredHeight * IconAtlas.ImageSize, TextureFormat.RGBA32, false);
-                for (var iconId = min; iconId < max; iconId++)
+                var path = iconsPaths[i];
+                if (path == null) continue;
+                
+                if (i % 1000 == 0)
                 {
-                    var path = iconsPaths[iconId];
-                    if (path == null)
-                        continue;
-                    var texture = GetPngTexture(path);
-                    if (texture == null)
-                        continue;
-                    
-                    var positionX = (iconId & IconAtlas.XMask) * IconAtlas.ImageSize;
-                    var positionY = ((requiredHeight - 1) - ((iconId & IconAtlas.YMask) >> IconAtlas.DimensionBits)) * IconAtlas.ImageSize;
-                    currentAtlas.CopyPixels(texture, 0, 0, 0, 0, IconAtlas.ImageSize, IconAtlas.ImageSize, 0, positionX, positionY);
+                    Console.WriteLine($"Loading icon {i + 1} of {iconsPaths.Count}...");
                 }
                 
-                currentAtlas.Apply();
-                var png = currentAtlas.EncodeToPNG();
-                var atlasPath = Path.Combine(savePath, atlasId + ".png");
-                pagesPath.Add(atlasPath);
-                File.WriteAllBytes(atlasPath, png);
-                Object.DestroyImmediate(currentAtlas);
-                currentAtlas = null;
+                var image = LoadImageFromArchive(path);
+                if (image != null)
+                {
+                    images.Add(image);
+                }
             }
 
-            return pagesPath;
+            Console.WriteLine($"Loaded {images.Count} icons successfully.");
+
+            if (images.Count == 0)
+            {
+                Console.WriteLine("No valid icons found to create atlas.");
+                return null;
+            }
+
+            // Calculate required dimensions
+            var iconsCount = images.Count;
+            var requiredHeight = (iconsCount - 1) / (1 << IconAtlas.DimensionBits) + 1;
+            var width = (1 << IconAtlas.DimensionBits) * IconAtlas.ImageSize;
+            var height = requiredHeight * IconAtlas.ImageSize;
+
+            Console.WriteLine($"Creating atlas with dimensions {width}x{height}...");
+
+            // Create the atlas
+            using var atlas = new Image<Rgba32>(width, height);
+            
+            // Draw all images onto the atlas
+            for (var i = 0; i < images.Count; i++)
+            {
+                if (i % 1000 == 0)
+                {
+                    Console.WriteLine($"Compositing icon {i + 1} of {images.Count}...");
+                }
+                
+                var image = images[i];
+                var positionX = (i & IconAtlas.XMask) * IconAtlas.ImageSize;
+                var positionY = ((i & IconAtlas.YMask) >> IconAtlas.DimensionBits) * IconAtlas.ImageSize;
+                
+                atlas.Mutate(x => x.DrawImage(image, new Point(positionX, positionY), 1f));
+                image.Dispose();
+            }
+
+            Console.WriteLine("Resizing...");
+
+            // Resize to 50% and save as WebP
+            using var resized = atlas.Clone(x => x.Resize(width / 2, height / 2, KnownResamplers.Box));
+            Console.WriteLine("Saving as WEBP...");
+            var encoder = new WebpEncoder
+            {
+                FileFormat = WebpFileFormatType.Lossless,
+                Quality = 100
+            };
+            
+            using var fileStream = File.Create(savePath);
+            resized.Save(fileStream, encoder);
+
+            Console.WriteLine($"Atlas creation complete. Saved to: {savePath}");
+            return savePath;
         }
 
         public void Dispose()

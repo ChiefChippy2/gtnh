@@ -1,4 +1,6 @@
-﻿namespace export;
+﻿using Source;
+
+namespace export;
 
 class Program
 {
@@ -10,9 +12,9 @@ class Program
             return;
         }
 
-        string path = args[0];
-        string outputPath = args.Length > 1 ? args[1] : args[0];
+        var path = args[0];
+        var outputPath = args.Length > 1 ? args[1] : ".";
 
-        Console.WriteLine($"Exporting nesql data from {path}...");
+        PackGenerator.Generate(path, outputPath);
     }
 }

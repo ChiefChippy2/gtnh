@@ -27,7 +27,7 @@ namespace Source
                 if (line == null)
                     break;
                 if ((lineNumber++ & 0xFFF) == 0)
-                    Console.WriteLine("Parsing line"+ lineNumber.ToString() + " ["+(10000 * fs.Position / fs.Length)/100.0+"%]");
+                    Console.WriteLine("Parsing line "+ lineNumber.ToString() + " ["+(10000 * fs.Position / fs.Length)/100.0+"%]");
                 var reader = new SqlLineReader(line);
                 if (!reader.ReadToken(out var first))
                     continue;
