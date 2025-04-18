@@ -121,11 +121,17 @@ input::placeholder {
 .icon-grid
 {
     position: relative;
-    width: calc(var(--grid-width)*36px);
-    height: calc(var(--grid-height)*36px);
+    width: var(--grid-pixel-width);
+    height: var(--grid-pixel-height);
     gap: 0px;
     background-size: 36px;
     background-image: url("./../images/Slot.png");
+}
+
+.item-icon-grid {
+    position: absolute;
+    left: var(--grid-x);
+    top: var(--grid-y);
 }
 
 .icon {
@@ -136,28 +142,20 @@ input::placeholder {
 
     background-image: url('./../../data/atlas.webp');
     background-position: 
-        calc(mod(var(--icon-id), 256) * (-32px))
-        calc(round(var(--icon-id)/256 - 0.5) * (-32px));
+        var(--pos-x)
+        var(--pos-y);
 }
 
 item-icon {
     width: 32px;
     height: 32px;
     position: relative;
-    display: inline-block;
     background-size: 8192px;
     background-repeat: no-repeat;
     pointer-events: auto;
     background-image: url('./../../data/atlas.webp');
-    background-position-x: calc(mod(var(--icon-id), 256) * (-32px));
-    background-position-y: calc(round(var(--icon-id)/256 - 0.5) * (-32px));
-}
-
-/* Apply grid positioning when --grid-width is defined */
-item-icon:where(:has(+ [style*="--grid-width"]), [style*="--grid-width"] *) {
-    position: absolute;
-    left: calc(mod(var(--grid-position), var(--grid-width)) * 36px + 2px);
-    top: calc(round(var(--grid-position)/var(--grid-width) - 0.5) * 36px + 2px);
+    background-position-x: var(--pos-x);
+    background-position-y: var(--pos-y);
 }
 
 item-icon::after {

@@ -88,7 +88,11 @@ export class IconBox extends HTMLElement
     UpdateIconId() {
         const obj = this.GetDisplayObject();
         if (obj) {
-            this.style.setProperty('--icon-id', obj.iconId.toString());
+            const iconId = obj.iconId;
+            const ix = iconId % 256;
+            const iy = Math.floor(iconId / 256);
+            this.style.setProperty('--pos-x', `${ix * -32}px`);
+            this.style.setProperty('--pos-y', `${iy * -32}px`);
             
             // Update tooltip if this element is currently being hovered
             if (IsHovered(this)) {

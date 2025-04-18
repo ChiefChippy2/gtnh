@@ -62,12 +62,15 @@ class ItemAllocator implements NeiRowAllocator<Goods>
         var dom:string[] = [];
         const isSelectingGoods = showNeiCallback?.onSelectGoods != null;
         const selectGoodsAction = isSelectingGoods ? ' data-action="select"' : "";
-        dom.push(`<div class="nei-items-row icon-grid" style="--grid-width:${elements.length}; top:${elementSize*rowY}px">`);
+        const gridWidth = elements.length * 36;
+        dom.push(`<div class="nei-items-row icon-grid" style="--grid-pixel-width:${gridWidth}px; --grid-pixel-height:36px; top:${elementSize*rowY}px">`);
         for (var i=0; i<elements.length; i++) {
             var elem = elements[i];
-            dom.push(`<item-icon class="item-icon-grid" style="--grid-position:${i}" data-id="${elem.id}"${selectGoodsAction}></item-icon>`);
+            const gridX = (i % elements.length) * 36 + 2;
+            const gridY = Math.floor(i / elements.length) * 36 + 2;
+            dom.push(`<item-icon class="item-icon-grid" style="--grid-x:${gridX}px; --grid-y:${gridY}px" data-id="${elem.id}"${selectGoodsAction}></item-icon>`);
         }
-        dom.push(`<\div>`);
+        dom.push(`</div>`);
         return dom.join("");
     }
 }
@@ -112,7 +115,9 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             return index;
         var dimY = this.dimensions[dimensionOffset + 1];
         var count = dimX * dimY;
-        dom.push(`<div class="icon-grid" style="--grid-width: ${dimX}; --grid-height: ${dimY}">`);
+        const gridWidth = dimX * 36;
+        const gridHeight = dimY * 36;
+        dom.push(`<div class="icon-grid" style="--grid-pixel-width:${gridWidth}px; --grid-pixel-height:${gridHeight}px">`);
         for (;index<items.length;index++) {
             var item = items[index];
             if (item.type > type)
@@ -120,7 +125,9 @@ class NeiRecipeTypeInfo extends Array implements NeiRowAllocator<Recipe>
             if (item.slot >= count)
                 continue;
             var goods = item.goods;
-            var iconAttrs = `class="item-icon-grid" style="--grid-position:${item.slot}" data-id="${goods.id}"`;
+            const gridX = (item.slot % dimX) * 36 + 2;
+            const gridY = Math.floor(item.slot / dimX) * 36 + 2;
+            var iconAttrs = `class="item-icon-grid" style="--grid-x:${gridX}px; --grid-y:${gridY}px" data-id="${goods.id}"`;
             var amountText = formatAmount(item.amount);
             
             var isFluid = goods instanceof Fluid;
@@ -614,7 +621,10 @@ function createTabs() {
     tabs.forEach((tab, index) => {
         const tabElement = document.createElement('div');
         tabElement.className = 'panel-tab';
-        tabElement.innerHTML = `<icon class="icon" style="--icon-id:${tab.iconId}"></icon>`;
+        const iconId = tab.iconId;
+        const ix = iconId % 256;
+        const iy = Math.floor(iconId / 256);
+        tabElement.innerHTML = `<icon class="icon" style="--pos-x:${ix * -32}px; --pos-y:${iy * -32}px"></icon>`;
         tabElement.addEventListener('click', () => switchTab(index));
         tabElement.addEventListener('mouseenter', () => ShowTooltip(tabElement, { header: tab.name }));
         neiTabs.appendChild(tabElement);

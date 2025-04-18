@@ -231,7 +231,7 @@ export class RecipeList {
                         let obj = GetByIid(parseInt(element.getAttribute("data-iid")!))?.current as RecipeModel;
                         if (obj) {
                             let recipe = Repository.current.GetById<Recipe>(obj.recipeId);
-                            let text = `${obj.recipesPerMinute/page.timeScale} recipes/${page.settings.timeUnit}`;
+                            let text = `${formatAmount(obj.recipesPerMinute/page.timeScale)} recipes/${page.settings.timeUnit}`;
                             if (recipe?.gtRecipe) {
                                 let initialTier = recipe.gtRecipe.voltageTier;
                                 let finalTier = initialTier + obj.overclockTiers;
@@ -241,8 +241,8 @@ export class RecipeList {
                                     `${obj.overclockTiers} overclocks (${obj.perfectOverclocks} perfect)`;
                                 text = `${obj.parallels} parallels\n` +
                                        `${overclocksText} ${initialTier == finalTier ? `(${initialTierName})` : `(${initialTierName} → ${finalTierName})`}\n` +
-                                       text + `\n${obj.overclockFactor}x machine speed\n` +
-                                       `${obj.powerFactor}x eu per recipe`;
+                                       text + `\n${formatAmount(obj.overclockFactor)}x machine speed\n` +
+                                       `${formatAmount(obj.powerFactor)}x eu per recipe`;
                             }
                             ShowTooltip(element as HTMLElement, {
                                 header: recipe?.recipeType.name + " recipe",
@@ -501,7 +501,7 @@ export class RecipeList {
     private renderRecipe(recipeModel: RecipeModel, group: RecipeGroupModel, level: number = 0): string {
         let recipe = Repository.current.GetById<Recipe>(recipeModel.recipeId);
         return `
-            <tr class="recipe-item" data-iid="${recipeModel.iid}" draggable="true" style="--nest-level: ${level}">
+            <tr class="recipe-item" data-iid="${recipeModel.iid}" draggable="true">
                 ${this.renderRecipeShortInfo(recipe, recipeModel, group)}
                 ${this.renderIoInfo(recipeModel.flow, group)}
                 <td>
@@ -515,7 +515,7 @@ export class RecipeList {
 
     private renderCollapsedGroup(group: RecipeGroupModel, parentGroup: RecipeGroupModel, level: number = 0): string {
         return `
-            <tr class="recipe-group collapsed" data-iid="${group.iid}" draggable="true" style="--nest-level: ${level}">
+            <tr class="recipe-group collapsed" data-iid="${group.iid}" draggable="true">
                 <td>
                     <div class="icon-container">
                         <button class="expand-btn icon-button" data-iid="${group.iid}" data-action="toggle_collapse"></button>
