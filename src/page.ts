@@ -304,6 +304,10 @@ export class PageModel extends ModelObject
     constructor(source:any = undefined)
     {
         super();
+        this.loadFromObject(source);
+    }
+
+    private loadFromObject(source:any) {
         if (source instanceof Object) {
             if (typeof source.name === "string")
                 this.name = source.name;
@@ -333,10 +337,7 @@ export class PageModel extends ModelObject
             this.history.pop(); // Remove current state
             const previousState = this.history[this.history.length - 1];
             try {
-                const previousPage = new PageModel(JSON.parse(previousState));
-                this.name = previousPage.name;
-                this.products = previousPage.products;
-                this.rootGroup = previousPage.rootGroup;
+                this.loadFromObject(JSON.parse(previousState));
                 SolvePage(this);
                 return true;
             } catch (e) {

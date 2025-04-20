@@ -93,10 +93,10 @@ export class RecipeList {
                 const populateDropdown = (container: HTMLElement) => {
                     container.innerHTML = `
                         <div class="dropdown-list">
-                            <h2>Select crafter:</h2>
+                            Select crafter:
                             ${options.map(goods => {
                                 const isSingleblock = recipeType.singleblocks.includes(goods as Item);
-                                const displayName = isSingleblock ? "Singleblock machine" : goods.name;
+                                const displayName = isSingleblock ? "Singleblock "+recipe.recipeType.name : goods.name;
                                 return `
                                     <div class="dropdown-item" 
                                         data-iid="${obj.iid}"
@@ -127,7 +127,7 @@ export class RecipeList {
                                             min="0">
                                     </label>
                                 </div>
-                                <span class="text-small">When selecting fixed crafter count, you usually need remove the product from the desired product list and let it be calculated, otherwise the model will likely become infeasible</span>
+                                <span class="text-small">When using a fixed crafter count, you should remove the product from the desired product list and let it be calculated automatically. Otherwise, the model will likely become infeasible.</span>
                             ` : ''}
                         </div>
                     `;
@@ -758,7 +758,7 @@ export class RecipeList {
                     <div>
                         <a href="#" class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</a> •
                         <a href="#" class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</a> •
-                        You can also add recipes by left or right clicking on an item in the product list.
+                        You can also add recipes by clicking on an item.
                     </div>
                 </td>
             </tr>

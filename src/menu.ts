@@ -1,4 +1,4 @@
-import { PageModel, serializer, SetCurrentPage, addProjectChangeListener, page } from './page.js';
+import { PageModel, serializer, SetCurrentPage, addProjectChangeListener, page, UpdateProject } from './page.js';
 import { showConfirmDialog } from './dialogues.js';
 import { ShowNei, ShowNeiMode } from "./nei.js";
 
@@ -7,6 +7,7 @@ export class PageManager {
     private currentPage: string | null = null;
     private pageListContainer: HTMLElement;
     private pageCache: Map<string, PageModel> = new Map();
+    private undoInProgress: boolean = false;
 
     constructor() {
         this.pageListContainer = document.querySelector('.page-list')!;
@@ -32,13 +33,12 @@ export class PageManager {
     private setupPageChangeListener() {
         addProjectChangeListener(() => {
             if (this.currentPage && page) {
-                // Serialize and save the current page when it changes
                 const serialized = JSON.stringify(serializer.Serialize(page));
                 localStorage.setItem(`p:${this.currentPage}`, serialized);
-                // Update cache
                 this.pageCache.set(this.currentPage, page);
-                // Add to history
-                page.addToHistory(serialized);
+                if (!this.undoInProgress) {
+                    page.addToHistory(serialized);
+                }
             }
         });
     }
@@ -190,6 +190,7 @@ export class PageManager {
 
     private undo() {
         if (page && page.undo()) {
+            this.undoInProgress = true;
             // After undo, update the cache and localStorage
             const serialized = JSON.stringify(serializer.Serialize(page));
             if (this.currentPage) {
@@ -197,7 +198,8 @@ export class PageManager {
                 this.pageCache.set(this.currentPage, page);
             }
             // Notify listeners about the change
-            SetCurrentPage(page);
+            UpdateProject();
+            this.undoInProgress = false;
         }
     }
 
