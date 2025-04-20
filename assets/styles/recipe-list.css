@@ -7,6 +7,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
+    min-width: 800px;
 }
 
 .product-items {
@@ -57,7 +59,6 @@
 /* Base table layout */
 .recipe-table {
     width: 100%;
-    table-layout: fixed;
     border-collapse: collapse;
     border-spacing: 0;
     color: #888888;

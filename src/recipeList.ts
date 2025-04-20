@@ -682,7 +682,8 @@ export class RecipeList {
                 <td colspan="6">
                     <div>
                         <a href="#" class="add-recipe-btn" data-iid="${group.iid}" data-action="add_recipe">Add Recipe</a> •
-                        <a href="#" class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</a>
+                        <a href="#" class="add-group-btn" data-iid="${group.iid}" data-action="add_group">Add Group</a> •
+                        You can also add recipes by left or right clicking on an item in the product list.
                     </div>
                 </td>
             </tr>

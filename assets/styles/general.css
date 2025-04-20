@@ -13,11 +13,13 @@ body {
     font-size: 16px;
     margin: 0px;
     line-height: 22px;
-    overflow: hidden;
     color: white;
     background-color: #212121;
     word-break: break-word;
     height: 100vh;
+    min-width: 800px;
+    overflow-y: hidden;
+    overflow-x: auto;
 }
 
 .text-small
