@@ -1,7 +1,7 @@
 import { Goods, Item, Recipe, RecipeObject } from "./repository.js";
 import { SolvePage } from "./solver.js";
 import { showConfirmDialog } from './dialogues.js';
-import { Machine } from "./machines.js";
+import { Machine, singleBlockMachine } from "./machines.js";
 import { Choice } from "./machines.js";
 
 let nextIid = 0;
@@ -205,6 +205,7 @@ export class RecipeModel extends RecipeGroupEntry
     overclockTiers:number = 0;
     perfectOverclocks:number = 0;
     selectedOreDicts:{[key:string]:Item} = {};
+    machineInfo:Machine = singleBlockMachine;
 
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "type", this.type);

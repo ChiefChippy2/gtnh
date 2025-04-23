@@ -70,23 +70,33 @@ namespace Source
         {
             public string iid;
             public string oredict;
-            public List<RecipeInput<Item>> variants = new List<RecipeInput<Item>>();
+            public readonly List<RecipeInput<Item>> variants = new List<RecipeInput<Item>>();
 
             public Item singleItem;
             public OreDict multiItem;
             public int amount;
             public ItemGroupBuilder baseItemGroup;
             private bool compiled;
+            public bool touched;
+
+            public void MarkUsedItems()
+            {
+                if (!touched || variants.Count == 0)
+                    return;
+                if (variants.Any(x => x.goods.touched))
+                    return;
+                variants[0].goods.touched = true;
+            }
 
             public void Compile()
             {
-                if (variants.Count == 0 || compiled)
+                if (variants.Count == 0 || compiled || !touched)
                     return;
                 compiled = true;
-                var safeVariant = variants[0];
-                amount = safeVariant.amount;
+                amount = variants[0].amount;
                 if (baseItemGroup != this)
                 {
+                    baseItemGroup.touched = true;
                     baseItemGroup.Compile();
                     singleItem = baseItemGroup.singleItem;
                     multiItem = baseItemGroup.multiItem;
@@ -94,11 +104,6 @@ namespace Source
                 else
                 {
                     variants.RemoveAll(x => !x.goods.touched);
-                    if (variants.Count == 0)
-                    {
-                        variants.Add(safeVariant);
-                        safeVariant.goods.touched = true;
-                    }
                     if (variants.Count == 1)
                         singleItem = variants[0].goods;
                     else multiItem = new OreDict { id = oredict, variants = variants.Select(x => x.goods).ToArray(), iid = iid };
@@ -123,16 +128,25 @@ namespace Source
             private static List<RecipeInput<Item>> bufferItems = new();
             private static List<RecipeInput<Fluid>> bufferFluids = new();
             private static List<RecipeInput<OreDict>> bufferOredict = new();
-            
-            public void Compile()
+
+            public void MarkUsedItems()
             {
-                recipe.itemOutputs = itemOutputs.ToArray();
                 foreach (var output in itemOutputs)
                 {
                     if (output.goods == null)
                         banned = true;
                     else output.goods.touched = true;
                 }
+
+                foreach (var input in itemInputs)
+                {
+                    input.items.touched = true;
+                }
+            }
+            
+            public void Compile()
+            {
+                recipe.itemOutputs = itemOutputs.ToArray();
                 recipe.fluidOutputs = fluidOutputs.ToArray();
                 bufferItems.Clear();
                 bufferFluids.Clear();
@@ -290,10 +304,16 @@ namespace Source
 
             foreach (var fluidStack in generator.GetTableContents(fluidGroupFluidStacks))
                 fgroups[fluidStack.FluidGroupId].fluid = new RecipeInput<Fluid>{goods = fluids[fluidStack.FluidStacksFluidId], amount = fluidStack.FluidStacksAmount};
-
+            
+            foreach (var (_, recipe) in recipes)
+                recipe.MarkUsedItems();
+            
+            foreach (var (_, igroup) in igroups)
+                igroup.MarkUsedItems();
+            
             foreach (var (_, igroup) in igroups)
                 igroup.Compile();
-
+            
             foreach (var (_, recipe) in recipes)
                 recipe.Compile();
 

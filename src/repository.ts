@@ -56,6 +56,8 @@ export class Repository
             return null;
         var idCode = id.charCodeAt(0);
         var type:IMemMappedObjectPrototype<SearchableObject> = idCode == charCodeItem ? Item : idCode == charCodeFluid ? Fluid : idCode == charCodeRecipe ? Recipe : OreDict;
+        if (!this.objectPositionMap[id])
+            return null;
         return this.GetObject(this.objectPositionMap[id], type) as T;
     }
 

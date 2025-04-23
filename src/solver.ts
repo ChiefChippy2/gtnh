@@ -67,7 +67,9 @@ function CreateLinkByAlgorithm(model:Model, algorithm:LinkAlgorithm, group:Recip
 
 function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkCollection)
 {
-    let recipe = Repository.current.GetById(recipeModel.recipeId) as Recipe;
+    let recipe = Repository.current.GetById<Recipe>(recipeModel.recipeId);
+    if (!recipe)
+        return;
     recipeModel.recipe = recipe;
     let varName = `recipe_${recipeModel.iid}`;
     model.variables[varName] = {"obj":1};
@@ -99,10 +101,11 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
 
     let gtRecipe = recipe.gtRecipe;
     if (gtRecipe && gtRecipe.durationTicks > 0) {
-        if (!recipeModel.crafter && recipe.recipeType.singleblocks.length == 0)
-            recipeModel.crafter = recipe.recipeType.defaultCrafter.id;
-        let crafter = recipeModel.crafter ? Repository.current.GetById(recipeModel.crafter) as Item : null;
+        let crafter = recipeModel.crafter ? Repository.current.GetById<Item>(recipeModel.crafter) : null;
+        if (crafter != null && !recipe.recipeType.multiblocks.includes(crafter))
+            crafter = null;
         let machineInfo = crafter ? (machines[crafter.name] || notImplementedMachine) : singleBlockMachine;
+        recipeModel.machineInfo = machineInfo;
         recipeModel.ValidateChoices(machineInfo);
         let actualVoltage = voltageTier[recipeModel.voltageTier].voltage;
         let machineParallels = GetParameter(machineInfo.parallels, recipeModel, 1);

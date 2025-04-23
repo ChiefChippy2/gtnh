@@ -242,8 +242,12 @@ export class RecipeList {
                 const target = event.target as HTMLElement;
                 const item = target.closest('.dropdown-item');
                 if (item) {
-                    const goodsId = item.getAttribute('data-id');
-                    obj.crafter = goodsId ?? undefined;
+                    const goodsId = item.getAttribute('data-id')!;
+                    const crafter = Repository.current.GetById<Item>(goodsId);
+                    if (crafter && obj.recipe?.recipeType.multiblocks.includes(crafter))
+                        obj.crafter = crafter.id;
+                    else
+                        obj.crafter = undefined;
                     UpdateProject();
                     HideDropdown();
                 }
@@ -473,9 +477,7 @@ export class RecipeList {
             `;
         }
         let crafter:Item | null = null;
-        if (recipeModel.crafter)
-            crafter = Repository.current.GetById(recipeModel.crafter) as Item;
-        let machineInfo = crafter ? (machines[crafter.name] || notImplementedMachine) : singleBlockMachine;
+        let machineInfo = recipeModel.machineInfo;
         if (!crafter)
             crafter = recipe.recipeType.singleblocks[recipeModel.voltageTier] ?? recipe.recipeType.defaultCrafter;
         
@@ -792,15 +794,13 @@ export class RecipeList {
         this.productItemsContainer.innerHTML = `
             ${products.map(product => {
                 if (!(product instanceof ProductModel)) return '';
-                const obj = Repository.current.GetById(product.goodsId);
-                if (!obj || !(obj instanceof Goods)) return '';
-                const goods = obj as Goods;
+                const goods = Repository.current.GetById<Goods>(product.goodsId);
                 return `
                     <div class="product-item">
-                        <item-icon data-id="${goods.id}" data-action="item_icon_click" data-iid="${page.rootGroup.iid}"></item-icon>
+                        <item-icon data-id="${goods?.id}" data-action="item_icon_click" data-iid="${page.rootGroup.iid}"></item-icon>
                         <input type="number" class="amount" value="${product.amount/page.timeScale}" step="0" data-iid="${product.iid}" data-action="update_amount">
                         <span class="amount-unit">/${page.settings.timeUnit}</span>
-                        ${goods.name}
+                        ${goods?.name ?? "Unknown product: " + product.goodsId}
                         <button class="delete-btn" data-iid="${product.iid}" data-action="delete_product">x</button>
                     </div>
                 `;

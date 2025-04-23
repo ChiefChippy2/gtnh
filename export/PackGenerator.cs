@@ -15,6 +15,7 @@ namespace Source
             PackPreProcessor.PreProcessPack(repository);
             HardcodeFixes.Fix(repository);
             
+            Console.WriteLine("Exporting data.bin...");
             var mmap = new MemoryMappedPackConverter(repository);
             var compiledBytes = mmap.Compile();
             File.WriteAllBytes(Path.Combine(targetPath, "data.bin"), compiledBytes);
