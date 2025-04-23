@@ -210,7 +210,8 @@ namespace Source
             }
 
             foreach (var container in generator.GetTableContents(fluidContainer))
-                items[container.ContainerId].container = new FluidContainer() { fluid = fluids[container.FluidStackFluidId], amount = container.FluidStackAmount, empty = items[container.EmptyContainerId] };
+                if (items.TryGetValue(container.ContainerId, out var item) && item != null)
+                    item.container = new FluidContainer() { fluid = fluids[container.FluidStackFluidId], amount = container.FluidStackAmount, empty = items[container.EmptyContainerId] };
 
             foreach (var itemGroup in generator.GetTableContents(itemGroup))
                 igroups[itemGroup.Id] = new ItemGroupBuilder() {iid = itemGroup.Id};

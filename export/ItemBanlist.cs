@@ -120,6 +120,10 @@
                                                      x.EndsWith("Shovel Head", StringComparison.Ordinal) ||
                                                      x.EndsWith("Drill Tip", StringComparison.Ordinal)
             },
+            {
+                // Remove GT steam cell in favor of IC2 steam cell
+                ("gregtech", "gt.metaitem.98"), x => x == "Steam Cell"
+            },
             {("gregtech", "gt.metatool.01"), null},
             {("miscutils", "gt.plusplus.metatool.01"), x => x is "Angle Grinder" or "Automatic Snips"},
             //{("bartworks", "gt.bwMetaGeneratedtoolHeadHammer"), null}
