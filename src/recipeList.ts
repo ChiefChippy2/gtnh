@@ -5,7 +5,7 @@ import { voltageTier, GtVoltageTier, formatAmount } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
 import { ShowDropdown, HideDropdown } from "./dropdown.js";
-import { machines, singleBlockMachine } from "./machines.js";
+import { machines, notImplementedMachine, singleBlockMachine } from "./machines.js";
 
 const linkAlgorithmNames: { [key in LinkAlgorithm]: string } = {
     [LinkAlgorithm.Match]: "",
@@ -475,13 +475,12 @@ export class RecipeList {
         let crafter:Item | null = null;
         if (recipeModel.crafter)
             crafter = Repository.current.GetById(recipeModel.crafter) as Item;
-        if (!crafter) {
+        let machineInfo = crafter ? (machines[crafter.name] || notImplementedMachine) : singleBlockMachine;
+        if (!crafter)
             crafter = recipe.recipeType.singleblocks[recipeModel.voltageTier] ?? recipe.recipeType.defaultCrafter;
-        }
         
         let gtRecipe = recipe.gtRecipe;
         let shortInfoContent = `<span data-tooltip="recipe" data-iid="${recipeModel.iid}">${crafter?.name ?? recipe.recipeType.name}</span>`;
-        let machineInfo = machines[crafter.name] ?? singleBlockMachine;
         let machineCountsText = "";
         if (gtRecipe && gtRecipe.durationTicks > 0) {
             const minTier = gtRecipe.voltageTier;
@@ -527,17 +526,14 @@ export class RecipeList {
                         </select>
                     `;
                 } else {
-                    // Render as number input
-                    const min = choice.min ?? 0;
-                    const max = choice.max ?? 999;
                     inputHtml = `
                         <input type="number" class="machine-choice" 
                             data-iid="${recipeModel.iid}" 
                             data-action="update_machine_choice"
                             data-choice="${key}"
                             value="${currentValue}"
-                            min="${min}"
-                            max="${max}"
+                            min="${choice.min ?? 0}"
+                            max="${choice.max ?? ''}"
                         >
                     `;
                 }
@@ -683,6 +679,7 @@ export class RecipeList {
                     </select>
                 </div>
                 <div class="share-links">
+                    Share:
                     <a href="#" data-action="copy_link">Copy shareable link to clipboard</a> •
                     <a href="#" data-action="download">Download</a>
                 </div>

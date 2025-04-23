@@ -906,3 +906,10 @@ machines["Draconic Evolution Fusion Crafter"] = {
     parallels: 1,
     choices: {casingTier: PipeCasingTierChoice}
 };
+
+machines["Large Sifter Control Block"] = {
+    perfectOverclock: 0,
+    speed: 5,
+    power: 0.75,
+    parallels: (recipe) => (recipe.voltageTier + 1) * 4,
+};

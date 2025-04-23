@@ -245,7 +245,7 @@ export class RecipeModel extends RecipeGroupEntry
             const typedChoice = choice as Choice;
 
             const min = typedChoice.min ?? 0;
-            let max = typedChoice.max ?? 999;
+            let max = typedChoice.max ?? Number.POSITIVE_INFINITY;
             if (typedChoice.choices)
                 max = typedChoice.choices.length - 1;
             validatedChoices[key] = Math.min(Math.max(currentValue ?? min, min), max);
