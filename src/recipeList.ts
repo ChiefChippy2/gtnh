@@ -454,7 +454,7 @@ export class RecipeList {
                 totalEnergy += Math.ceil(amount)
             }
 
-            const formattedTotalEnergy  = new Intl.NumberFormat().format(totalEnergy);
+            const formattedTotalEnergy = formatAmount(totalEnergy);
 
             out += `<br>EU/t: ${formattedTotalEnergy}`
 
