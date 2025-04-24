@@ -445,12 +445,19 @@ export class RecipeList {
         };
 
         const renderEnergyItems = (energy: {[key:number]:number}) => {
-            let out = "";
-            for (const [tier, amount] of Object.entries(energy)) {
+            let totalEnergy = 0;
+
+            const tierDetails = Object.entries(energy).map(([tier, amount]) => {
                 const tierInfo = voltageTier[parseInt(tier)];
-                out += `${tierInfo.name}: ${Math.ceil(100 * amount/tierInfo.voltage)/100}A<br>`;
-            }
-            return out;
+                const current = Math.ceil(100 * amount / tierInfo.voltage) / 100;
+                totalEnergy += Math.ceil(amount);
+
+                return `${tierInfo.name}: ${current}A`;
+            }).join('<br>');
+
+            const formattedTotalEnergy = formatAmount(totalEnergy);
+
+            return `${tierDetails}<br><br>EU/t: ${formattedTotalEnergy}`;
         }
 
         return `
