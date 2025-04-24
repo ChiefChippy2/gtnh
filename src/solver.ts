@@ -104,6 +104,8 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
         let crafter = recipeModel.crafter ? Repository.current.GetById<Item>(recipeModel.crafter) : null;
         if (crafter != null && !recipe.recipeType.multiblocks.includes(crafter))
             crafter = null;
+        if (crafter === null && recipe.recipeType.singleblocks.length == 0)
+            crafter = recipe.recipeType.defaultCrafter;
         let machineInfo = crafter ? (machines[crafter.name] || notImplementedMachine) : singleBlockMachine;
         recipeModel.machineInfo = machineInfo;
         recipeModel.ValidateChoices(machineInfo);
@@ -126,7 +128,7 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
             overclockPower *= coef;
         }
         let speedModifier = GetParameter(machineInfo.speed, recipeModel);
-        //console.log({machineParallels, maxParallels, parallels, overclockTiers, overclockSpeed, overclockPower, energyModifier, speedModifier});
+        console.log({machineParallels, maxParallels, parallels, overclockTiers, overclockSpeed, overclockPower, energyModifier, speedModifier});
         recipeModel.overclockFactor = overclockSpeed * speedModifier * parallels;
         recipeModel.powerFactor = overclockPower * energyModifier;
         recipeModel.parallels = parallels;
