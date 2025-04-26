@@ -43,6 +43,12 @@ export class Repository
         this.FillObjectPositionMap(this.recipes);
     }
 
+    static load(data: ArrayBuffer): Repository {
+        const repository = new Repository(data);
+        Repository.current = repository;
+        return repository;
+    }
+
     private FillObjectPositionMap(elements:Int32Array) {
         for (var i=0; i<elements.length; i++) {
             var id = this.GetString(this.elements[elements[i]+4]);
@@ -363,37 +369,4 @@ export class Recipe extends SearchableObject
         }
         return false;
     }
-}
-
-export async function loadRepository(): Promise<Repository> {
-    const response = await fetch(import.meta.resolve("./data/data.bin"));
-    const stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
-    const buffer = await new Response(stream).arrayBuffer();
-    const repository = new Repository(buffer);
-    Repository.current = repository;
-    return repository;
-}
-
-export async function loadRepositoryNodejs(): Promise<Repository> {
-    const fs = await import('fs/promises');
-    const zlib = await import('zlib');
-    const path = await import('path');
-    
-    const dataPath = path.join(process.cwd(), 'data', 'data.bin');
-    const compressedData = await fs.readFile(dataPath);
-    const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-        zlib.gunzip(compressedData, (err, decompressed) => {
-            if (err) reject(err);
-            else {
-                const arrayBuffer = new ArrayBuffer(decompressed.length);
-                const view = new Uint8Array(arrayBuffer);
-                decompressed.copy(view);
-                resolve(arrayBuffer);
-            }
-        });
-    });
-    
-    const repository = new Repository(buffer);
-    Repository.current = repository;
-    return repository;
 }

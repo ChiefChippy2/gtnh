@@ -4,9 +4,15 @@ try {
     const atlas = new Image();
     atlas.src = "./data/atlas.webp";
 
-    // Load repository first since other modules depend on Repository.current
-    const repositoryModule = await import("./repository.js");
-    await repositoryModule.loadRepository();
+    // Load repository and data in parallel
+    const [repositoryModule, response] = await Promise.all([
+        import("./repository.js"),
+        fetch(import.meta.resolve("./data/data.bin"))
+    ]);
+    const stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
+    const buffer = await new Response(stream).arrayBuffer();
+    repositoryModule.Repository.load(buffer);
+    console.log("Repository loaded", repositoryModule.Repository.current);
 
     // Then load other modules
     await Promise.all([
