@@ -370,4 +370,3 @@ var stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
 var buffer = await new Response(stream).arrayBuffer();
 var repository = new Repository(buffer);
 Repository.current = repository;
-console.log("Repository loaded", repository);

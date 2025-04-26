@@ -187,6 +187,14 @@ export class RecipeGroupModel extends RecipeGroupEntry
     }
 }
 
+type RecipeTestExpectation = {
+    recipesPerMinute:number;
+    crafterCount:number;
+    powerFactor:number;
+    overclockFactor:number;
+    perfectOverclocks:number;
+}
+
 export class RecipeModel extends RecipeGroupEntry
 {
     type: string = "recipe";
@@ -208,6 +216,9 @@ export class RecipeModel extends RecipeGroupEntry
     machineInfo:Machine = singleBlockMachine;
     multiblockCrafter:Item | null = null;
 
+    testExpect?: RecipeTestExpectation;
+
+
     Visit(visitor: ModelObjectVisitor): void {
         visitor.VisitData(this, "type", this.type);
         visitor.VisitData(this, "recipeId", this.recipeId);
@@ -215,6 +226,7 @@ export class RecipeModel extends RecipeGroupEntry
         visitor.VisitData(this, "crafter", this.crafter);
         visitor.VisitData(this, "choices", this.choices);
         visitor.VisitData(this, "fixedCrafterCount", this.fixedCrafterCount);
+        visitor.VisitData(this, "testExpect", this.testExpect);
     }
 
     constructor(source:any = undefined)
@@ -231,6 +243,8 @@ export class RecipeModel extends RecipeGroupEntry
                 this.choices = source.choices;
             if (typeof source.fixedCrafterCount === "number")
                 this.fixedCrafterCount = source.fixedCrafterCount;
+            if (typeof source.testExpect === "object")
+                this.testExpect = source.testExpect;
         }
     }
 
