@@ -250,7 +250,7 @@ export class OreDict extends RecipeObject
         var items = this.items;
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            if (repository.ObjectMatchQueryBits(query, item.objectOffset) && item.MatchSearchText(query))
+            if (this.repository.ObjectMatchQueryBits(query, item.objectOffset) && item.MatchSearchText(query))
                 return true;
         }
         return false;
@@ -354,7 +354,7 @@ export class Recipe extends SearchableObject
         for (var i=0; i<count; i++) 
         {
             var pointer = slice[i*5+1];
-            if (!repository.ObjectMatchQueryBits(query, pointer))
+            if (!this.repository.ObjectMatchQueryBits(query, pointer))
                 continue;
             var objType = RecipeIoTypePrototypes[slice[i*5]];
             var obj = this.repository.GetObject<RecipeObject>(pointer, objType);
@@ -365,8 +365,35 @@ export class Recipe extends SearchableObject
     }
 }
 
-var response = (await fetch(import.meta.resolve("./data/data.bin")));
-var stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
-var buffer = await new Response(stream).arrayBuffer();
-var repository = new Repository(buffer);
-Repository.current = repository;
+export async function loadRepository(): Promise<Repository> {
+    const response = await fetch(import.meta.resolve("./data/data.bin"));
+    const stream = response.body!.pipeThrough(new DecompressionStream("gzip"));
+    const buffer = await new Response(stream).arrayBuffer();
+    const repository = new Repository(buffer);
+    Repository.current = repository;
+    return repository;
+}
+
+export async function loadRepositoryNodejs(): Promise<Repository> {
+    const fs = await import('fs/promises');
+    const zlib = await import('zlib');
+    const path = await import('path');
+    
+    const dataPath = path.join(process.cwd(), 'data', 'data.bin');
+    const compressedData = await fs.readFile(dataPath);
+    const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        zlib.gunzip(compressedData, (err, decompressed) => {
+            if (err) reject(err);
+            else {
+                const arrayBuffer = new ArrayBuffer(decompressed.length);
+                const view = new Uint8Array(arrayBuffer);
+                decompressed.copy(view);
+                resolve(arrayBuffer);
+            }
+        });
+    });
+    
+    const repository = new Repository(buffer);
+    Repository.current = repository;
+    return repository;
+}
