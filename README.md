@@ -1,6 +1,6 @@
 # GTNH Calculator
 
-[![Tests](https://github.com/ShadowTheAge/gtnh/actions/workflows/deploy.yml/badge.svg)](https://github.com/ShadowTheAge/GtnhCalc/actions/workflows/deploy.yml)
+[![Tests](https://github.com/ShadowTheAge/gtnh/actions/workflows/deploy.yml/badge.svg)](https://github.com/ShadowTheAge/gtnh/actions/workflows/deploy.yml)
 
 A calculator for GregTech: New Horizons recipes and production chains.
 Large parts of this project were written using AI assistance, so code style and quality are all over the place.
