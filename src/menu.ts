@@ -106,27 +106,38 @@ export class PageManager {
     }
 
     private render() {
-        this.pageListContainer.innerHTML = this.pages.map(pageName => {
+        this.pageListContainer.innerHTML = '';
+
+        this.pages.forEach(pageName => {
             if (pageName === this.currentPage) {
-                return `
-                    <div class="active-page">
-                        <input type="text" 
-                               value="${pageName}"
-                               data-action="rename-page"
-                               data-page-name="${pageName}">
-                        <button class="delete-btn" data-action="delete-page" data-page-name="${pageName}">x</button>
-                    </div>
-                `;
+                const container = document.createElement('div');
+                container.className = 'active-page';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = pageName;
+                input.setAttribute('data-action', 'rename-page');
+                input.setAttribute('data-page-name', pageName);
+
+                const button = document.createElement('button');
+                button.className = 'delete-btn';
+                button.textContent = 'x';
+                button.setAttribute('data-action', 'delete-page');
+                button.setAttribute('data-page-name', pageName);
+
+                container.appendChild(input);
+                container.appendChild(button);
+                this.pageListContainer.appendChild(container);
             } else {
-                return `
-                    <button class="page-button"
-                            data-action="switch-page"
-                            data-page-name="${pageName}">
-                        ${pageName}
-                    </button>
-                `;
+                const button = document.createElement('button');
+                button.className = 'page-button';
+                button.textContent = pageName;
+                button.setAttribute('data-action', 'switch-page');
+                button.setAttribute('data-page-name', pageName);
+
+                this.pageListContainer.appendChild(button);
             }
-        }).join('');
+        });
     }
 
     private loadFirstPage() {
