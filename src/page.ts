@@ -360,7 +360,7 @@ export function DragAndDrop(sourceIid:number, targetIid:number)
     if (draggingObject === null || !(draggingObject.parent instanceof RecipeGroupModel) || !(draggingObject.current instanceof RecipeGroupEntry))
         return;
     var targetObject = GetByIid(targetIid);
-    if (targetObject === null || !(targetObject.parent instanceof RecipeGroupModel) || !(targetObject.current instanceof RecipeGroupEntry))
+    if (targetObject === null || !(targetObject.current instanceof RecipeGroupEntry))
         return;
     if (draggingObject.current instanceof RecipeGroupModel && !draggingObject.current.collapsed)
         return;
