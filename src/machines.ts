@@ -714,7 +714,7 @@ machines["Industrial Wire Factory"] = {
 };
 
 machines["Digester"] = {
-    perfectOverclock: 0,
+    perfectOverclock: MAX_OVERCLOCK,
     speed: 1,
     power: 1,
     parallels: 1,
