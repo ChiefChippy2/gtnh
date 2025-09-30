@@ -82,27 +82,27 @@ export const notImplementedMachine:Machine = {
 }
 
 machines["Steam Compressor"] = machines["Steam Alloy Smelter"] = machines["Steam Extractor"] = machines["Steam Furnace"] = machines["Steam Forge Hammer"] = machines["Steam Macerator"] = {
-    perfectOverclock: 0,
+    customOverclock: noOverclock,
     speed: 0.5,
     power: 0,
     parallels: 1,
-    info: "Steam machine: Steam consumption not calculated, set the voltage to LV",
+    info: "Steam machine: Steam consumption not calculated",
 }
 
 machines["High Pressure Steam Compressor"] = machines["High Pressure Alloy Smelter"] = machines["High Pressure Steam Extractor"] = machines["High Pressure Steam Furnace"] = machines["High Pressure Steam Forge Hammer"] = machines["High Pressure Steam Macerator"] = {
-    perfectOverclock: 0,
+    customOverclock: noOverclock,
     speed: 1,
     power: 0,
     parallels: 1,
-    info: "High pressure steam machine: Steam consumption not calculated, set the voltage to LV",
+    info: "High pressure steam machine: Steam consumption not calculated",
 }
 
 machines["Steam Squasher"] = machines["Steam Separator"] = machines["Steam Presser"] = machines["Steam Grinder"] = machines["Steam Purifier"] = machines["Steam Blender"] = {
-    perfectOverclock: 0,
+    customOverclock: noOverclock,
     speed: (recipe, choices) => choices.pressure == 1 ? 1.25 : 0.625,
     power: 0,
     parallels: 8,
-    info: "Steam multiblock machine: Steam consumption not calculated, set the voltage to LV",
+    info: "Steam multiblock machine: Steam consumption not calculated",
     choices: {
         pressure: {
             description: "Pressure",
@@ -219,11 +219,11 @@ machines["Precise Auto-Assembler MT-3662"] = {
 
 machines["Fluid Shaper"] = {
     perfectOverclock: 0,
-    speed: 3, // TODO: Speed decays
+    speed: 3,
     power: 0.8,
-    parallels: (recipe, choices) => (recipe.voltageTier + 1) * 2 + (recipe.voltageTier + 1) * 3 * choices.widthExpansion,
-    choices: {widthExpansion: {description: "Width Expansion"}},
-    info: "Speed decays over time.",
+    parallels: (recipe, choices) => (recipe.voltageTier + 1) * (2 + 3 * choices.widthExpansion),
+    choices: {widthExpansion: {description: "Width Expansion", max: 6}},
+    info: "Assuming running at max speed.",
 };
 
 machines["Zyngen"] = {
