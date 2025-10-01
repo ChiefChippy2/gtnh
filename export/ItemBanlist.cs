@@ -2,7 +2,7 @@
 {
     public static class ItemBanlist
     {
-        private static Dictionary<(string mod, string name), Func<string, bool>> BanList = new Dictionary<(string mod, string name), Func<string, bool>>()
+        private static Dictionary<(string mod, string name), Func<string, string, bool>> BanList = new Dictionary<(string mod, string name), Func<string, string, bool>>()
         {
             {("Botania", "twigWand"), null},
             {("Forestry", "beeDroneGE"), null},
@@ -102,37 +102,43 @@
             
             {("gadomancy", "ItemEtherealFamiliar"), null},
             
-            {("gregtech", "gt.detrav.metatool.01"), x => x.Contains("Prospector's Scanner", StringComparison.Ordinal)},
-            {("gregtech", "gt.metaitem.01"), x => x is "Data Orb" or "Writes Research result" or "Reads Research result"},
+            {("gregtech", "gt.detrav.metatool.01"), (name, nbt) => name.Contains("Prospector's Scanner", StringComparison.Ordinal)},
+            {("gregtech", "gt.metaitem.01"), (name, nbt) =>
+                {
+                    if (name == "Data Orb")
+                        return nbt != "";
+                    return name is "Writes Research result" or "Reads Research result";
+                }
+            },
             {
-                ("gregtech", "gt.metaitem.02"), x => x.EndsWith("Wrench Tip", StringComparison.Ordinal) || 
-                                                     x.EndsWith("Spade Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Pickaxe Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Sense Blade", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Plow Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Buzzsaw Blade", StringComparison.Ordinal) ||
-                                                     //x.EndsWith("Turbine Blade", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Sword Blade", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Axe Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Hoe Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Hammer Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("File Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Shovel Head", StringComparison.Ordinal) ||
-                                                     x.EndsWith("Drill Tip", StringComparison.Ordinal)
+                ("gregtech", "gt.metaitem.02"), (name, nbt) => name.EndsWith("Wrench Tip", StringComparison.Ordinal) || 
+                                                               name.EndsWith("Spade Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Pickaxe Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Sense Blade", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Plow Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Buzzsaw Blade", StringComparison.Ordinal) ||
+                                                               //x.EndsWith("Turbine Blade", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Sword Blade", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Axe Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Hoe Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Hammer Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("File Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Shovel Head", StringComparison.Ordinal) ||
+                                                               name.EndsWith("Drill Tip", StringComparison.Ordinal)
             },
             {
                 // Remove GT steam cell in favor of IC2 steam cell
-                ("gregtech", "gt.metaitem.98"), x => x == "Steam Cell"
+                ("gregtech", "gt.metaitem.98"), (name, nbt) => name == "Steam Cell"
             },
             {("gregtech", "gt.metatool.01"), null},
-            {("miscutils", "gt.plusplus.metatool.01"), x => x is "Angle Grinder" or "Automatic Snips"},
+            {("miscutils", "gt.plusplus.metatool.01"), (name, nbt) => name is "Angle Grinder" or "Automatic Snips"},
             //{("bartworks", "gt.bwMetaGeneratedtoolHeadHammer"), null}
         };
         
-        public static bool IsItemBanned(string mod, string internalName, string localizedName)
+        public static bool IsItemBanned(string mod, string internalName, string localizedName, string nbt)
         {
             if (BanList.TryGetValue((mod, internalName), out var processor))
-                return processor == null || processor(localizedName);
+                return processor == null || processor(localizedName, nbt);
             return false;
         }
     }

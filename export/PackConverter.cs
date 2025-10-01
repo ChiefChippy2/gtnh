@@ -197,7 +197,7 @@ namespace Source
 
             foreach (var item in generator.GetTableContents(item))
             {
-                if (ItemBanlist.IsItemBanned(item.ModId, item.InternalName, item.LocalizedName))
+                if (ItemBanlist.IsItemBanned(item.ModId, item.InternalName, item.LocalizedName, item.Nbt))
                     items[item.Id] = null;
                 else
                 {
