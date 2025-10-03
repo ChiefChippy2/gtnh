@@ -375,15 +375,8 @@ machines["Distillation Tower"] = {
 machines["Dangote Distillus"] = {
     perfectOverclock: 0,
     speed: (recipe, choices) => IsRecipeType(recipe, "Distillation Tower") ? 3.5 : 2,
-    power: (recipe, choices) => IsRecipeType(recipe, "Distillation Tower") ? 1 : 0.15,
-    parallels: (recipe, choices) => {
-        if (IsRecipeType(recipe, "Distillation Tower")) {
-            return choices.tier == 0 ? 4 : 12;
-        } else {
-            return (recipe.voltageTier + 1) * 4 * (choices.tier + 1);
-        }
-    },
-    choices: {tier: {description: "Tier", choices: ["T1", "T2"]}},
+    power: (recipe, choices) => IsRecipeType(recipe, "Distillation Tower") ? 1 : 0.85,
+    parallels: (recipe, choices) => IsRecipeType(recipe, "Distillation Tower") ? 12 : (recipe.voltageTier + 1) * 8,
 };
 
 machines["Mega Distillation Tower"] = {
@@ -980,7 +973,7 @@ machines["Industrial Coke Oven"] = {
     perfectOverclock: 0,
     speed: 1,
     power: (recipe, choices) => 1 - (recipe.voltageTier + 1) * 0.04,
-    parallels: (recipe, choices) => choices.casingType == 1 ? 24 : 12,
+    parallels: (recipe, choices) => choices.casingType == 1 ? 30 : 18,
     choices: {casingType: {description: "Casing Type", choices: ["Heat Resistant Casings", "Heat Proof Casings"]}},
 };
 
