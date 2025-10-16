@@ -1,4 +1,4 @@
-import { GetScrollbarWidth, voltageTier, formatAmount, CoilTierNames, TIER_MV, GetFusionTier } from "./utils.js";
+import { GetScrollbarWidth, voltageTier, formatAmount, CoilTierNames, TIER_MV, getFusionTierByStartupCost } from "./utils.js";
 import { Goods, Fluid, Item, Repository, IMemMappedObjectPrototype, Recipe, RecipeType, RecipeIoType, RecipeInOut, RecipeObject, OreDict, GtRecipeMetadata } from "./repository.js";
 import { SearchQuery } from "./searchQuery.js";
 import { ShowTooltip, HideTooltip } from "./tooltip.js";
@@ -222,7 +222,7 @@ function DisplayHeatRequired(heat:number):string {
 }
 
 function DisplayFusionTier(euToStart:number):string {
-    let tier = GetFusionTier(euToStart);
+    let tier = getFusionTierByStartupCost(euToStart);
     return "To start: "+formatAmount(euToStart)+" EU (T"+tier+")";
 }
 

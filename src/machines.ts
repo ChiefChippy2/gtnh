@@ -2,7 +2,7 @@ import { RecipeModel, OverclockResult } from "./page.js";
 import { Fluid, Goods, Item, Recipe, RecipeInOut, RecipeIoType, RecipeType, Repository } from "./repository.js";
 import { calculateDefaultOverclocks } from "./solver.js";
 import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, CoilTierNames } from "./utils.js";
-import { voltageTier } from "./utils.js";
+import { voltageTier, getFusionTierByStartupCost } from "./utils.js";
 
 export type MachineCoefficient = number | ((recipe:RecipeModel, choices:{[key:string]:number}) => number);
 
@@ -1168,9 +1168,14 @@ machines["Large Sifter Control Block"] = {
     parallels: (recipe) => (recipe.voltageTier + 1) * 4,
 };
 
+function getFusionTier(recipeModel:RecipeModel): number {
+    const cost = recipeModel.recipe?.gtRecipe?.MetadataByKey("fusion_threshold") ?? 0;
+    return getFusionTierByStartupCost(cost);
+}
+
 function makeFusionOverclockCalculator(fusionTier:number, overclockMultiplier:number):(recipeModel:RecipeModel, overclockTiers:number) => OverclockResult {
     return function (recipeModel:RecipeModel, overclockTiers:number): OverclockResult {
-        const recipeTier = Math.max(TIER_LUV, recipeModel.recipe?.gtRecipe?.voltageTier || 0);
+        const recipeTier = Math.max(TIER_LUV, recipeModel.recipe?.gtRecipe?.voltageTier || 0, getFusionTier(recipeModel)+TIER_LUV-1);
         const perfectOverclocks = Math.max(0, fusionTier - recipeTier);
         return {
             overclockSpeed:Math.pow(overclockMultiplier, perfectOverclocks),
@@ -1229,20 +1234,15 @@ machines["Compact Fusion Computer MK-I Prototype"] = {
     info: "Min. energy hatch tier: LUV",
 };
 
-function getCompactFusionParallel(recipe:RecipeModel, buckets:number[][]) {
-    const startupCost = recipe.recipe?.gtRecipe?.specialValue ?? 0;
-    for (const [threshold, parallel] of buckets) {
-        if (startupCost < threshold) {
-            return parallel;
-        }
-    }
-    return 1;
+function getCompactFusionParallel(recipe:RecipeModel, tier:number) {
+    const fusionTier = getFusionTier(recipe);
+    return (1 + tier - fusionTier) * 64;
 }
 
 machines["Compact Fusion Computer MK-II"] = {
     speed: 1,
     power: 1,
-    parallels: (recipe) => getCompactFusionParallel(recipe, [[160_000_000, 128], [Number.POSITIVE_INFINITY, 64]]),
+    parallels: (recipe) => getCompactFusionParallel(recipe, 2),
     customOverclock: makeFusionOverclockCalculator(TIER_ZPM, 2),
     info: "Min. energy hatch tier: ZPM",
 };
@@ -1250,7 +1250,7 @@ machines["Compact Fusion Computer MK-II"] = {
 machines["Compact Fusion Computer MK-III"] = {
     speed: 1,
     power: 1,
-    parallels: (recipe) => getCompactFusionParallel(recipe, [[160_000_000, 192], [320_000_000, 128], [Number.POSITIVE_INFINITY, 64]]),
+    parallels: (recipe) => getCompactFusionParallel(recipe, 3),
     customOverclock: makeFusionOverclockCalculator(TIER_UV, 2),
     info: "Min. energy hatch tier: UV",
 };
@@ -1258,7 +1258,7 @@ machines["Compact Fusion Computer MK-III"] = {
 machines["Compact Fusion Computer MK-IV Prototype"] = {
     speed: 1,
     power: 1,
-    parallels: (recipe) => getCompactFusionParallel(recipe, [[160_000_000, 256], [320_000_000, 192], [640_000_000, 128], [Number.POSITIVE_INFINITY, 64]]),
+    parallels: (recipe) => getCompactFusionParallel(recipe, 4),
     customOverclock: makeFusionOverclockCalculator(TIER_UHV, 4),
     info: "Min. energy hatch tier: UHV",
 };
@@ -1266,7 +1266,7 @@ machines["Compact Fusion Computer MK-IV Prototype"] = {
 machines["Compact Fusion Computer MK-V"] = {
     speed: 1,
     power: 1,
-    parallels: (recipe) => getCompactFusionParallel(recipe, [[160_000_000, 320], [320_000_000, 256], [640_000_000, 192], [1_200_000_000, 128], [Number.POSITIVE_INFINITY, 64]]),
+    parallels: (recipe) => getCompactFusionParallel(recipe, 5),
     customOverclock: makeFusionOverclockCalculator(TIER_UEV, 4),
     info: "Min. energy hatch tier: UEV",
 };

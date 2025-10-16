@@ -23,7 +23,7 @@ export type GtVoltageTier = {
     voltage:number;
 }
 
-export function GetFusionTier(euToStart:number):number {
+export function getFusionTierByStartupCost(euToStart:number):number {
     let rawTier = Math.log2(euToStart / 160e6) + 1;
     return Math.min(5, Math.max(1, Math.ceil(rawTier)));
 }
