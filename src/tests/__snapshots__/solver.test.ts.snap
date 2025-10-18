@@ -212,6 +212,35 @@ exports[`Solver Processing Catalyst.gtnh should process without errors 1`] = `
 ]
 `;
 
+exports[`Solver Processing DEFC.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1.00000000125,
+    "id": "r~6dpibzBzMyuP0RKd0xgHdA==",
+    "overclockFactor": 8,
+    "overclockName": "Perfect OC x1, OC x1",
+    "powerFactor": 2,
+    "recipesPerMinute": 2.66666667,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~UiEe_M5KPsivzV1CV6DU7A==",
+    "overclockFactor": 128,
+    "overclockName": "Perfect OC x3, OC x1",
+    "powerFactor": 2,
+    "recipesPerMinute": 192,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~JMWTxsEINfKXfcUcXWs7nA==",
+    "overclockFactor": 64,
+    "overclockName": "Perfect OC x3",
+    "powerFactor": 1,
+    "recipesPerMinute": 384,
+  },
+]
+`;
+
 exports[`Solver Processing DTPF Convergence Catalyst Test.gtnh should process without errors 1`] = `
 [
   {

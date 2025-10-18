@@ -1172,12 +1172,23 @@ machines["Tree Growth Simulator"] = {
     parallels: 1,
 };
 
+let defcPerfectOverclock:MachineCoefficient = (recipe, choices) => {
+    const buildingTierCoil = choices.casings + 1;
+    const recipeTierCoil = recipe.recipe?.gtRecipe.MetadataByKey("defc_casing_tier") ?? 1;
+    const maxPerfectOverclocks = Math.max(0, buildingTierCoil - recipeTierCoil);
+    return maxPerfectOverclocks;
+}
+
 machines["Draconic Evolution Fusion Crafter"] = {
-    perfectOverclock: 0,
-    speed: (recipe, choices) => 1 / Math.max(1, (choices.casingTier - (recipe.recipe?.gtRecipe?.voltageTier || 0))),
+    perfectOverclock: defcPerfectOverclock,
+    speed: 1,
     power: 1,
     parallels: 1,
-    choices: {casingTier: PipeCasingTierChoice}
+    choices: {casings: {description:"Fusion casings", choices:["Bloody Ichorium", "Draconium", "Wyvern", "Awakened Draconium", "Chaotic"]}},
+    enforceChoiceConstraints: (recipe, choices) => {
+        const recipeTier = recipe.recipe?.gtRecipe.MetadataByKey("defc_casing_tier") ?? 1;
+        choices.casings = Math.max(choices.casings, recipeTier - 1);
+    }
 };
 
 machines["Large Sifter Control Block"] = {
