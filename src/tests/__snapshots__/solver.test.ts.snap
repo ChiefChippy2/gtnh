@@ -1166,6 +1166,43 @@ exports[`Solver Processing Mercury Sulphur Formic Plans.gtnh should process with
 ]
 `;
 
+exports[`Solver Processing Naqfuel.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~C9WbwWoXMjSerM8cibAyAA==",
+    "overclockFactor": 1,
+    "overclockName": "Perfect OC x0",
+    "powerFactor": 1,
+    "recipesPerMinute": 600,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~AtFem9qVPea3V_6oxSZfOQ==",
+    "overclockFactor": 1,
+    "overclockName": "Perfect OC x0",
+    "powerFactor": 1,
+    "recipesPerMinute": 5,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~AtFem9qVPea3V_6oxSZfOQ==",
+    "overclockFactor": 1,
+    "overclockName": "Perfect OC x0",
+    "powerFactor": 1,
+    "recipesPerMinute": 5,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~AtFem9qVPea3V_6oxSZfOQ==",
+    "overclockFactor": 4,
+    "overclockName": "Perfect OC x1",
+    "powerFactor": 1,
+    "recipesPerMinute": 20,
+  },
+]
+`;
+
 exports[`Solver Processing Nitrobenzene.gtnh should process without errors 1`] = `
 [
   {
@@ -2143,7 +2180,7 @@ exports[`Solver Processing UHV naqfuel mk3 chromatic glass.gtnh should process w
     "crafterCount": 0.09999999999999999,
     "id": "r~QhS4wt8yPZKMmptzObghdg==",
     "overclockFactor": 1,
-    "overclockName": undefined,
+    "overclockName": "Perfect OC x0",
     "powerFactor": 1,
     "recipesPerMinute": 1.2,
   },

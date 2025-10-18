@@ -179,15 +179,34 @@ machines["Extreme Heat Exchanger"] = {
     parallels: 1,
 };
 
+function calculateNaquadahFuelRefineryOverclock(recipeModel:RecipeModel, overclockTiers:number): OverclockResult {
+    const buildingTierCoil = recipeModel.choices.coils + 1;
+    const recipeTierCoil = recipeModel.recipe?.gtRecipe.MetadataByKey("nfr_coil_tier") ?? 1;
+    const maxPerfectOverclocks = Math.max(0, buildingTierCoil - recipeTierCoil);
+    const recipeTier = recipeModel.recipe?.gtRecipe?.voltageTier || 0;
+    const voltageTier = recipeModel.voltageTier;
+    const perfectOverclocks = Math.min(maxPerfectOverclocks, voltageTier - recipeTier);
+    return {
+        overclockSpeed : Math.pow(4, perfectOverclocks),
+        overclockPower : 1,
+        perfectOverclocks : perfectOverclocks,
+        overclockName : "Perfect OC x"+perfectOverclocks
+    };
+}
+
 machines["Naquadah Fuel Refinery"] = {
-    perfectOverclock: (recipe, choices) => recipe.voltageTier - TIER_UEV + choices.coils,
     speed: 1,
     power: 1,
     parallels: 1,
+    customOverclock: calculateNaquadahFuelRefineryOverclock,
     choices: {coils: {
         description: "Coils",
         choices: ["T1 Field Restriction Coil", "T2 Advanced Field Restriction Coil", "T3 Ultimate Field Restriction Coil", "T4 Temporal Field Restriction Coil"],
     }},
+    enforceChoiceConstraints: (recipe, choices) => {
+        const recipeTier = recipe.recipe?.gtRecipe.MetadataByKey("nfr_coil_tier") ?? 1;
+        choices.coils = Math.max(choices.coils, recipeTier - 1);
+    }
 };
 
 machines["Neutron Activator"] = {
