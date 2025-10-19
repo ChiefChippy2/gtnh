@@ -1195,6 +1195,43 @@ exports[`Solver Processing Mercury Sulphur Formic Plans.gtnh should process with
 ]
 `;
 
+exports[`Solver Processing Nano Forge.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~rJ_Q9euXNNuH4fT-6M0thg==",
+    "overclockFactor": 16,
+    "overclockName": "OC x4",
+    "powerFactor": 16,
+    "recipesPerMinute": 1.92,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~rJ_Q9euXNNuH4fT-6M0thg==",
+    "overclockFactor": 256,
+    "overclockName": "Perfect OC x4",
+    "powerFactor": 1,
+    "recipesPerMinute": 30.72,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~7CNUEH4VN2qq2mZCQvktZg==",
+    "overclockFactor": 8,
+    "overclockName": "OC x3",
+    "powerFactor": 8,
+    "recipesPerMinute": 2.4,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~P9JJdSdAP0OhndO7neyYdw==",
+    "overclockFactor": 185574071522.36307,
+    "overclockName": "Perfect OC x1",
+    "powerFactor": 0.0000027590061251541823,
+    "recipesPerMinute": 11134444291.341784,
+  },
+]
+`;
+
 exports[`Solver Processing Naqfuel.gtnh should process without errors 1`] = `
 [
   {
