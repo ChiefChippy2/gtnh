@@ -1124,8 +1124,109 @@ machines["Quantum Force Transformer"] = {
     perfectOverclock: 0,
     speed: 1,
     power: 1,
-    parallels: (recipe, choices) => 1 + choices.catalysts,
-    choices: {catalysts: {description: "Catalysts", min: 0}},
+    parallels: (recipe, choices) => choices.catalysts,
+    recipe: (recipe, choices, items) => {
+        const numOutputs = recipe.getOutputCount();
+        if (numOutputs == 0) {
+            return recipe.recipe?.items ?? [];
+        }
+        
+        const focusTier = recipe.recipe?.gtRecipe.MetadataByKey("qft_focus_tier") ?? 1;
+
+        const baseProbability = 1.0 / numOutputs;
+        
+        items = createEditableCopy(recipe.recipe?.items || []);
+        // NOTE: we rely on this matching the NEI order
+        let j = 0;
+        for (let i=0; i<items.length; i++) {
+            let item = items[i];
+            if (item.type == RecipeIoType.FluidOutput || item.type == RecipeIoType.ItemOutput) {
+                let actualProbability = baseProbability;
+
+                // Singular focusing
+                if (choices.focusedOutput > 0) {
+                    if (choices.focusedOutput == j + 1) {
+                        // Increase due to singular focus
+                        if (choices.shielding + 1 == focusTier) {
+                            actualProbability += (baseProbability - baseProbability / 2.0) * (numOutputs - 1);
+                        } else if (choices.shielding + 1 == focusTier + 1) {
+                            actualProbability += (baseProbability - baseProbability / 4.0) * (numOutputs - 1);
+                        } else if (choices.shielding + 1 >= focusTier + 2) {
+                            actualProbability = 1.0;
+                        }
+                    } else {
+                        // Decrease due to singular focus
+                        if (choices.shielding + 1 == focusTier) {
+                            actualProbability /= 2.0;
+                        } else if (choices.shielding + 1 == focusTier + 1) {
+                            actualProbability /= 4.0;
+                        } else if (choices.shielding + 1 >= focusTier + 2) {
+                            actualProbability = 0.0;
+                        }
+                    }
+                }
+
+                if (choices.focusedAll) {
+                    if (choices.shielding + 1 == focusTier) {
+                        actualProbability += (1.0 - actualProbability) / 4.0;
+                    } else if (choices.shielding + 1 == focusTier + 1) {
+                        actualProbability += (1.0 - actualProbability) / 3.0;
+                    } else if (choices.shielding + 1 >= focusTier + 2) {
+                        actualProbability += (1.0 - actualProbability) / 2.0;
+                    }
+                }
+
+                item.probability = actualProbability;
+                ++j;
+            }
+        }
+
+        if (choices.focusedOutput > 0) {
+            let neptuniumPlasmaFluid : RecipeInOut = {
+                type : RecipeIoType.FluidInput,
+                goodsPtr : 0,
+                goods : Repository.current.GetById<Fluid>("f:miscutils:plasma.neptunium") as Fluid,
+                slot : 0,
+                amount : Math.floor(4 * (choices.shielding + 1) * Math.sqrt(choices.catalysts)),
+                probability : 1.0
+            };
+            items.push(neptuniumPlasmaFluid);
+        }
+
+        if (choices.focusedAll) {
+            let fermiumPlasmaFluid : RecipeInOut = {
+                type : RecipeIoType.FluidInput,
+                goodsPtr : 0,
+                goods : Repository.current.GetById<Fluid>("f:miscutils:plasma.fermium") as Fluid,
+                slot : 0,
+                amount : Math.floor(4 * (choices.shielding + 1) * Math.sqrt(choices.catalysts)),
+                probability : 1.0
+            };
+            items.push(fermiumPlasmaFluid);
+        }
+
+        return items;
+    },
+    choices: {
+        catalysts: {description: "Catalysts", min: 1},
+        shielding: {description: "Shielding", choices: ["Neutron", "Cosmic", "Infinity", "SpaceTime"]},
+        manipulator: {description: "Manipulator", choices: ["Neutron", "Cosmic", "Infinity", "SpaceTime"]},
+        focusedOutput: {description: "Focused Output", choices: ["None", "1", "2", "3", "4", "5", "6"]},
+        focusedAll: {description: "Focus All", choices: ["No", "Yes"]}
+    },    
+    enforceChoiceConstraints: (recipe, choices) => {
+        const focusTier = recipe.recipe?.gtRecipe.MetadataByKey("qft_focus_tier") ?? 1;
+        choices.manipulator = Math.max(choices.manipulator, focusTier - 1);
+
+        if (choices.shielding + 1 < focusTier) {
+            // Shielding not high enough to be able to focus.
+            choices.focusedOutput = 0;
+            choices.focusedAll = 0;
+        } else {
+            const numOutputs = recipe.getOutputCount();
+            choices.focusedOutput = Math.min(choices.focusedOutput, numOutputs);
+        }
+    }
 };
 
 machines["Sparge Tower Controller"] = {

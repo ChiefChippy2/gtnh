@@ -1913,6 +1913,35 @@ exports[`Solver Processing Polyphenylene.gtnh should process without errors 1`] 
 ]
 `;
 
+exports[`Solver Processing QFT.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~VxRte9DANy-Bha2qusaLUQ==",
+    "overclockFactor": 64,
+    "overclockName": "OC x2",
+    "powerFactor": 4,
+    "recipesPerMinute": 192,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~QV3Yc2vgN0eJu_LjC9QG6g==",
+    "overclockFactor": 1,
+    "overclockName": undefined,
+    "powerFactor": 1,
+    "recipesPerMinute": 3,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~OuVGFxaDNBSFyLid1b3k3w==",
+    "overclockFactor": 1,
+    "overclockName": undefined,
+    "powerFactor": 1,
+    "recipesPerMinute": 3,
+  },
+]
+`;
+
 exports[`Solver Processing Test ore proc.gtnh should process without errors 1`] = `
 [
   {

@@ -297,6 +297,10 @@ export class RecipeModel extends RecipeGroupEntry
         return this.recipeItems.filter((entry) => entry.type in [RecipeIoType.FluidInput, RecipeIoType.ItemInput, RecipeIoType.OreDictInput]).length;
     }
 
+    public getOutputCount(): number {
+        return this.recipeItems.length - this.getInputCount();
+    }
+
     public getItemInputCount(): number {
         return this.recipeItems.filter((entry) => entry.type in [RecipeIoType.ItemInput, RecipeIoType.OreDictInput]).length;
     }
