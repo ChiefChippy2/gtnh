@@ -496,6 +496,11 @@ export function UpdateProject(visualOnly:boolean = false) {
     if (!visualOnly)
         SolvePage(page);
     notifyListeners();
+
+    // workaround to getting empty recipes on first solve
+    if (!visualOnly)
+        SolvePage(page);
+    notifyListeners();
 }
 
 async function GetUrlHashFromJson(json:string):Promise<string>
