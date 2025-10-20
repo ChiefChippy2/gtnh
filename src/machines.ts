@@ -627,8 +627,19 @@ machines["Industrial Material Press"] = {
 
 machines["Nano Forge"] = {
     perfectOverclock: (recipeModel, choices) => {
-        const tier = recipeModel.recipe?.gtRecipe.MetadataByKey("nano_forge_tier") ?? 1;
-        return choices.tier + 1 > tier || (choices.tier == 3 && choices.parallels > 1) ? MAX_OVERCLOCK : 0;
+        // if ((mSpecialTier < 4 || recipe.mSpecialValue < 3) && mSpecialTier > recipe.mSpecialValue) {
+        //     OCFactor = 4.0;
+        // } else if (recipe.mSpecialValue == 3 && maxParallel > 1) {
+        //     OCFactor = 4.0;
+        // }
+        // where specialValue is required tier, specialTier is building tier
+        const neededTier = recipeModel.recipe?.gtRecipe.MetadataByKey("nano_forge_tier") ?? 1;
+        const buildingTier = choices.tier + 1;
+        if ((buildingTier < 4 || neededTier < 3) && buildingTier > neededTier)
+            return MAX_OVERCLOCK;
+        else if (neededTier == 3 && choices.parallels > 1)
+            return MAX_OVERCLOCK;
+        return 0;
     },
     speed: (recipe, choices) => {
         return (choices.tier == 3 && choices.parallels > 1) ? 1 / Math.pow(0.9999, choices.parallels) : 1;

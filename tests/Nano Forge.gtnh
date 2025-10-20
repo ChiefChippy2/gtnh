@@ -4,7 +4,8 @@
   "rootGroup": {
     "type": "recipe_group",
     "links": {
-      "i:gregtech:gt.metaitem.03:4143": 1
+      "i:gregtech:gt.metaitem.03:4143": 1,
+      "i:gregtech:gt.metaitem.03:4086": 1
     },
     "elements": [
       {
@@ -44,6 +45,26 @@
         "choices": {
           "tier": 3,
           "parallels": 128000
+        },
+        "fixedCrafterCount": 1
+      },
+      {
+        "type": "recipe",
+        "recipeId": "r~_TucNvjbPbKRfD4kzTpKPg==",
+        "voltageTier": 14,
+        "choices": {
+          "tier": 3,
+          "parallels": 1
+        },
+        "fixedCrafterCount": 1
+      },
+      {
+        "type": "recipe",
+        "recipeId": "r~_TucNvjbPbKRfD4kzTpKPg==",
+        "voltageTier": 14,
+        "choices": {
+          "tier": 3,
+          "parallels": 4
         },
         "fixedCrafterCount": 1
       }
