@@ -1913,6 +1913,51 @@ exports[`Solver Processing Polyphenylene.gtnh should process without errors 1`] 
 ]
 `;
 
+exports[`Solver Processing Space Assembler.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~_OfRiEPMPYma6yzVAjPajQ==",
+    "overclockFactor": 4,
+    "overclockName": "OC x0 (capped)",
+    "powerFactor": 1,
+    "recipesPerMinute": 12,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~_OfRiEPMPYma6yzVAjPajQ==",
+    "overclockFactor": 64,
+    "overclockName": "OC x2 (capped)",
+    "powerFactor": 4,
+    "recipesPerMinute": 192,
+  },
+  {
+    "crafterCount": NaN,
+    "id": "r~xA6YuAZVPaGujqwTSBbBsA==",
+    "overclockFactor": 0,
+    "overclockName": "Can't perform, requires higher Space Assembler tier.",
+    "powerFactor": 1,
+    "recipesPerMinute": 0,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~Z8sp-Sc0O5uJTFpcwDCtkg==",
+    "overclockFactor": 16,
+    "overclockName": "OC x0 (capped)",
+    "powerFactor": 1,
+    "recipesPerMinute": 48,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~Z8sp-Sc0O5uJTFpcwDCtkg==",
+    "overclockFactor": 256,
+    "overclockName": "OC x2 (capped)",
+    "powerFactor": 4,
+    "recipesPerMinute": 768,
+  },
+]
+`;
+
 exports[`Solver Processing Test ore proc.gtnh should process without errors 1`] = `
 [
   {

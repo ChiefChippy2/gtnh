@@ -1,7 +1,7 @@
 import { RecipeModel, OverclockResult } from "./page.js";
 import { Fluid, Goods, Item, Recipe, RecipeInOut, RecipeIoType, RecipeType, Repository } from "./repository.js";
 import { calculateDefaultOverclocks } from "./solver.js";
-import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, CoilTierNames } from "./utils.js";
+import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, TIER_UIV, TIER_UXV, CoilTierNames } from "./utils.js";
 import { voltageTier, getFusionTierByStartupCost } from "./utils.js";
 
 export type MachineCoefficient = number | ((recipe:RecipeModel, choices:{[key:string]:number}) => number);
@@ -268,6 +268,59 @@ machines["Large Scale Auto-Assembler v1.01"] = {
     speed: 3,
     power: 1,
     parallels: (recipe) => (recipe.voltageTier + 1) * 2,
+};
+
+function makeSpaceAssemblerOverclockCalculator(maxVoltageTier:number, tier:number):(recipeModel:RecipeModel, overclockTiers:number) => OverclockResult {
+    return function (recipeModel:RecipeModel, overclockTiers:number): OverclockResult {
+        const recipeTier = recipeModel.recipe?.gtRecipe.MetadataByKey("space_elevator_module_tier") ?? 0;
+        const maxOverclocks = maxVoltageTier - (recipeModel.recipe?.gtRecipe.voltageTier ?? TIER_LV);
+        if (maxOverclocks < 0 || tier < recipeTier) {
+            return {
+                overclockSpeed:0,
+                overclockPower:1,
+                perfectOverclocks:0,
+                overclockName:"Can't perform, requires higher Space Assembler tier."
+            };
+        } else {
+            const overclocks = Math.max(0, maxOverclocks);
+            return {
+                overclockSpeed:Math.pow(2, overclocks),
+                overclockPower:Math.pow(2, overclocks),
+                perfectOverclocks:0,
+                overclockName:"OC x"+overclocks + ((overclocks == maxOverclocks) ? " (capped)" : "")
+            };
+        }
+    };
+}
+
+machines["Space Assembler Module MK-I"] = {
+    perfectOverclock: 0,
+    speed: 1,
+    power: 1,
+    parallels: 4,
+    ignoreParallelLimit: true,
+    customOverclock: makeSpaceAssemblerOverclockCalculator(TIER_UHV, 1),
+    info: "NOTE: overrides voltage tier"
+};
+
+machines["Space Assembler Module MK-II"] = {
+    perfectOverclock: 0,
+    speed: 1,
+    power: 1,
+    parallels: 16,
+    ignoreParallelLimit: true,
+    customOverclock: makeSpaceAssemblerOverclockCalculator(TIER_UIV, 2),
+    info: "NOTE: overrides voltage tier"
+};
+
+machines["Space Assembler Module MK-III"] = {
+    perfectOverclock: 0,
+    speed: 1,
+    power: 1,
+    parallels: 64,
+    ignoreParallelLimit: true,
+    customOverclock: makeSpaceAssemblerOverclockCalculator(TIER_UXV, 3),
+    info: "NOTE: overrides voltage tier"
 };
 
 let PipeCasingTierChoice:Choice = {
