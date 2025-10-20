@@ -679,12 +679,73 @@ machines["Industrial Material Press"] = {
 };
 
 machines["Nano Forge"] = {
-    perfectOverclock: 0,
-    speed: 1,
+    perfectOverclock: (recipeModel, choices) => {
+        // if ((mSpecialTier < 4 || recipe.mSpecialValue < 3) && mSpecialTier > recipe.mSpecialValue) {
+        //     OCFactor = 4.0;
+        // } else if (recipe.mSpecialValue == 3 && maxParallel > 1) {
+        //     OCFactor = 4.0;
+        // }
+        // where specialValue is required tier, specialTier is building tier
+        const neededTier = recipeModel.recipe?.gtRecipe.MetadataByKey("nano_forge_tier") ?? 1;
+        const buildingTier = choices.tier + 1;
+        if ((buildingTier < 4 || neededTier < 3) && buildingTier > neededTier)
+            return MAX_OVERCLOCK;
+        else if (neededTier == 3 && choices.parallels > 1)
+            return MAX_OVERCLOCK;
+        return 0;
+    },
+    speed: (recipe, choices) => {
+        return (choices.tier == 3 && choices.parallels > 1) ? 1 / Math.pow(0.9999, choices.parallels) : 1;
+    },
     power: 1,
-    parallels: 1,
-    choices: {tier: {description: "Tier", choices: ["T1 (Carbon Nanite)", "T2 (Neutronium Nanite)", "T3 (Transcendent Metal Nanite)"]}},
-    info: "Nano forge perfect overclock not implemented.",
+    parallels: (recipe, choices) => choices.parallels,
+    recipe: (recipe, choices, items) => {
+        if (choices.tier < 3 || choices.parallel <= 1) {
+            return items;
+        }
+
+        items = createEditableCopy(items);
+
+        for (let i = 0; i < items.length; ++i) {
+            let item = items[i];
+            if (item.type == RecipeIoType.ItemOutput) {
+                let naniteItem = createEditableCopy([item])[0];
+                naniteItem.type = RecipeIoType.ItemInput;
+                // Simulate needing 1 of an output nanite in the input to trigger parallels by
+                // spreading the input over all parallels.
+                naniteItem.amount = 1.0 / choices.parallels;
+                naniteItem.slot = 0;
+                items.push(naniteItem);
+            }
+        }
+
+        let magmatterFluid : RecipeInOut = {
+            type : RecipeIoType.FluidInput,
+            goodsPtr : 0,
+            goods : Repository.current.GetById<Fluid>("f:gregtech:molten.magmatter") as Fluid,
+            slot : 0,
+            // maxParallel = Math.max((int) (drainedMagmatter / (288 / GTUtility.powInt(2, 4 - recipe.mSpecialValue))), 1)
+            // maxParallel = drainedMagmatter / (288 / GTUtility.powInt(2, 4 - recipe.mSpecialValue))
+            // maxParallel * (288 / GTUtility.powInt(2, 4 - recipe.mSpecialValue)) = drainedMagmatter
+            amount : choices.parallels * (288 / Math.pow(2, 4 - choices.tier)),
+            probability : 1.0
+        };
+        items.push(magmatterFluid);
+
+        return items;
+    },
+    choices: {
+        tier: {description: "Tier", choices: ["T1 (Carbon Nanite)", "T2 (Neutronium Nanite)", "T3 (Transcendent Metal Nanite)", "T4 (Eternity Nanite)"]},
+        parallels: {description: "Parallels", min: 1}
+    },
+    enforceChoiceConstraints: (recipeModel, choices) => {
+        const tier = recipeModel.recipe?.gtRecipe.MetadataByKey("nano_forge_tier") ?? 1;
+        choices.tier = Math.max(choices.tier, tier - 1);
+
+        if (choices.tier != 3) {
+            choices.parallels = 1;
+        }
+    }
 };
 
 machines["Neutronium Compressor"] = {

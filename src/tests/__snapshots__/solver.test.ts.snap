@@ -1195,6 +1195,59 @@ exports[`Solver Processing Mercury Sulphur Formic Plans.gtnh should process with
 ]
 `;
 
+exports[`Solver Processing Nano Forge.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~rJ_Q9euXNNuH4fT-6M0thg==",
+    "overclockFactor": 16,
+    "overclockName": "OC x4",
+    "powerFactor": 16,
+    "recipesPerMinute": 1.92,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~rJ_Q9euXNNuH4fT-6M0thg==",
+    "overclockFactor": 256,
+    "overclockName": "Perfect OC x4",
+    "powerFactor": 1,
+    "recipesPerMinute": 30.72,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~7CNUEH4VN2qq2mZCQvktZg==",
+    "overclockFactor": 8,
+    "overclockName": "OC x3",
+    "powerFactor": 8,
+    "recipesPerMinute": 2.4,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~P9JJdSdAP0OhndO7neyYdw==",
+    "overclockFactor": 92787035761.18153,
+    "overclockName": "OC x1",
+    "powerFactor": 0.000005518012250308365,
+    "recipesPerMinute": 5567222145.670892,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~_TucNvjbPbKRfD4kzTpKPg==",
+    "overclockFactor": 8,
+    "overclockName": "OC x3",
+    "powerFactor": 8,
+    "recipesPerMinute": 0.48,
+  },
+  {
+    "crafterCount": 0.9999999989387545,
+    "id": "r~_TucNvjbPbKRfD4kzTpKPg==",
+    "overclockFactor": 64.02560640128023,
+    "overclockName": "Perfect OC x2",
+    "powerFactor": 0.999600059996,
+    "recipesPerMinute": 3.84153638,
+  },
+]
+`;
+
 exports[`Solver Processing Naqfuel.gtnh should process without errors 1`] = `
 [
   {
