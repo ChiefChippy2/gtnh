@@ -656,7 +656,7 @@ exports[`Solver Processing Fusion Compact.gtnh should process without errors 1`]
     "crafterCount": 1,
     "id": "r~F6QidLWMO_CMaXkzw9l9ew==",
     "overclockFactor": 512,
-    "overclockName": "4/4 OC x1",
+    "overclockName": "4/4 OC x1 (capped)",
     "powerFactor": 1,
     "recipesPerMinute": 1280,
   },
@@ -664,7 +664,7 @@ exports[`Solver Processing Fusion Compact.gtnh should process without errors 1`]
     "crafterCount": 1,
     "id": "r~Ddxccy1nNXKyF69zWmk7DQ==",
     "overclockFactor": 64,
-    "overclockName": "4/4 OC x0",
+    "overclockName": "4/4 OC x0 (capped)",
     "powerFactor": 1,
     "recipesPerMinute": 128,
   },
@@ -674,12 +674,28 @@ exports[`Solver Processing Fusion Compact.gtnh should process without errors 1`]
 exports[`Solver Processing Fusion test.gtnh should process without errors 1`] = `
 [
   {
-    "crafterCount": 0.16666666666666669,
+    "crafterCount": 0.11979166666666667,
     "id": "r~DP9KmpbrNhK_f7XN8kGPuQ==",
     "overclockFactor": 64,
-    "overclockName": "4/4 OC x3",
+    "overclockName": "4/4 OC x3 (capped)",
     "powerFactor": 1,
-    "recipesPerMinute": 800,
+    "recipesPerMinute": 575,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~DP9KmpbrNhK_f7XN8kGPuQ==",
+    "overclockFactor": 1,
+    "overclockName": "2/2 OC x0 (capped)",
+    "powerFactor": 1,
+    "recipesPerMinute": 75,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~DP9KmpbrNhK_f7XN8kGPuQ==",
+    "overclockFactor": 2,
+    "overclockName": "2/2 OC x1 (capped)",
+    "powerFactor": 1,
+    "recipesPerMinute": 150,
   },
 ]
 `;

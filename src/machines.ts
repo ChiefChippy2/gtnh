@@ -1206,12 +1206,13 @@ function getFusionTier(recipeModel:RecipeModel): number {
 function makeFusionOverclockCalculator(fusionTier:number, overclockMultiplier:number):(recipeModel:RecipeModel, overclockTiers:number) => OverclockResult {
     return function (recipeModel:RecipeModel, overclockTiers:number): OverclockResult {
         const recipeTier = Math.max(TIER_LUV, recipeModel.recipe?.gtRecipe?.voltageTier || 0, getFusionTier(recipeModel)+TIER_LUV-1);
-        const perfectOverclocks = Math.max(0, fusionTier - recipeTier);
+        const maxOverclocks = fusionTier - recipeTier;
+        const perfectOverclocks = Math.max(0, maxOverclocks);
         return {
             overclockSpeed:Math.pow(overclockMultiplier, perfectOverclocks),
             overclockPower:1,
             perfectOverclocks:perfectOverclocks,
-            overclockName:overclockMultiplier+"/"+overclockMultiplier+" OC x"+perfectOverclocks
+            overclockName:overclockMultiplier+"/"+overclockMultiplier+" OC x"+perfectOverclocks + ((perfectOverclocks == maxOverclocks) ? " (capped)" : "")
         };
     };
 }
@@ -1221,7 +1222,7 @@ machines["Fusion Control Computer Mark I"] = {
     power: 1,
     parallels: 1,
     customOverclock: makeFusionOverclockCalculator(TIER_LUV, 2),
-    info: "Min. energy hatch tier: LUV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Fusion Control Computer Mark II"] = {
@@ -1229,7 +1230,7 @@ machines["Fusion Control Computer Mark II"] = {
     power: 1,
     parallels: 1,
     customOverclock: makeFusionOverclockCalculator(TIER_ZPM, 2),
-    info: "Min. energy hatch tier: ZPM",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Fusion Control Computer Mark III"] = {
@@ -1237,7 +1238,7 @@ machines["Fusion Control Computer Mark III"] = {
     power: 1,
     parallels: 1,
     customOverclock: makeFusionOverclockCalculator(TIER_UV, 2),
-    info: "Min. energy hatch tier: UV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["FusionTech MK IV"] = {
@@ -1245,7 +1246,7 @@ machines["FusionTech MK IV"] = {
     power: 1,
     parallels: 1,
     customOverclock: makeFusionOverclockCalculator(TIER_UHV, 4),
-    info: "Min. energy hatch tier: UHV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["FusionTech MK V"] = {
@@ -1253,15 +1254,16 @@ machines["FusionTech MK V"] = {
     power: 1,
     parallels: 1,
     customOverclock: makeFusionOverclockCalculator(TIER_UEV, 4),
-    info: "Min. energy hatch tier: UEV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Compact Fusion Computer MK-I Prototype"] = {
     speed: 1,
     power: 1,
     parallels: 64,
+    ignoreParallelLimit: true,
     customOverclock: makeFusionOverclockCalculator(TIER_LUV, 2),
-    info: "Min. energy hatch tier: LUV",
+    info: "NOTE: overrides voltage tier"
 };
 
 function getCompactFusionParallel(recipe:RecipeModel, tier:number) {
@@ -1273,30 +1275,34 @@ machines["Compact Fusion Computer MK-II"] = {
     speed: 1,
     power: 1,
     parallels: (recipe) => getCompactFusionParallel(recipe, 2),
+    ignoreParallelLimit: true,
     customOverclock: makeFusionOverclockCalculator(TIER_ZPM, 2),
-    info: "Min. energy hatch tier: ZPM",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Compact Fusion Computer MK-III"] = {
     speed: 1,
     power: 1,
     parallels: (recipe) => getCompactFusionParallel(recipe, 3),
+    ignoreParallelLimit: true,
     customOverclock: makeFusionOverclockCalculator(TIER_UV, 2),
-    info: "Min. energy hatch tier: UV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Compact Fusion Computer MK-IV Prototype"] = {
     speed: 1,
     power: 1,
     parallels: (recipe) => getCompactFusionParallel(recipe, 4),
+    ignoreParallelLimit: true,
     customOverclock: makeFusionOverclockCalculator(TIER_UHV, 4),
-    info: "Min. energy hatch tier: UHV",
+    info: "NOTE: overrides voltage tier"
 };
 
 machines["Compact Fusion Computer MK-V"] = {
     speed: 1,
     power: 1,
     parallels: (recipe) => getCompactFusionParallel(recipe, 5),
+    ignoreParallelLimit: true,
     customOverclock: makeFusionOverclockCalculator(TIER_UEV, 4),
-    info: "Min. energy hatch tier: UEV",
+    info: "NOTE: overrides voltage tier"
 };

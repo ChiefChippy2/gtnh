@@ -10,7 +10,7 @@
       {
         "type": "recipe",
         "recipeId": "r~F6QidLWMO_CMaXkzw9l9ew==",
-        "voltageTier": 24,
+        "voltageTier": 6,
         "crafter": "i:gregtech:gt.blockmachines:32022",
         "choices": {},
         "fixedCrafterCount": 1
@@ -18,7 +18,7 @@
       {
         "type": "recipe",
         "recipeId": "r~Ddxccy1nNXKyF69zWmk7DQ==",
-        "voltageTier": 24,
+        "voltageTier": 7,
         "crafter": "i:gregtech:gt.blockmachines:32022",
         "choices": {},
         "fixedCrafterCount": 1
