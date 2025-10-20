@@ -190,7 +190,7 @@ function calculateNaquadahFuelRefineryOverclock(recipeModel:RecipeModel, overclo
         overclockSpeed : Math.pow(4, perfectOverclocks),
         overclockPower : 1,
         perfectOverclocks : perfectOverclocks,
-        overclockName : "Perfect OC x"+perfectOverclocks
+        overclockName : "Perfect OC x"+perfectOverclocks + ((perfectOverclocks == maxPerfectOverclocks) ? " (capped)" : "")
     };
 }
 
