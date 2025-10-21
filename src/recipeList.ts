@@ -5,7 +5,7 @@ import { voltageTier, GtVoltageTier, formatAmount } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
 import { ShowDropdown, HideDropdown } from "./dropdown.js";
-import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine } from "./machines.js";
+import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine, GetOptionalParameter } from "./machines.js";
 
 const linkAlgorithmNames: { [key in LinkAlgorithm]: string } = {
     [LinkAlgorithm.Match]: "",
@@ -611,12 +611,6 @@ export class RecipeList {
         let shortInfoContent = `<span data-tooltip="recipe" data-iid="${recipeModel.iid}">${crafter?.name ?? recipe.recipeType.name}</span>`;
         let machineCountsText = "";
         if (gtRecipe && gtRecipe.durationTicks > 0) {
-            const minTier = gtRecipe.voltageTier;
-            const maxTier = voltageTier.length - 1;
-            const options = voltageTier
-                .slice(minTier, maxTier + 1)
-                .map((tier: GtVoltageTier, index: number) => `<option value="${minTier + index}" ${minTier + index === recipeModel.voltageTier ? 'selected' : ''}>${tier.name}</option>`)
-                .join('');
             let machineCounts = recipeModel.crafterCount;
             machineCountsText = formatAmount(machineCounts);
 
@@ -629,12 +623,21 @@ export class RecipeList {
                 shortInfoContent += `<span class="text-small white-text">(${info.join(", ")})</span>`;
             }
 
-            shortInfoContent = `
-                <select class="voltage-tier-select" data-iid="${recipeModel.iid}" data-action="update_voltage_tier">
-                    ${options}
-                </select>
-                ${shortInfoContent} 
-            `;
+            if (!machineInfo.fixedVoltageTier) {
+                const minTier = gtRecipe.voltageTier;
+                const maxTier = voltageTier.length - 1;
+                const options = voltageTier
+                    .slice(minTier, maxTier + 1)
+                    .map((tier: GtVoltageTier, index: number) => `<option value="${minTier + index}" ${minTier + index === recipeModel.voltageTier ? 'selected' : ''}>${tier.name}</option>`)
+                    .join('');
+
+                shortInfoContent = `
+                    <select class="voltage-tier-select" data-iid="${recipeModel.iid}" data-action="update_voltage_tier">
+                        ${options}
+                    </select>
+                    ${shortInfoContent} 
+                `;
+            }
         }
 
         if (recipe.id !== recipeModel.recipeId) {

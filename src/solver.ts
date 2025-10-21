@@ -1,7 +1,7 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
 import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm, OverclockResult } from './page.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./repository.js";
-import { singleBlockMachine, MachineCoefficient, machines, notImplementedMachine, GetSingleBlockMachine } from "./machines.js";
+import { singleBlockMachine, MachineCoefficient, machines, notImplementedMachine, GetSingleBlockMachine, GetParameter } from "./machines.js";
 import { voltageTier } from "./utils.js";
 
 class LinkCollection {
@@ -232,15 +232,6 @@ function CreateAndMatchLinks(group:RecipeGroupModel, model:Model, collection:Lin
     }
 
     return collection;
-}
-
-function GetParameter(coefficient: MachineCoefficient, recipeModel:RecipeModel, min:number = 0): number {
-    if (typeof coefficient === "number")
-        return coefficient;
-    let coef = coefficient(recipeModel, recipeModel.choices);
-    if (coef < min)
-        return min;
-    return coef;
 }
 
 function ApplySolutionRecipe(recipeModel:RecipeModel, solution:Solution):void
