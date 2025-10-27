@@ -24,8 +24,18 @@ export type GtVoltageTier = {
 }
 
 export function getFusionTierByStartupCost(euToStart:number):number {
-    let rawTier = Math.log2(euToStart / 160e6) + 1;
-    return Math.min(5, Math.max(1, Math.ceil(rawTier)));
+    if (euToStart < 10_000_000 * 16)
+        return 1;
+    else if (euToStart < 20_000_000 * 16)
+        return 2;
+    else if (euToStart < 40_000_000 * 16)
+        return 3;
+    else if (euToStart < 320_000_000 * 16)
+        return 4;
+    else if (euToStart < 1_280_000_000 * 16)
+        return 5;
+    else
+        throw RangeError("Fusion startup cost is too high.");
 }
 
 export var voltageTier:GtVoltageTier[] = [
