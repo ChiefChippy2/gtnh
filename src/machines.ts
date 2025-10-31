@@ -291,10 +291,24 @@ machines["Circuit Assembly Line"] = {
 };
 
 machines["Component Assembly Line"] = {
-    overclocker: StandardOverclocker.onlyPerfect(),
-    speed: 1,
+    overclocker: StandardOverclocker.onlyNormal(),
+    speed: (recipeModel, choices) => {
+        const recipeCoalTier = recipeModel.recipe?.gtRecipe.MetadataByKey("coal_casing_tier") ?? 1;
+        const actualCoalTier = choices.componentTier + 1;
+        return Math.pow(2, actualCoalTier - recipeCoalTier);
+    },
     power: 1,
-    parallels: 1
+    parallels: 1,
+    enforceChoiceConstraints: (recipeModel, choices) => {
+        const recipeCoalTier = recipeModel.recipe?.gtRecipe.MetadataByKey("coal_casing_tier") ?? 1;
+        choices.componentTier = Math.max(choices.componentTier, recipeCoalTier - 1);
+    },
+    choices: {
+        componentTier: { 
+            description: "Components Tier", 
+            choices: voltageTier.slice(0, 13).map(v => v.name)
+        }
+    }
 };
 
 machines["Extreme Heat Exchanger"] = {

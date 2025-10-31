@@ -212,6 +212,35 @@ exports[`Solver Processing Catalyst.gtnh should process without errors 1`] = `
 ]
 `;
 
+exports[`Solver Processing CoAL.gtnh should process without errors 1`] = `
+[
+  {
+    "crafterCount": 1,
+    "id": "r~vtAga4EYMHeNuvLms_Addw==",
+    "overclockFactor": 16,
+    "overclockName": "OC x4",
+    "powerFactor": 16,
+    "recipesPerMinute": 0.4,
+  },
+  {
+    "crafterCount": 1,
+    "id": "r~EJ-509OZNnyv8TjMTmVqLA==",
+    "overclockFactor": 128,
+    "overclockName": "OC x6",
+    "powerFactor": 32,
+    "recipesPerMinute": 3.2,
+  },
+  {
+    "crafterCount": 1.0000000000012206,
+    "id": "r~B7HNN4BIOUKRk4bQzDhHXw==",
+    "overclockFactor": 65536,
+    "overclockName": "OC x10",
+    "powerFactor": 16,
+    "recipesPerMinute": 2730.66666667,
+  },
+]
+`;
+
 exports[`Solver Processing DEFC.gtnh should process without errors 1`] = `
 [
   {
