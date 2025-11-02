@@ -109,7 +109,7 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
             if (recipe.recipeType.singleblocks.length == 0)
                 return false;
             const machine = GetSingleBlockMachine(recipe.recipeType);
-            const excluded = machine.excludesRecipe ? machine.excludesRecipe(recipe) : false;
+            const excluded = machine?.excludesRecipe ? machine.excludesRecipe(recipe) : false;
             return !excluded;
         })();
 
@@ -117,7 +117,7 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
             for(let i = 0; i < recipe.recipeType.multiblocks.length; ++i) {
                 const item = recipe.recipeType.multiblocks[i];
                 const machine = machines[item.name];
-                const excluded = machine.excludesRecipe ? machine.excludesRecipe(recipe) : false;
+                const excluded = machine?.excludesRecipe ? machine.excludesRecipe(recipe) : false;
                 if (!excluded) {
                     crafter = item;
                     break;
