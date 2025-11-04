@@ -1261,6 +1261,14 @@ exports[`Solver Processing Nano Forge.gtnh should process without errors 1`] = `
     "powerFactor": 0.999600059996,
     "recipesPerMinute": 3.84153638,
   },
+  {
+    "crafterCount": 1,
+    "id": "r~7CNUEH4VN2qq2mZCQvktZg==",
+    "overclockFactor": 64,
+    "overclockName": "Perfect OC x3",
+    "powerFactor": 1,
+    "recipesPerMinute": 19.2,
+  },
 ]
 `;
 

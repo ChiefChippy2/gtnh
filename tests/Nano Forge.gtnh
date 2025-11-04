@@ -67,6 +67,16 @@
           "parallels": 4
         },
         "fixedCrafterCount": 1
+      },
+      {
+        "type": "recipe",
+        "recipeId": "r~7CNUEH4VN2qq2mZCQvktZg==",
+        "voltageTier": 14,
+        "choices": {
+          "tier": 3,
+          "parallels": 1
+        },
+        "fixedCrafterCount": 1
       }
     ],
     "collapsed": false,

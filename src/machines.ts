@@ -796,7 +796,7 @@ machines["Nano Forge"] = {
     power: 1,
     parallels: (recipe, choices) => choices.parallels,
     recipe: (recipe, choices, items) => {
-        if (choices.tier < 3 || choices.parallel <= 1) {
+        if (choices.tier < 3 || choices.parallels <= 1) {
             return items;
         }
 
