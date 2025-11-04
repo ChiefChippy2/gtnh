@@ -5,7 +5,7 @@ import { voltageTier, GtVoltageTier, formatAmount } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
 import { ShowDropdown, HideDropdown } from "./dropdown.js";
-import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine, GetOptionalParameter } from "./machines.js";
+import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine, GetOptionalParameter, GetParameter } from "./machines.js";
 
 const linkAlgorithmNames: { [key in LinkAlgorithm]: string } = {
     [LinkAlgorithm.Match]: "",

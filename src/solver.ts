@@ -1,7 +1,7 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
 import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm, OverclockResult } from './page.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./repository.js";
-import { singleBlockMachine, MachineCoefficient, machines, notImplementedMachine, GetSingleBlockMachine, GetParameter } from "./machines.js";
+import { singleBlockMachine, MachineCoefficient, machines, notImplementedMachine, GetSingleBlockMachine, GetParameter, GetOptionalParameter, GetParameterOverclocker } from "./machines.js";
 import { voltageTier } from "./utils.js";
 
 class LinkCollection {
@@ -65,29 +65,6 @@ function CreateLinkByAlgorithm(model:Model, algorithm:LinkAlgorithm, group:Recip
     model.constraints[linkName] = {equal:amount};
 }
 
-export function calculateDefaultOverclocks(recipeModel:RecipeModel, overclockTiers:number): OverclockResult {
-    let machineInfo = recipeModel.machineInfo;
-
-    let overclockSpeed = 1;
-    let overclockPower = recipeModel.recipe?.gtRecipe.amperage || 1;
-
-    let perfectOverclocks = Math.min(GetParameter(machineInfo.perfectOverclock || 0, recipeModel), overclockTiers);
-    let normalOverclocks = overclockTiers - perfectOverclocks;
-    if (perfectOverclocks > 0) {
-        overclockSpeed = Math.pow(4, perfectOverclocks);
-    }
-    if (normalOverclocks > 0) {
-        let coef = Math.pow(2, normalOverclocks);
-        overclockSpeed *= coef;
-        overclockPower *= coef;
-    }
-
-    let overclockName = perfectOverclocks > 0 ? normalOverclocks > 0 ? "Perfect OC x"+perfectOverclocks+", OC x" + normalOverclocks 
-        : "Perfect OC x"+perfectOverclocks : normalOverclocks > 0 ? "OC x" + normalOverclocks : undefined;
-
-    return { overclockSpeed, overclockPower, perfectOverclocks, overclockName };
-}
-
 function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkCollection)
 {
     let recipe = Repository.current.GetById<Recipe>(recipeModel.recipeId);
@@ -130,19 +107,23 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
         machineInfo = crafter ? (machines[crafter.name] || notImplementedMachine) : GetSingleBlockMachine(recipe.recipeType);
         recipeModel.multiblockCrafter = crafter;
         recipeModel.machineInfo = machineInfo;
+        if (machineInfo.fixedVoltageTier) {
+            recipeModel.voltageTier = GetOptionalParameter(machineInfo.fixedVoltageTier, recipeModel)!;
+        }
         recipeModel.ValidateChoices(machineInfo, recipeModel);
+        let amperage = gtRecipe.amperage;
         let actualVoltage = voltageTier[recipeModel.voltageTier].voltage;
         let machineParallels = GetParameter(machineInfo.parallels, recipeModel, 1);
         let energyModifier = GetParameter(machineInfo.power, recipeModel);
-        let maxParallels = machineInfo.ignoreParallelLimit ? machineParallels : Math.max(1, Math.floor(actualVoltage / (gtRecipe.voltage * energyModifier * gtRecipe.amperage)));
+        let maxParallels = machineInfo.ignoreParallelLimit ? machineParallels : Math.max(1, Math.floor(actualVoltage / (gtRecipe.voltage * energyModifier * amperage)));
         let parallels = Math.min(maxParallels, machineParallels);
         let tierDifference = recipeModel.voltageTier - gtRecipe.voltageTier;
         let overclockTiers = isSingleblock ? tierDifference : Math.min(tierDifference, Math.floor(Math.log2(maxParallels / parallels) / 2));
-        let overclockResult = (machineInfo.customOverclock || calculateDefaultOverclocks)(recipeModel, overclockTiers);
+        let overclockResult = GetParameterOverclocker(machineInfo.overclocker, recipeModel).calculate(recipeModel, overclockTiers);
         let speedModifier = GetParameter(machineInfo.speed, recipeModel);
         //console.log({machineParallels, maxParallels, parallels, overclockTiers, overclockSpeed, overclockPower, energyModifier, speedModifier});
         recipeModel.overclockFactor = overclockResult.overclockSpeed * speedModifier * parallels;
-        recipeModel.powerFactor = overclockResult.overclockPower * energyModifier / speedModifier;
+        recipeModel.powerFactor = amperage * overclockResult.overclockPower * energyModifier / speedModifier;
         recipeModel.parallels = parallels;
         recipeModel.overclockTiers = overclockTiers;
         recipeModel.overclockName = overclockResult.overclockName;
