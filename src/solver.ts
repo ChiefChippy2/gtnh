@@ -1,7 +1,7 @@
 import { Model, Solution } from "./types/javascript-lp-solver.js";
 import { PageModel, RecipeGroupModel, RecipeModel, ProductModel, FlowInformation, LinkAlgorithm, OverclockResult } from './page.js';
 import { Goods, Item, OreDict, Recipe, RecipeIoType, RecipeObject, Repository } from "./repository.js";
-import { singleBlockMachine, MachineCoefficient, machines, notImplementedMachine, GetSingleBlockMachine, GetParameter, GetOptionalParameter, GetParameterOverclocker } from "./machines.js";
+import { singleBlockMachine, machines, notImplementedMachine, GetSingleBlockMachine, GetParameter } from "./machines.js";
 import { voltageTier } from "./utils.js";
 
 class LinkCollection {
@@ -108,18 +108,18 @@ function PreProcessRecipe(recipeModel:RecipeModel, model:Model, collection:LinkC
         recipeModel.multiblockCrafter = crafter;
         recipeModel.machineInfo = machineInfo;
         if (machineInfo.fixedVoltageTier) {
-            recipeModel.voltageTier = GetOptionalParameter(machineInfo.fixedVoltageTier, recipeModel)!;
+            recipeModel.voltageTier = GetParameter(machineInfo.fixedVoltageTier, recipeModel)!;
         }
         recipeModel.ValidateChoices(machineInfo, recipeModel);
         let amperage = gtRecipe.amperage;
         let actualVoltage = voltageTier[recipeModel.voltageTier].voltage;
-        let machineParallels = GetParameter(machineInfo.parallels, recipeModel, 1);
+        let machineParallels = Math.max(1, GetParameter(machineInfo.parallels, recipeModel));
         let energyModifier = GetParameter(machineInfo.power, recipeModel);
         let maxParallels = machineInfo.ignoreParallelLimit ? machineParallels : Math.max(1, Math.floor(actualVoltage / (gtRecipe.voltage * energyModifier * amperage)));
         let parallels = Math.min(maxParallels, machineParallels);
         let tierDifference = recipeModel.voltageTier - gtRecipe.voltageTier;
         let overclockTiers = isSingleblock ? tierDifference : Math.min(tierDifference, Math.floor(Math.log2(maxParallels / parallels) / 2));
-        let overclockResult = GetParameterOverclocker(machineInfo.overclocker, recipeModel).calculate(recipeModel, overclockTiers);
+        let overclockResult = GetParameter(machineInfo.overclocker, recipeModel).calculate(recipeModel, overclockTiers);
         let speedModifier = GetParameter(machineInfo.speed, recipeModel);
         //console.log({machineParallels, maxParallels, parallels, overclockTiers, overclockSpeed, overclockPower, energyModifier, speedModifier});
         recipeModel.overclockFactor = overclockResult.overclockSpeed * speedModifier * parallels;

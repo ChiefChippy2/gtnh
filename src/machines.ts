@@ -4,7 +4,7 @@ import { Fluid, Goods, Item, Recipe, RecipeInOut, RecipeIoType, RecipeType, Repo
 import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, TIER_UIV, TIER_UXV, CoilTierNames } from "./utils.js";
 import { voltageTier, getFusionTierByStartupCost } from "./utils.js";
 
-export type MachineCoefficient = number | ((recipe:RecipeModel, choices:{[key:string]:number}) => number);
+export type MachineCoefficient<T> = Exclude<T, Function> | ((recipe:RecipeModel, choices:{[key:string]:number}) => T);
 
 export abstract class Overclocker {
     public abstract calculate(recipeModel:RecipeModel, overclockTiers:number): OverclockResult;
@@ -98,47 +98,25 @@ export class OverclockerFromClosure extends Overclocker {
 
 const MAX_OVERCLOCK = Number.POSITIVE_INFINITY;
 
-export type MachineCoefficientOverclocker = Overclocker | ((recipe:RecipeModel, choices:{[key:string]:number}) => Overclocker);
-
 export type Machine = {
     choices?: {[key:string]:Choice};
     enforceChoiceConstraints?: (recipe:RecipeModel, choices:{[key:string]:number}) => void;
-    overclocker: MachineCoefficientOverclocker;
-    speed: MachineCoefficient;
-    power: MachineCoefficient;
-    parallels: MachineCoefficient;
+    overclocker: MachineCoefficient<Overclocker>;
+    speed: MachineCoefficient<number>;
+    power: MachineCoefficient<number>;
+    parallels: MachineCoefficient<number>;
     recipe?: (recipe:RecipeModel, choices:{[key:string]:number}, items:RecipeInOut[]) => RecipeInOut[];
     info?: string;
     ignoreParallelLimit?: boolean;
-    fixedVoltageTier?: MachineCoefficient;
+    fixedVoltageTier?: MachineCoefficient<number>;
     excludesRecipe?: (recipe:Recipe) => boolean;
 }
 
-export function GetParameter(coefficient: MachineCoefficient, recipeModel:RecipeModel, min:number = 0): number {
-    if (typeof coefficient === "number")
+export function GetParameter<T>(coefficient: MachineCoefficient<T>, recipeModel:RecipeModel): T {
+    if (typeof coefficient === "function")
+        return (coefficient as ((recipe:RecipeModel, choices:{[key:string]:number}) => T))(recipeModel, recipeModel.choices);
+    else 
         return coefficient;
-    let coef = coefficient(recipeModel, recipeModel.choices);
-    if (coef < min)
-        return min;
-    return coef;
-}
-
-export function GetParameterOverclocker(coefficient: MachineCoefficientOverclocker, recipeModel:RecipeModel): Overclocker {
-    if (coefficient instanceof Overclocker)
-        return coefficient;
-    let coef = coefficient(recipeModel, recipeModel.choices);
-    return coef;
-}
-
-export function GetOptionalParameter(coefficient: MachineCoefficient | undefined, recipeModel:RecipeModel, min:number = 0): number | undefined {
-    if (coefficient === undefined)
-        return undefined;
-    if (typeof coefficient === "number")
-        return coefficient;
-    let coef = coefficient(recipeModel, recipeModel.choices);
-    if (coef < min)
-        return min;
-    return coef;
 }
 
 export type Choice = {
