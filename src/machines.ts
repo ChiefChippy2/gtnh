@@ -2,7 +2,7 @@ import { maxHeaderSize } from "http";
 import { RecipeModel, OverclockResult } from "./page.js";
 import { Fluid, Goods, Item, Recipe, RecipeInOut, RecipeIoType, RecipeType, Repository } from "./repository.js";
 import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, TIER_UIV, TIER_UXV, CoilTierNames } from "./utils.js";
-import { voltageTier, getFusionTierByStartupCost } from "./utils.js";
+import { voltageTier, getFusionTierByStartupCost, formatTicksAsTime } from "./utils.js";
 
 export type MachineCoefficient<T> = Exclude<T, Function> | ((recipe:RecipeModel, choices:{[key:string]:number}) => T);
 
@@ -106,7 +106,7 @@ export type Machine = {
     power: MachineCoefficient<number>;
     parallels: MachineCoefficient<number>;
     recipe?: (recipe:RecipeModel, choices:{[key:string]:number}, items:RecipeInOut[]) => RecipeInOut[];
-    info?: string;
+    info?: MachineCoefficient<string>;
     ignoreParallelLimit?: boolean;
     fixedVoltageTier?: MachineCoefficient<number>;
     excludesRecipe?: (recipe:Recipe) => boolean;
@@ -325,7 +325,21 @@ machines["Neutron Activator"] = {
         description: "Speeding Pipe Casing",
         min: 4,
     }},
-    info: "Power calculation is not implemented.",
+    info: (recipeModel, choices) => {
+        const nke = recipeModel.recipe?.gtRecipe.MetadataByKey("nke_range") ?? 0;
+        const nkeMin = nke % 10000;
+        const nkeMax = Math.floor(nke / 10000);
+        const nkeRange = nkeMax - nkeMin;
+        const baseAverageEvPerEU = (10 + 20) / 2;
+        const averageEvPerEU = baseAverageEvPerEU * Math.pow(0.95, choices.speedingPipeCasing - 4);
+        const voltage = voltageTier[recipeModel.voltageTier].voltage;
+        const averageEvPerTick = averageEvPerEU * voltage;
+        const estimatedTicksToReachMinNke = nkeMin * 1000000 / averageEvPerTick;
+        const estimatedTicksToReachMaxNke = nkeMax * 1000000 / averageEvPerTick;
+        const estimatedTicksInRange = estimatedTicksToReachMaxNke - estimatedTicksToReachMinNke;
+        return   "INFO: Power usage not calculated</br>"
+               + "INFO: Requires " + nkeMin.toString() + "MeV. Estimated " + formatTicksAsTime(estimatedTicksToReachMinNke) + " to reach, " + formatTicksAsTime(estimatedTicksInRange) + " in range.";
+    },
 };
 
 machines["Precise Auto-Assembler MT-3662"] = {

@@ -5,7 +5,7 @@ import { voltageTier, GtVoltageTier, formatAmount } from "./utils.js";
 import { ShowTooltip } from "./tooltip.js";
 import { IconBox } from "./itemIcon.js";
 import { ShowDropdown, HideDropdown } from "./dropdown.js";
-import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine } from "./machines.js";
+import { machines, notImplementedMachine, singleBlockMachine, GetSingleBlockMachine, GetParameter } from "./machines.js";
 
 const linkAlgorithmNames: { [key in LinkAlgorithm]: string } = {
     [LinkAlgorithm.Match]: "",
@@ -693,7 +693,7 @@ export class RecipeList {
         if (machineInfo.info) {
             if (!machineInfo.choices)
                 shortInfoContent += `<br>`;
-            shortInfoContent += `<span class="text-small white-text">${machineInfo.info}</span>`;
+            shortInfoContent += `<span class="text-small white-text">${GetParameter(machineInfo.info, recipeModel)}</span>`;
         }
 
         let iconCell = `<td><div class="icon-container"><item-icon data-id="${crafter.id}" data-action="crafter_click" data-iid="${recipeModel.iid}" data-amount="${machineCountsText}">`+

@@ -121,3 +121,33 @@ export function formatAmount(amount: number): string {
     
     return (Math.round(dividedAmount * div) / div).toString() + suffix;
 }
+
+export function formatTicksAsTime(ticks:number): string {
+    const ticksInSecond = 20;
+    const ticksInMinute = ticksInSecond * 60;
+    const ticksInHour = ticksInMinute * 60;
+
+    const hours = Math.floor(ticks / ticksInHour);
+    ticks -= hours * ticksInHour;
+
+    const minutes = Math.floor(ticks / ticksInMinute);
+    ticks -= minutes * ticksInMinute;
+
+    const seconds = Math.floor(ticks / ticksInSecond);
+    ticks -= seconds * ticksInSecond;
+
+    ticks = Math.ceil(ticks);
+
+    let result = "";
+
+    if (hours > 0)
+        result += hours.toString() + "h";
+    if (minutes > 0 || result != "")
+        result += minutes.toString().padStart(2, "0") + "m";
+    if (seconds > 0 || result != "")
+        result += seconds.toString().padStart(2, "0") + "s";
+    if (ticks > 0 || result != "")
+        result += ticks.toString().padStart(2, "0") + "t";
+
+    return result;
+}
