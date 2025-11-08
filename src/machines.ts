@@ -1097,7 +1097,7 @@ machines["Pyrolyse Oven"] = {
 };
 
 machines["Elemental Duplicator"] = {
-    overclocker: StandardOverclocker.onlyNormal(),
+    overclocker: StandardOverclocker.onlyPerfect(),
     speed: 2,
     power: 1,
     parallels: (recipe) => 8 * (recipe.voltageTier + 1),
@@ -1274,7 +1274,7 @@ machines["Thorium Reactor [LFTR]"] = {
 };
 
 machines["Matter Fabrication CPU"] = {
-    overclocker: StandardOverclocker.onlyNormal(),
+    overclocker: StandardOverclocker.onlyPerfect(),
     speed: 1,
     power: 0.8,
     parallels: (recipe, choices) => {
