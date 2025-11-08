@@ -57,23 +57,17 @@ export class Dropdown {
         this.dropdown.style.display = "block";
         
         // Position the dropdown
+        // Needs reduced set here for some reason.
+        this.dropdown.style.zIndex = "10000";
         const targetRect = target.getBoundingClientRect();
         const dropdownRect = this.dropdown.getBoundingClientRect();
         
         // Check if there's enough space below
-        const spaceBelow = window.innerHeight - targetRect.bottom;
-        const spaceAbove = targetRect.top;
+        // Save some space for dynamic parts of the dropdown.
+        const spaceBelow = window.innerHeight - targetRect.bottom - 50;
         
-        if (spaceBelow >= dropdownRect.height || spaceBelow > spaceAbove) {
-            // Position below
-            this.dropdown.style.top = `${targetRect.bottom}px`;
-        } else {
-            // Position above
-            this.dropdown.style.top = `${targetRect.top - dropdownRect.height}px`;
-        }
-        
-        // Center horizontally relative to target
-        this.dropdown.style.left = `${targetRect.left + (targetRect.width - dropdownRect.width) / 2}px`;
+        this.dropdown.style.top = `${targetRect.bottom - Math.max(0, (dropdownRect.height - spaceBelow))}px`;
+        this.dropdown.style.left = `${targetRect.right + Math.max(0, (targetRect.width - dropdownRect.width) / 2)}px`;
     }
 
     public hide(): void {

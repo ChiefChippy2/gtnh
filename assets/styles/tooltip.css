@@ -1,7 +1,7 @@
 #tooltip,
 #dropdown
 {
-    max-width: 500px;
+    max-width: max(50%, 500px);
     border-style: solid;
     background-color: #100010;
     border-color: #100010;
@@ -13,11 +13,20 @@
     position: absolute;
     display: none;
     box-shadow: inset 0 0 0 2px #4300D650;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+#dropdown
+{
+    z-index: 10000;
+    max-height: 80%;
 }
 
 #tooltip
 {
     z-index: 2000;
+    max-height: 100%;
 }
 
 #tooltip-header

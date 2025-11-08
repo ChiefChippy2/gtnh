@@ -9,6 +9,9 @@ const tooltipText = tooltip.querySelector("#tooltip-text") as HTMLElement;
 const tooltipAction = tooltip.querySelector("#tooltip-action") as HTMLElement;
 const tooltipMod = tooltip.querySelector("#tooltip-mod") as HTMLElement;
 const tooltipRecipe = tooltip.querySelector("#tooltip-recipe") as HTMLElement;
+let tooltipScrollTarget = 0;
+let tooltipScrollCache = new Map<HTMLElement, number>();
+
 interface TooltipData {
     header?: string;
     text?: string | null;
@@ -16,6 +19,16 @@ interface TooltipData {
     goods?: Goods;
     recipe?: Recipe | null;
     overrideIo?: RecipeInOut[];
+}
+
+function OnGlobalScroll(ev: WheelEvent) : any {
+  if (!tooltip || tooltip.style.display !== "block") return;
+  
+  // Scroll inside tooltip instead of page
+  tooltipScrollTarget += ev.deltaY;
+  tooltipScrollTarget = Math.max(0, Math.min(tooltipScrollTarget, tooltip.scrollHeight - tooltip.clientHeight));
+  tooltip.scrollTop = tooltipScrollTarget;
+  ev.preventDefault(); // block normal page scroll
 }
 
 export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
@@ -30,7 +43,22 @@ export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
     const recipe = data.recipe ?? null;
     const overrideIo = data.overrideIo;
     ShowTooltipRaw(target, header, debug, text, mod, action, recipe, overrideIo);
+    target.focus();
     target.addEventListener("mouseleave", () => HideTooltip(target), { once: true });
+    if (tooltipScrollCache.has(target)) {
+        tooltipScrollTarget = tooltipScrollCache.get(target)!;
+    } else {
+        tooltipScrollTarget = 0;
+    }
+ 
+    // Override smooth scroll for the initial scroll loaded from cache.
+    // Otherwise it scrolls visibly every time.
+    tooltip.style.scrollBehavior = 'auto';
+    tooltipScrollTarget = Math.max(0, Math.min(tooltipScrollTarget, tooltip.scrollHeight - tooltip.clientHeight));
+    tooltip.scrollTop = tooltipScrollTarget;
+    tooltip.style.scrollBehavior = 'smooth';
+    
+    window.addEventListener("wheel", OnGlobalScroll, { passive: false });
 }
 
 function SetTextOptional(element:HTMLElement, data: string | null, html: boolean)
@@ -84,8 +112,10 @@ export function HideTooltip(target:HTMLElement)
 {
     if (currentTooltipElement !== target)
         return;
+    tooltipScrollCache.set(target, tooltipScrollTarget);
     currentTooltipElement = undefined;
     tooltip.style.display = "none";
+    window.removeEventListener("wheel", OnGlobalScroll);
 }
 
 export function IsHovered(obj:HTMLElement):boolean
