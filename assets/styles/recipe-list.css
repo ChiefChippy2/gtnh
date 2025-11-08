@@ -310,6 +310,15 @@ select:hover {
 .machine-choice-container {
     display: flex;
     align-items: center;
+
+    /* Allows wrapping between text and input control */
+    display: flex; 
+    flex-wrap: wrap; 
+
+    /* Indents second line if there's a split */
+    padding-left: 2em; 
+    text-indent: -2em; 
+
     gap: 4px;
 }
 

@@ -675,7 +675,7 @@ export class RecipeList {
 
                 return `
                     <div class="machine-choice-container">
-                        <label>${choice.description}:</label>
+                        <label>${choice.description}: </label>
                         ${inputHtml}
                     </div>
                 `;

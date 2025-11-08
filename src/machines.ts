@@ -1637,3 +1637,183 @@ machines["Compact Fusion Computer MK-V"] = {
     excludesRecipe: makeFusionRecipeExcluder(5),
     info: "NOTE: overrides voltage tier"
 };
+
+const EyeOfHarmonyTierNames = [
+    "1 - Crude",
+    "2 - Primitive",
+    "3 - Stable",
+    "4 - Advanced",
+    "5 - Superb",
+    "6 - Exotic",
+    "7 - Perfect",
+    "8 - Tipler",
+    "9 - Gallifreyan"
+]
+
+function getEyeOfHarmonyRecipeTier(recipeModel : RecipeModel) : number {
+    let planetItem = undefined;
+    const items = recipeModel.recipe?.items;
+    if (items === undefined)
+        return 0;
+
+    for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        if (item.type == RecipeIoType.ItemInput) {
+            planetItem = item;
+            break;
+        }
+    }
+
+    if (planetItem === undefined)
+        return 0;
+
+    // "Overworld", "T4: Venus", "T10: Deep Dark"
+    const parts = (planetItem.goods as Item).name.split(":");
+    if (parts.length == 2) {
+        // Remove leading "T".
+        return parseInt(parts[0].substring(1)) || 0;
+    }
+
+    return 0;
+}
+
+function getEyeOfHarmonySuccessRateWithPity(originalSuccessRate: number) : number {
+    const boost = (1 - originalSuccessRate) * originalSuccessRate;
+    if (originalSuccessRate < 1 && boost == 0)
+        return originalSuccessRate;
+
+    let chanceToHaveExactlyNAttempts = [0, originalSuccessRate];
+
+    let currentSuccessChance = originalSuccessRate;
+    while (currentSuccessChance < 1) {
+        let currentFailChance = 1 - currentSuccessChance;
+        currentSuccessChance += boost;
+        let prob = currentFailChance * currentSuccessChance;
+        chanceToHaveExactlyNAttempts.push(prob);
+    }
+
+    let expectedNumberOfAttempts = 0;
+    for (let i = 1; i < chanceToHaveExactlyNAttempts.length; ++i) {
+        expectedNumberOfAttempts += chanceToHaveExactlyNAttempts[i] * i;
+    }
+
+    return 1 / expectedNumberOfAttempts;
+}
+
+function getEyeOfHarmonySpeed(recipeModel: RecipeModel, choices: {[key:string]:number}) : number {
+    const recipeTier = Math.min(getEyeOfHarmonyRecipeTier(recipeModel), 9);
+    const compressionTier = choices.compression + 1;
+    const tiersAbove = Math.max(0, compressionTier - recipeTier);
+
+    const durationMultiplierFromDilation = Math.pow(0.5, choices.dilation);
+    const durationMultiplierFromTier = Math.pow(0.97, tiersAbove);
+    
+    return 1 / (durationMultiplierFromDilation * durationMultiplierFromTier);
+}
+
+function getEyeOfHarmonyParallel(astralArrays: number) : number {
+    if (astralArrays == 0)
+        return 1;
+
+    const parallelExponent = Math.floor(Math.log(8 * astralArrays) / Math.log(1.7))
+    return Math.pow(2, parallelExponent);
+}
+
+machines["Eye of Harmony"] = {
+    speed: getEyeOfHarmonySpeed,
+    power: 1,
+    parallels: (recipeModel, choices) => {
+        return getEyeOfHarmonyParallel(choices.astralArrays);
+    },
+    overclocker: (recipeModel, choices) => {
+        return StandardOverclocker.onlyNormal(choices.overclocks);
+    },
+    recipe: (recipeModel, choices, items) => {
+        items = createEditableCopy(items);
+
+        const recipeTier = Math.min(getEyeOfHarmonyRecipeTier(recipeModel), 9);
+
+        const successPenalty = 0.0925 * choices.dilation;
+        const successBoost = 0.05 * choices.stabilisation;
+        const yieldPenalty = 0.05 * choices.stabilisation;
+        const powerPenalty = 0.4 - 0.05 * choices.stabilisation;
+
+        const baseSuccessChance = 1 - 0.05 * recipeTier;
+        const rawSuccessChance = Math.max(0, baseSuccessChance - successPenalty + successBoost);
+        const successChance = getEyeOfHarmonySuccessRateWithPity(rawSuccessChance);
+
+        const basicFluidNeeded = 1e9 * (recipeTier + 1);
+
+        for (let i = 0; i < items.length; ++i) {
+            let item = items[i];
+            if (item.type == RecipeIoType.ItemOutput || item.type == RecipeIoType.FluidOutput) {
+                item.probability = successChance;
+                item.amount *= 1 - yieldPenalty;
+            } else if (item.type == RecipeIoType.FluidInput) {
+                const fluid = item.goods as Fluid;
+                if (choices.astralArrays) {
+                    if (fluid.id == "f:gregtech:rawstarmatter") {
+                        item.amount = (12.4 / 1e6) * basicFluidNeeded;
+                    }
+                } else {
+                    if (fluid.id == "f:GalacticraftMars:hydrogen" || fluid.id == "f:GalacticraftMars:helium") {
+                        item.amount = basicFluidNeeded;
+                    }
+                }
+            } else if (item.type == RecipeIoType.ItemInput) {
+                item.amount = 1;
+            }
+        }
+
+        let spacetimeFluid : RecipeInOut = {
+            type : RecipeIoType.FluidOutput,
+            goodsPtr : 0,
+            goods : Repository.current.GetById<Fluid>("f:gregtech:molten.spacetime") as Fluid,
+            slot : 0,
+            amount : rawSuccessChance * 14400 * Math.pow(2, recipeTier),
+            probability : 1 - successChance
+        };
+        items.push(spacetimeFluid);
+
+        const recipeDurationSeconds = (recipeModel.recipe?.gtRecipe.durationSeconds || 1) / getEyeOfHarmonySpeed(recipeModel, choices);
+
+        // TODO: either remove as we agreed not to calculate such things, or provide display via some means
+        const parallel = getEyeOfHarmonyParallel(choices.astralArrays);
+        console.info("Cycle duration: " + recipeDurationSeconds.toString() + "s. Success chance: " + (rawSuccessChance*100).toString() + "%. Parallel: " + parallel.toString() + ".");
+        
+        return items;
+    },
+    choices: {
+        compression: {
+            description: "Compression", choices: EyeOfHarmonyTierNames
+        },
+        dilation: {
+            description: "Time Dilation", choices: EyeOfHarmonyTierNames
+        },
+        stabilisation: {
+            description: "Stabilisation", choices: EyeOfHarmonyTierNames
+        },
+        astralArrays: {
+            description: "Astral Arrays"
+        },
+        overclocks: {
+            description: "Overclocks"
+        }
+    },
+    fixedVoltageTier: TIER_UXV,
+    enforceChoiceConstraints: (recipeModel, choices) => {
+        const requiredTier = Math.min(getEyeOfHarmonyRecipeTier(recipeModel), 9);
+        choices.compression = Math.max(choices.compression, requiredTier - 1);
+
+        if (Number.isNaN(choices.astralArrays))
+            choices.astralArrays = 0;
+        else
+            choices.astralArrays = Math.min(Math.max(choices.astralArrays, 0), 8637);
+        
+        if (Number.isNaN(choices.overclocks))
+            choices.overclocks = 0;
+        else
+            choices.overclocks = Math.min(Math.max(choices.overclocks, 0), 24);
+    },
+    info: "NOTE: Power input/output not calculated"
+}
