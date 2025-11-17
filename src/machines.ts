@@ -612,6 +612,10 @@ function laserOverclockCalculator(recipeModel:RecipeModel, overclockTiers:number
     const availableEut = voltageTier[recipeModel.voltageTier].voltage * amperage;
     let currentEut = (recipeModel.recipe?.gtRecipe?.voltage || 32) * recipeModel.getItemInputCount();
     
+    // We will need to limit to 1 per tick at most for AAL.
+    const parallel = recipeModel.getItemInputCount();
+    const durationTicks = (recipeModel.recipe?.gtRecipe.durationTicks || Number.POSITIVE_INFINITY);
+
     let overclockSpeed = 1;
     let overclockPower = 1;
 
@@ -628,15 +632,16 @@ function laserOverclockCalculator(recipeModel:RecipeModel, overclockTiers:number
     while (true) {
         const multiplier = 4.0 + 0.3 * (laserOverclocks + 1);
         const potentialEU = currentEut * multiplier;
-
+        const estimatedDurationTicks = durationTicks / Math.pow(2, laserOverclocks + regularOverclocks + 1);
         if (potentialEU >= availableEut) break;
+        if (estimatedDurationTicks < parallel) break;
 
         currentEut = potentialEU;
         overclockSpeed *= 2;
         overclockPower *= multiplier / 2;
         laserOverclocks += 1;
 
-        if (laserOverclocks + regularOverclocks > overclockTiers + (Math.log(amperage) / Math.log(4))) break;
+        if (laserOverclocks + regularOverclocks > maxRegularOverclocks + (Math.log(amperage) / Math.log(4))) break;
     }
 
     let overclockNameParts = new Array();
@@ -646,6 +651,12 @@ function laserOverclockCalculator(recipeModel:RecipeModel, overclockTiers:number
 
     if (laserOverclocks > 0 ) {
         overclockNameParts.push("Laser OC x" + laserOverclocks);
+    }
+
+    // Display cap information if we're at the last possible overclock.
+    const estimatedDurationTicks = durationTicks / Math.pow(2, laserOverclocks + regularOverclocks);
+    if (estimatedDurationTicks / 2 < parallel) {
+        overclockNameParts.push("1 tick cap");
     }
 
     return {
@@ -663,7 +674,7 @@ machines["Advanced Assembly Line"] = {
     parallels: (recipe) => recipe.getItemInputCount(),
     ignoreParallelLimit: true, // prevent parallel limitation as solver does not understand separate ampearage
     choices: {inputAmperage: {description: "Input Amperage", min: 16}},
-    info: "NOTE: Voltage determines the energy hatch voltage, not maximum voltage. WARNING: Calculates beyond 1 slice per tick.",
+    info: "NOTE: Voltage determines the energy hatch voltage, not maximum voltage",
 };
 
 machines["Large Fluid Extractor"] = {
