@@ -676,7 +676,7 @@ machines["Advanced Assembly Line"] = {
     ignoreParallelLimit: true, // prevent parallel limitation as solver does not understand separate ampearage
     choices: {inputAmperage: {description: "Input Amperage", min: 16}},
     roundAfterParallels: true,
-    info: "NOTE: Voltage determines the energy hatch voltage, not maximum voltage. WARNING: Calculates beyond 1 slice per tick.",
+    info: "NOTE: Voltage determines the energy hatch voltage, not maximum voltage.",
 };
 
 machines["Large Fluid Extractor"] = {

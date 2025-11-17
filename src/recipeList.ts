@@ -372,7 +372,7 @@ export class RecipeList {
                                 let finalTier = initialTier + obj.overclockTiers;
                                 let initialTierName = voltageTier[initialTier].name;
                                 let finalTierName = voltageTier[finalTier].name;
-                                let overclocksText = obj.overclockName ?? "No overclocks";
+                                let overclocksText = obj.overclockName ? obj.overclockName : "No overclocks";
                                 text = `${obj.parallels} parallels\n` +
                                        `${overclocksText} ${initialTier == finalTier ? `(${initialTierName})` : `(${initialTierName} → ${finalTierName})`}\n` +
                                        text + `\n${formatAmount(obj.overclockFactor)}x machine speed\n` +
