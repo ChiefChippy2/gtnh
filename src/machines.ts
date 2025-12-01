@@ -1,7 +1,7 @@
 import { maxHeaderSize } from "http";
 import { RecipeModel, OverclockResult } from "./page.js";
 import { Fluid, Goods, Item, Recipe, RecipeInOut, RecipeIoType, RecipeType, Repository } from "./repository.js";
-import { TIER_LV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, TIER_UIV, TIER_UXV, CoilTierNames } from "./utils.js";
+import { TIER_LV, TIER_MV, TIER_LUV, TIER_ZPM, TIER_UV, TIER_UHV, TIER_UEV, TIER_UIV, TIER_UXV, CoilTierNames } from "./utils.js";
 import { voltageTier, getFusionTierByStartupCost, formatTicksAsTime } from "./utils.js";
 
 export type MachineCoefficient<T> = Exclude<T, Function> | ((recipe:RecipeModel, choices:{[key:string]:number}) => T);
@@ -439,21 +439,24 @@ machines["Industrial Autoclave"] = {
     choices: {coilTier: CoilTierChoice, pipeCasingTier: PipeCasingTierChoice},
 };
 
-function GetEbfRecipeBaseCoilTier(recipe?: Recipe): number {
-    let temp = recipe?.gtRecipe.specialValue ?? 0;
-    let coilTier = Math.max(0, Math.min(13, Math.floor((temp - 1801) / 900)));
-    return coilTier;
+function getEbfExcessHeat(recipe:RecipeModel, choices:{[key:string]:number}) {
+    const recipeHeat = recipe.recipe?.gtRecipe.specialValue ?? 0;
+    const coilHeat = 1801 + choices.coilTier * 900;
+    const voltageHeat = Math.max(0, recipe.voltageTier - TIER_MV) * 100;
+    const actualHeat = coilHeat + voltageHeat;
+    return actualHeat - recipeHeat;
 }
 
 function makeEbfOverclocker(recipe:RecipeModel, choices:{[key:string]:number}) {
-    let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-    let maxPerfectOverclocks = Math.floor((choices.coilTier - tier)/2);
+    const excessHeat = getEbfExcessHeat(recipe, choices);
+    const maxPerfectOverclocks = Math.floor(excessHeat / 1800);
     return StandardOverclocker.perfectThenNormal(maxPerfectOverclocks);
 }
 
 function ebfPower(recipe:RecipeModel, choices:{[key:string]:number}) {
-    let tier = GetEbfRecipeBaseCoilTier(recipe.recipe);
-    return Math.pow(0.95, choices.coilTier - tier);
+    const excessHeat = getEbfExcessHeat(recipe, choices);
+    const energyReductions = Math.floor(excessHeat / 900);
+    return Math.pow(0.95, energyReductions);
 }
 
 machines["Electric Blast Furnace"] = {

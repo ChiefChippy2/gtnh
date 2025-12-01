@@ -1544,7 +1544,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~vuu2rZ82Prq38HjtC49TzQ==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 5.42857143,
   },
   {
@@ -1672,7 +1672,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~2imLgzdaOZSo8pXaO3VPjw==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 0.71428571,
   },
   {
@@ -1704,7 +1704,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~vbNn53tuN1eOLJD9ft4XqA==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 0.25714286,
   },
   {
@@ -1808,7 +1808,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~CssUsJRmNbuzDNguZebxUg==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 0.07402597,
   },
   {
@@ -1864,7 +1864,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~69nvUSG0NVGpsijx3Edzdg==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 0.22207792,
   },
   {
@@ -1888,7 +1888,7 @@ exports[`Solver Processing Platline.gtnh should process without errors 1`] = `
     "id": "r~vW4NWbhyOFSLqSe1bw0zNw==",
     "overclockFactor": 1,
     "overclockName": "",
-    "powerFactor": 1,
+    "powerFactor": 0.95,
     "recipesPerMinute": 0.22207792,
   },
   {
@@ -2534,7 +2534,7 @@ exports[`Solver Processing UHV naqfuel mk3 chromatic glass.gtnh should process w
     "id": "r~cXEm-XdKOxyUAWAJTlI7zA==",
     "overclockFactor": 70.48458149779736,
     "overclockName": "Perfect OC x1",
-    "powerFactor": 0.25751990881347525,
+    "powerFactor": 0.27107358822471084,
     "recipesPerMinute": 24,
   },
   {
@@ -2582,7 +2582,7 @@ exports[`Solver Processing UHV naqfuel mk3 chromatic glass.gtnh should process w
     "id": "r~rcPNnvRDNmyj6qmxnD66iQ==",
     "overclockFactor": 71.42857142857143,
     "overclockName": "Perfect OC x3",
-    "powerFactor": 0.5647034711132497,
+    "powerFactor": 0.5364682975575873,
     "recipesPerMinute": 2.22222222,
   },
 ]
@@ -2643,10 +2643,10 @@ exports[`Solver Processing mebf.gtnh should process without errors 1`] = `
   {
     "crafterCount": 1,
     "id": "r~s6XwXJ10Nf6Rm_EayZQMUA==",
-    "overclockFactor": 153600,
-    "overclockName": "OC x9",
-    "powerFactor": 436.9066666666667,
-    "recipesPerMinute": 307200,
+    "overclockFactor": 262144,
+    "overclockName": "Perfect OC x1, OC x8",
+    "powerFactor": 231.04,
+    "recipesPerMinute": 524288,
   },
 ]
 `;
