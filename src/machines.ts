@@ -426,17 +426,20 @@ machines["Space Assembler Module MK-III"] = {
     info: "NOTE: overrides voltage tier"
 };
 
-let PipeCasingTierChoice:Choice = {
-    description: "Pipe Casing Tier",
+let PipeItemCasingTierChoice: Choice = {
+    description: "Item Pipe Casing Tier",
     choices: ["T1: Tin", "T2: Brass", "T3: Electrum", "T4: Platinum", "T5: Osmium", "T6: Quantium", "T7: Fluxed Electrum", "T8: Black Plutonium"],
 }
-
+let PipeFluidCasingTierChoice: Choice = {
+    description: "Fluid Pipe Casing Tier",
+    choices: ["T1: Bronze", "T2: Steel", "T3: Titanium", "T4: Tungstensteel"],
+}
 machines["Industrial Autoclave"] = {
     overclocker: StandardOverclocker.onlyNormal(),
     speed: (recipe, choices) => 1.25 + choices.coilTier * 0.25,
-    power: (recipe, choices) => (11 - choices.pipeCasingTier) / 12,
-    parallels: (recipe, choices) => choices.pipeCasingTier * 12 + 12,
-    choices: {coilTier: CoilTierChoice, pipeCasingTier: PipeCasingTierChoice},
+    power: (recipe, choices) => (11 - choices.pipeFluidCasingTier) / 12,
+    parallels: (recipe, choices) => choices.pipeItemCasingTier * 12 + 12,
+    choices: {coilTier: CoilTierChoice, pipeItemCasingTier: PipeItemCasingTierChoice, pipeFluidCasingTier:PipeFluidCasingTierChoice},
 };
 
 function getEbfExcessHeat(recipe:RecipeModel, choices:{[key:string]:number}) {
@@ -594,7 +597,7 @@ machines["Dissection Apparatus"] = {
     speed: 3,
     power: 0.85,
     parallels: (recipe, choices) => (choices.pipeCasingTier + 1) * 8,
-    choices: {pipeCasingTier: PipeCasingTierChoice},
+    choices: {pipeCasingTier: PipeItemCasingTierChoice},
 };
 
 machines["Industrial Extrusion Machine"] = {
@@ -774,7 +777,7 @@ machines["Industrial Precision Lathe"] = {
     speed: (recipe, choices) => ((precisionLatheSpeed[choices.itemPipeCasings] + recipe.voltageTier + 1) / 4),
     power: 0.8,
     parallels: (recipe, choices) => precisionLatheParallels[choices.itemPipeCasings] + (recipe.voltageTier + 1) * 2,
-    choices: {itemPipeCasings:PipeCasingTierChoice}
+    choices: {itemPipeCasings:PipeItemCasingTierChoice}
 };
 
 machines["Industrial Maceration Stack"] = {
@@ -1281,15 +1284,17 @@ machines["ExxonMobil Chemical Plant"] = {
         return choices.coilTier * 0.5 + 0.5;
     },
     power: 1,
-    parallels: (recipe, choices) => (choices.pipeCasingTier + 1) * 2,
-    choices: {coilTier: CoilTierChoice, pipeCasingTier: {description: "Pipe Casing Tier", choices: ["T1: Bronze", "T2: Steel", "T3: Titanium", "T4: Tungstensteel"]}},
+    parallels: (recipe, choices) => (choices.pipeFluidCasingTier + 1) * 2,
+    choices: {coilTier: CoilTierChoice,
+        pipeFluidCasingTier:PipeFluidCasingTierChoice
+    },
     recipe: (recipe, choices, items) => {
-        if (choices.coilTier >= 10 && choices.pipeCasingTier >= 3)
+        if (choices.coilTier >= 10 && choices.pipeFluidCasingTier >= 3)
             return items;
         let catalystNumber = items.findIndex(item => item.type == RecipeIoType.ItemInput && item.goods instanceof Item && item.goods.name.endsWith("Catalyst"));
         if (catalystNumber == -1)
             return items;
-        let catalystUsage = (1 - 0.2 * choices.pipeCasingTier) / 50;
+        let catalystUsage = (1 - 0.2 * choices.pipeFluidCasingTier) / 50;
         items = createEditableCopy(items);
         items[catalystNumber].amount = catalystUsage;
         return items;
