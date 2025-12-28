@@ -438,8 +438,8 @@ machines["Industrial Autoclave"] = {
     overclocker: StandardOverclocker.onlyNormal(),
     speed: (recipe, choices) => 1.25 + choices.coilTier * 0.25,
     power: (recipe, choices) => (11 - choices.pipeFluidCasingTier) / 12,
-    parallels: (recipe, choices) => choices.pipeItemCasingTier * 12 + 12,
-    choices: {coilTier: CoilTierChoice, pipeItemCasingTier: PipeItemCasingTierChoice, pipeFluidCasingTier:PipeFluidCasingTierChoice},
+    parallels: (recipe, choices) => choices.pipeCasingTier * 12 + 12,
+    choices: {coilTier: CoilTierChoice, pipeCasingTier: PipeItemCasingTierChoice, pipeFluidCasingTier:PipeFluidCasingTierChoice},
 };
 
 function getEbfExcessHeat(recipe:RecipeModel, choices:{[key:string]:number}) {

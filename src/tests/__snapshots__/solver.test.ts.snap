@@ -218,12 +218,12 @@ exports[`Solver Processing Catalyst.gtnh should process without errors 1`] = `
     "recipesPerMinute": 5,
   },
   {
-    "crafterCount": 0.008,
+    "crafterCount": 0.02,
     "id": "r~TfozukvLNvOSEiUJuxoQxA==",
     "overclockFactor": 1,
     "overclockName": "",
     "powerFactor": 1,
-    "recipesPerMinute": 0.004,
+    "recipesPerMinute": 0.01,
   },
 ]
 `;
