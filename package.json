@@ -27,6 +27,6 @@
     "live-server": "^1.2.2",
     "ts-jest": "^29.1.2",
     "typescript": "^5.8.2",
-    "javascript-lp-solver": "^0.4.24"
+    "javascript-lp-solver": "0.4.24"
   }
 }
