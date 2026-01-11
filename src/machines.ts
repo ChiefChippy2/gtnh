@@ -1245,9 +1245,9 @@ machines["Industrial Coke Oven"] = {
 
 machines["Cryogenic Freezer"] = {
     overclocker: StandardOverclocker.onlyNormal(),
-    speed: 2,
-    power: 1,
-    parallels: 4,
+    speed: 2.2,
+    power: 0.9,
+    parallels: 8,
 };
 
 machines["COMET - Compact Cyclotron"] = {
