@@ -16,8 +16,8 @@ body {
     color: white;
     background-color: #212121;
     word-break: break-word;
-    height: 100vh;
-    min-width: 800px;
+    /* height: 100vh; */
+    /* min-width: 800px; */
     overflow-y: hidden;
     overflow-x: auto;
 }

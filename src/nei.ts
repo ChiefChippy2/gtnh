@@ -590,18 +590,18 @@ class NeiGrid implements NeiGridAllocator<any>
 
 function Resize()
 {
-    var newUnitWidth = Math.round((window.innerWidth - 30 - scrollWidth) / elementSize);
-    var newUnitHeight = Math.round((window.innerHeight - 120) / elementSize);
-    var widthRemainder = window.innerWidth - newUnitWidth;
+    var newUnitWidth = Math.round((document.body.clientWidth - 30 - scrollWidth) / elementSize);
+    var newUnitHeight = Math.round((document.body.clientHeight - 120) / elementSize);
+    var widthRemainder = document.body.clientWidth - newUnitWidth;
     if (newUnitWidth !== unitWidth || newUnitHeight !== unitHeight)
     {
         unitWidth = newUnitWidth;
         unitHeight = newUnitHeight;
         var windowWidth = unitWidth * elementSize + scrollWidth;
         var windowHeight = unitHeight * elementSize;
-        if ((window.innerWidth - windowWidth) % 2 == 1)
+        if ((document.body.clientWidth - windowWidth) % 2 == 1)
             windowWidth++;
-        if ((window.innerWidth - windowHeight) % 2 == 1)
+        if ((document.body.clientWidth - windowHeight) % 2 == 1)
             windowHeight++;
         neiScrollBox.style.width = `${windowWidth}px`;
         neiScrollBox.style.height = `${windowHeight}px`;
