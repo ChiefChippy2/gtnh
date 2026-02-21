@@ -826,6 +826,7 @@ export class RecipeList {
 
     private renderRootGroup(group: RecipeGroupModel): string {
         return `
+          <div class="recipe-table-container">
             <table class="recipe-table root-group" data-iid="${group.iid}">
                 <thead>
                     <tr>
@@ -858,6 +859,7 @@ export class RecipeList {
                     ${this.renderButtons(group)}
                 </tbody>
             </table>
+          </div>
             ${this.renderSettings()}
         `;
     }

@@ -57,9 +57,11 @@
 }
 
 /* Base table layout */
+.recipe-table-container {
+  overflow-x: auto;
+}
 .recipe-table {
-    overflow-x: auto;
-    /* width: 100%; */
+    min-width: 800px;
     border-collapse: collapse;
     border-spacing: 0;
     color: #888888;
@@ -264,7 +266,7 @@ select:hover {
     padding: 8px;
     border-radius: 4px;
     position: relative;
-    width: calc(100% - 350px);
+    /* width: calc(100% - 350px); */
 }
 
 .status-message:not(.solved) {
