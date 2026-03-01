@@ -268,10 +268,10 @@ class RecipeTypeAllocator implements NeiRowAllocator<RecipeType>
         dom.push(`<div class="nei-recipe-type" style="top:${rowY*elementSize}px; width:${elementWidth*elementSize}px">`);
         for (let block of single.singleblocks) {
             if (block)
-                dom.push(`<item-icon data-id="${block.id}"></item-icon>`);
+                dom.push(`<item-icon class="optional-pc" data-id="${block.id}"></item-icon>`);
         }
         for (let block of single.multiblocks) {
-            dom.push(`<item-icon data-id="${block.id}"></item-icon>`);
+            dom.push(`<item-icon class="optional-pc" data-id="${block.id}"></item-icon>`);
         }
         dom.push(`<span class="nei-recipe-type-name">${single.name}</span>`);
         dom.push(`</div>`);

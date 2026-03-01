@@ -56,6 +56,12 @@
     flex-shrink: 0;
 }
 
+@media screen and (max-width: 1200px) {
+  .optional-pc {
+    display: none;
+  }
+}
+
 /* Base table layout */
 .recipe-table-container {
   overflow-x: auto;
