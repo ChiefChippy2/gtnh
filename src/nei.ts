@@ -4,6 +4,7 @@ import { SearchQuery } from "./searchQuery.js";
 import { ShowTooltip, HideTooltip } from "./tooltip.js";
 
 const repository = Repository.current;
+const accessibleBtn = document.querySelector('#accessible-hover');
 const nei = document.getElementById("nei")!;
 const neiScrollBox = nei.querySelector("#nei-scroll") as HTMLElement;
 const neiContent = nei.querySelector("#nei-content") as HTMLElement;
@@ -385,6 +386,7 @@ let showNeiCallback:ShowNeiCallback | null = null;
 export function HideNei()
 {
     nei.classList.add("hidden");
+    accessibleBtn.classList.add("hidden");
     showNeiCallback = null;
     currentGoods = null;
 }
@@ -440,6 +442,7 @@ export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:Sh
             neiHistory.push({goods:currentGoods, mode:currentMode, tabIndex:activeTabIndex});
     }
     nei.classList.remove("hidden");
+    accessibleBtn.classList.remove("hidden");
     ShowNeiInternal(goods, mode);
 }
 
