@@ -67,7 +67,7 @@
   overflow-x: auto;
 }
 .recipe-table {
-    min-width: 800px;
+    width: max(800px, 100%);
     border-collapse: collapse;
     border-spacing: 0;
     color: #888888;
