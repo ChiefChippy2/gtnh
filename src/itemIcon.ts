@@ -145,8 +145,14 @@ export class IconBox extends HTMLElement
         return this.getAttribute('data-action');
     }
 
+    MobileClick(event:any)
+    {
+
+    }
+
     RightClick(event:any)
     {
+        if (window.mobile) 
         if (this.CustomAction())
             return;
         if (event.ctrlKey || event.metaKey)
