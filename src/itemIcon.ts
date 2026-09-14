@@ -163,6 +163,17 @@ export class IconBox extends HTMLElement
 
     LeftClick()
     {
+        if (window.accessibleMode) {
+          if (highlightStyle.textContent === '') {
+              const event = new CustomEvent("mouseenter");
+              this.dispatchEvent(event);
+          }
+          else {
+              const event = new CustomEvent("mouseleave");
+              this.dispatchEvent(event);
+          }
+          return;
+        }
         let action = this.CustomAction();
         if (action === "select")
             NeiSelect(this.GetDisplayObject() as Goods);
