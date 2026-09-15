@@ -49,6 +49,8 @@
 {
     color: #ACA1AB;
     white-space: pre-line;
+    max-height: 40%;
+    overflow-y: auto;
 }
 
 #tooltip-action
@@ -57,11 +59,37 @@
     white-space: pre-line;
 }
 
-@media screen and (max-width: 800px) {
+/* @media screen and (max-width: 800px) {
   #tooltip-action {
     display: none !important;
   }
+} */
+
+.mobile-tooltip
+{
+    width: min(90%, 300px) !important;
+    height: min(50%, 750px) !important;
+    padding: 2px 10px 0px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-50%);
+    align-content: center;
+    flex-direction: column;
+    justify-content: center;
 }
+
+#tooltip-action > button {
+    margin: 3px;
+}
+
+#tooltip-close-btn {
+    position: fixed;
+}
+
+#tooltip-icon {
+    margin: 0;
+}
+
 
 #tooltip-mod
 {

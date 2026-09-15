@@ -1,5 +1,5 @@
 import { Repository, Goods, Item, Fluid, OreDict, RecipeObject } from "./repository.js";
-import { NeiSelect, ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
+import { MobileDisplay, NeiSelect, ShowNei, ShowNeiContext, ShowNeiMode } from "./nei.js";
 import { ShowTooltip, HideTooltip, IsHovered } from "./tooltip.js";
 
 // Global cycling state
@@ -33,13 +33,14 @@ export class IconBox extends HTMLElement
         super();
         
         this.addEventListener("mouseenter", () => {
+            if (window.accessibleMode) return;
             const obj = this.GetDisplayObject();
             if (obj) {
                 const actionType = this.getAttribute('data-action');
                 const actionText = actionType ? actions[actionType] : undefined;
                 ShowTooltip(this, {
                     goods: obj,
-                    action: actionText ?? "Left/Right click to view Production/Consumption for this item"
+                    action: actionText ?? "Left/Right click to view Production/Consumption for this item",
                 });
                 
                 this.UpdateHighlightStyle();
@@ -47,6 +48,7 @@ export class IconBox extends HTMLElement
         });
         
         this.addEventListener("mouseleave", () => {
+            if (window.accessibleMode) return;
             highlightStyle.textContent = '';
         });
         
@@ -95,7 +97,7 @@ export class IconBox extends HTMLElement
             this.style.setProperty('--pos-y', `${iy * -32}px`);
             
             // Update tooltip if this element is currently being hovered
-            if (IsHovered(this)) {
+            if (IsHovered(this) && !window.accessibleMode) {
                 ShowTooltip(this, { goods: obj });
                 this.UpdateHighlightStyle();
             }
@@ -145,14 +147,28 @@ export class IconBox extends HTMLElement
         return this.getAttribute('data-action');
     }
 
-    MobileClick(event:any)
+    MobileClick()
     {
-
+        let action = this.CustomAction();
+        if (action === "select") MobileDisplay(this.GetDisplayObject() as Goods, this, new Map([
+            ['Add to Product', () => NeiSelect(this.GetDisplayObject() as Goods)],
+            ['Cancel', () => HideTooltip(this)],
+        ]))
+        if (action) return;
+        MobileDisplay(this.GetDisplayObject() as Goods, this, new Map([
+            ['Produce', () => ShowNei(this.obj, ShowNeiMode.Production, null)],
+            ['Consume', () => ShowNei(this.obj, ShowNeiMode.Consumption, null)],
+            ['\u00D7',  () => HideTooltip(this)],
+        ]));
     }
 
     RightClick(event:any)
     {
-        if (window.mobile) 
+        if (window.accessibleMode) {
+            this.MobileClick();
+            event.preventDefault();
+            return;
+        }
         if (this.CustomAction())
             return;
         if (event.ctrlKey || event.metaKey)
@@ -164,14 +180,7 @@ export class IconBox extends HTMLElement
     LeftClick()
     {
         if (window.accessibleMode) {
-          if (highlightStyle.textContent === '') {
-              const event = new CustomEvent("mouseenter");
-              this.dispatchEvent(event);
-          }
-          else {
-              const event = new CustomEvent("mouseleave");
-              this.dispatchEvent(event);
-          }
+          this.MobileClick();
           return;
         }
         let action = this.CustomAction();

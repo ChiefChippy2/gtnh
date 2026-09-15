@@ -3,6 +3,7 @@ import { Goods, Recipe, RecipeInOut } from "./repository.js";
 
 export var currentTooltipElement:HTMLElement | undefined;
 const tooltip = document.getElementById("tooltip")!;
+const tooltipImage = tooltip.querySelector("#tooltip-icon") as HTMLElement;
 const tooltipHeader = tooltip.querySelector("#tooltip-header") as HTMLElement;
 const tooltipDebugInfo = tooltip.querySelector("#tooltip-debug") as HTMLElement;
 const tooltipText = tooltip.querySelector("#tooltip-text") as HTMLElement;
@@ -15,7 +16,7 @@ let tooltipScrollCache = new Map<HTMLElement, number>();
 interface TooltipData {
     header?: string;
     text?: string | null;
-    action?: string | null;
+    action?: string | HTMLElement[] | null;
     goods?: Goods;
     recipe?: Recipe | null;
     overrideIo?: RecipeInOut[];
@@ -41,12 +42,13 @@ export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
     const debug = data.goods?.tooltipDebugInfo ?? null;
     const text = data.goods?.tooltip ?? data.text ?? null;
     const mod = data.goods?.mod ?? null;
+    const iconId = data.goods?.iconId;
     const action = data.action ?? null;
     const recipe = data.recipe ?? null;
     const overrideIo = data.overrideIo;
-    ShowTooltipRaw(target, header, debug, text, mod, action, recipe, overrideIo);
+    ShowTooltipRaw(target, header, window.accessibleMode, debug, text, mod, action, recipe, overrideIo, iconId);
     target.focus();
-    target.addEventListener("mouseleave", () => HideTooltip(target), { once: true });
+    if (!window.accessibleMode) target.addEventListener("mouseleave", () => HideTooltip(target), { once: true });
     if (tooltipScrollCache.has(target)) {
         tooltipScrollTarget = tooltipScrollCache.get(target)!;
     } else {
@@ -63,33 +65,74 @@ export function ShowTooltip(target: HTMLElement, data: TooltipData): void {
     window.addEventListener("wheel", OnGlobalScroll, { passive: false });
 }
 
-function SetTextOptional(element:HTMLElement, data: string | null, html: boolean)
+function SetTextOptional(element:HTMLElement, data: string | HTMLElement[] | null, html: boolean)
 {
-    if (data === undefined || data === null)
-        element.style.display = "none";
+    Array.from(element.childNodes).forEach(child => child.remove());
+    if (data === undefined || data === null) element.style.display = "none";
     else {
         element.style.display = "block";
         if (html)
-            element.innerHTML = data;
+            {
+               if (typeof data === 'string') element.innerHTML = data;
+               else data.map(node => element.appendChild(node));
+            }
         else
-            element.textContent = data;
+            if (typeof data === 'string') element.textContent = data;
     }
 }
 
-function ShowTooltipRaw(target:HTMLElement, header:string, debug:string|null, description:string|null, mod:string|null, action:string|null, recipe:Recipe|null, overrideIo?:RecipeInOut[])
+function SetIconOptional(element:HTMLElement, iconId?: number)
+{
+    if (iconId != null) {
+        const ix = iconId % 256;
+        const iy = Math.floor(iconId / 256);
+        element.style.setProperty('--pos-x', `${ix * -32}px`);
+        element.style.setProperty('--pos-y', `${iy * -32}px`);
+        element.style.display = "block"
+    }
+    else element.style.display = "none";
+}
+
+function ShowTooltipRaw(target:HTMLElement, header:string, mobile: boolean, debug:string|null, description:string|null, mod:string|null, action:string|HTMLElement[]|null, recipe:Recipe|null, overrideIo?:RecipeInOut[], iconId?: number)
 {
     tooltip.style.display = "block";
     currentTooltipElement = target;
     SetTextOptional(tooltipHeader, header, true);
     SetTextOptional(tooltipDebugInfo, debug, false);
     SetTextOptional(tooltipText, description, true);
-    SetTextOptional(tooltipAction, action, false);
+    SetTextOptional(tooltipAction, action, true);
+    SetIconOptional(tooltipImage, iconId);
     SetTextOptional(tooltipMod, mod, false);
 
     tooltipRecipe.style.display = "none";
     if (recipe) {
         tooltipRecipe.style.display = "block";
         tooltipRecipe.innerHTML = GetSingleRecipeDom(recipe, overrideIo);
+    }
+    if (mobile) {
+        if (!tooltip.querySelector('#tooltip-close-btn')) {
+            const closeBtn = document.createElement('button');
+            closeBtn.style.right = '2%';
+            closeBtn.style.bottom = '2%';
+            closeBtn.id = 'tooltip-close-btn';
+            closeBtn.textContent = '\u00D7'
+            tooltip.appendChild(closeBtn);
+        }
+        const closeBtn = tooltip.querySelector('#tooltip-close-btn') as HTMLElement;
+        if (!action)
+        {
+            closeBtn.addEventListener('click', HideTooltip.bind(null, target), {once: true})
+            closeBtn.style.display = 'block';
+        }
+        else closeBtn.style.display = 'none';
+        
+        tooltip.classList.add('mobile-tooltip');
+        tooltip.style.display = "flex";
+        return;
+    }
+    else {
+        tooltip.querySelector('#tooltip-close-btn')?.remove?.();
+        tooltip.classList.remove('mobile-tooltip');
     }
 
     const targetRect = target.getBoundingClientRect();
@@ -115,6 +158,8 @@ export function HideTooltip(target:HTMLElement)
     if (currentTooltipElement !== target)
         return;
     tooltipScrollCache.set(target, tooltipScrollTarget);
+    const closeBtn = tooltip.querySelector('#tooltip-close-btn');
+    if (closeBtn) closeBtn.remove();
     currentTooltipElement = undefined;
     tooltip.style.display = "none";
     window.removeEventListener("wheel", OnGlobalScroll);

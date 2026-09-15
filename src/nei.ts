@@ -4,7 +4,7 @@ import { SearchQuery } from "./searchQuery.js";
 import { ShowTooltip, HideTooltip } from "./tooltip.js";
 
 const repository = Repository.current;
-const accessibleBtn = document.querySelector('#accessible-hover');
+let accessibleBtn = document.querySelector('#accessible-hover');
 const nei = document.getElementById("nei")!;
 const neiScrollBox = nei.querySelector("#nei-scroll") as HTMLElement;
 const neiContent = nei.querySelector("#nei-content") as HTMLElement;
@@ -386,7 +386,8 @@ let showNeiCallback:ShowNeiCallback | null = null;
 export function HideNei()
 {
     nei.classList.add("hidden");
-    accessibleBtn.classList.add("hidden");
+    if (!accessibleBtn) accessibleBtn = document.querySelector('#accessible-hover')
+    accessibleBtn?.classList?.add?.("hidden");
     showNeiCallback = null;
     currentGoods = null;
 }
@@ -431,6 +432,21 @@ function Back()
         ShowNeiInternal(last.goods, last.mode, last.tabIndex);
 }
 
+export function MobileDisplay(goods:Goods, target: HTMLElement, actions: Map<string, Function>)
+{
+    const elements: HTMLElement[] = [];
+    actions.forEach((value, key)=> {
+        const element = document.createElement('button');
+        element.textContent = key;
+        element.addEventListener('click', () => value(), {'once' : true});
+        elements.push(element);
+    })
+    ShowTooltip(target, {
+        goods,
+        action: elements,
+    })
+}
+
 export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:ShowNeiCallback | null = null)
 {
     console.log("ShowNei", goods, mode, callback);
@@ -442,7 +458,8 @@ export function ShowNei(goods:RecipeObject | null, mode:ShowNeiMode, callback:Sh
             neiHistory.push({goods:currentGoods, mode:currentMode, tabIndex:activeTabIndex});
     }
     nei.classList.remove("hidden");
-    accessibleBtn.classList.remove("hidden");
+    if (!accessibleBtn) accessibleBtn = document.querySelector('#accessible-hover')
+    accessibleBtn?.classList?.remove?.("hidden");
     ShowNeiInternal(goods, mode);
 }
 
