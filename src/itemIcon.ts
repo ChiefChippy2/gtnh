@@ -151,7 +151,7 @@ export class IconBox extends HTMLElement
     {
         let action = this.CustomAction();
         if (action === "select") MobileDisplay(this.GetDisplayObject() as Goods, this, new Map([
-            ['Add to Product', () => NeiSelect(this.GetDisplayObject() as Goods)],
+            ['Add to Product', () => {NeiSelect(this.GetDisplayObject() as Goods); HideTooltip(this)}],
             ['Cancel', () => HideTooltip(this)],
         ]))
         if (action) return;
